@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="baderMarkTitle">
+  <title id="baderMarkTitle">بادر — النجمة</title>
+  <g transform="translate(64 64)">
+    <g fill="#D2D63E" stroke="#1F6B38" stroke-width="5.5" stroke-linejoin="round">
+      <rect x="-27" y="-27" width="54" height="54"/>
+      <rect x="-27" y="-27" width="54" height="54" transform="rotate(45)"/>
+    </g>
+    <g fill="none" stroke="#A8A84A" stroke-width="2.2" stroke-linejoin="round">
+      <rect x="-21" y="-21" width="42" height="42"/>
+      <rect x="-21" y="-21" width="42" height="42" transform="rotate(45)"/>
+    </g>
+  </g>
+</svg>

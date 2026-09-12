@@ -1,0 +1,47 @@
+@import 'tailwindcss';
+@import '@fontsource/ibm-plex-sans-arabic/400.css';
+@import '@fontsource/ibm-plex-sans-arabic/600.css';
+@import '@fontsource/ibm-plex-sans/400.css';
+@import '@fontsource/ibm-plex-sans/600.css';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+
+:root {
+    --bader-green: #1f6b38;
+    --bader-green-deep: #0f3d22;
+    --bader-lime: #d2d63e;
+    --bader-gold: #a8a84a;
+    --bader-paper: #f7f8ef;
+    --bader-ink: #102418;
+    --bader-black: #0a0a0a;
+    --bader-on-dark: #f4f7e8;
+}
+
+@theme {
+    --font-sans: 'IBM Plex Sans Arabic', 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    --color-bader-green: var(--bader-green);
+    --color-bader-green-deep: var(--bader-green-deep);
+    --color-bader-lime: var(--bader-lime);
+    --color-bader-gold: var(--bader-gold);
+    --color-bader-paper: var(--bader-paper);
+    --color-bader-ink: var(--bader-ink);
+    --color-bader-black: var(--bader-black);
+    --color-bader-on-dark: var(--bader-on-dark);
+}
+
+html {
+    color-scheme: light;
+}
+
+body {
+    font-family: var(--font-sans);
+    background: var(--bader-paper);
+    color: var(--bader-ink);
+    -webkit-font-smoothing: antialiased;
+}
+
+[dir='ltr'] {
+    font-family: 'IBM Plex Sans', 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, sans-serif;
+}
