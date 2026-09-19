@@ -11,7 +11,7 @@
 <body class="min-h-screen bg-bader-paper text-bader-ink antialiased">
     <a href="#content" class="sr-only focus:not-sr-only focus:absolute focus:start-4 focus:top-4 focus:z-[60] focus:rounded-full focus:bg-white focus:px-4 focus:py-2">{{ __('nav.skip') }}</a>
     @include('partials.urgent-bar')
-    @include('partials.site-header')
+    @include('partials.site-header', ['dark' => trim($__env->yieldContent('headerTheme')) === 'dark'])
     <main id="content">
         @yield('content')
     </main>

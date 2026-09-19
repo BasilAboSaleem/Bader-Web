@@ -15,7 +15,15 @@ class PublicSiteTest extends TestCase
             ->assertSee(__('brand.field'), false)
             ->assertSee(__('nav.donate'), false)
             ->assertSee(__('home.hero_title'), false)
-            ->assertSee(__('campaign.labbayk'), false)
+            ->assertSee(__('campaign.water'), false)
+            ->assertSee(__('campaign.goal'), false)
+            ->assertSee('120,000', false)
+            ->assertSee(__('home.stories_title'), false)
+            ->assertSee(__('story.quran_honor.title'), false)
+            ->assertSee('data-home-section="stories"', false)
+            ->assertSee('bg-bader-green-deep', false)
+            ->assertDontSee('border-white/10 bg-black/20', false)
+            ->assertDontSee('10400', false)
             ->assertSee('dir="rtl"', false);
     }
 
@@ -28,8 +36,9 @@ class PublicSiteTest extends TestCase
         $this->get(route('home'))
             ->assertOk()
             ->assertSee('dir="ltr"', false)
-            ->assertSee('Headquarters in Muscat', false)
-            ->assertSee('Field operations: Gaza', false);
+            ->assertSee('Sultanate of Oman, Muscat', false)
+            ->assertSee('Palestine, Gaza Strip', false)
+            ->assertSee(__('campaign.water'), false);
     }
 
     public function test_invalid_locale_is_not_found(): void
@@ -42,7 +51,10 @@ class PublicSiteTest extends TestCase
         foreach (PublicNavigation::all() as $item) {
             $this->get(route($item['route']))
                 ->assertOk()
-                ->assertSee(__($item['key']), false);
+                ->assertSee(__($item['key']), false)
+                ->assertDontSee(__('stub.body'), false)
+                ->assertDontSee('page.', false)
+                ->assertDontSee('campaign.education', false);
         }
 
         $this->get(route('donate'))

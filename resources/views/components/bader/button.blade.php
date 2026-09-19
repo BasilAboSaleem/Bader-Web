@@ -7,6 +7,8 @@
     $classes = match ($variant) {
         'line' => 'border border-bader-green bg-transparent text-bader-green hover:bg-bader-green hover:text-white',
         'light' => 'bg-white text-bader-green hover:bg-bader-lime',
+        'lime' => 'border border-bader-lime bg-bader-lime text-bader-green-deep hover:bg-white',
+        'ghost-light' => 'border border-white/35 bg-transparent text-white hover:bg-white/10',
         default => 'border border-bader-green bg-bader-green text-white hover:bg-bader-green-deep',
     };
 @endphp
