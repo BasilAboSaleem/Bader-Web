@@ -3,6 +3,12 @@
 return [
     'locales' => ['ar', 'en'],
 
+    'urgent' => [
+        'enabled' => false,
+        'text' => '',
+        'url' => null,
+    ],
+
     'assets' => [
         'logo_light' => 'brand/logo-light.jpg',
         'logo_dark' => 'brand/logo-dark1.jpg',

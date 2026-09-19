@@ -1,59 +1,87 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#1f6b38">
-    <title>{{ config('app.name') }}</title>
-    <link rel="icon" href="{{ asset(config('bader.assets.favicon')) }}" type="image/svg+xml">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="min-h-screen bg-bader-paper text-bader-ink">
-    <div class="pointer-events-none fixed inset-0 flex items-center justify-center opacity-[0.06]" aria-hidden="true">
-        <img src="{{ asset(config('bader.assets.mark_star')) }}" alt="" class="h-[min(70vh,36rem)] w-[min(70vh,36rem)]">
-    </div>
+@extends('layouts.public')
 
-    <header class="relative z-10 flex items-center justify-between px-6 py-5">
-        <img
-            src="{{ asset(config('bader.assets.mark_star')) }}"
-            alt=""
-            class="h-10 w-10"
-        >
-        <nav class="flex items-center gap-2 text-sm font-semibold" aria-label="Language">
-            <a
-                href="{{ route('locale.switch', 'ar') }}"
-                class="rounded-full px-3 py-1.5 {{ app()->getLocale() === 'ar' ? 'bg-bader-green text-white' : 'text-bader-green' }}"
-            >{{ __('phase0.locale_ar') }}</a>
-            <a
-                href="{{ route('locale.switch', 'en') }}"
-                class="rounded-full px-3 py-1.5 {{ app()->getLocale() === 'en' ? 'bg-bader-green text-white' : 'text-bader-green' }}"
-            >{{ __('phase0.locale_en') }}</a>
-        </nav>
-    </header>
+@section('title', __('brand.name'))
 
-    <main class="relative z-10 mx-auto flex min-h-[calc(100vh-5.5rem)] max-w-xl flex-col items-center justify-center px-6 pb-16 text-center">
-        <p class="mb-6 text-xs font-semibold tracking-[0.22em] text-bader-green uppercase">
-            {{ __('phase0.kicker') }}
-        </p>
+@section('content')
+    <section class="relative overflow-hidden">
+        <img src="{{ asset(config('bader.assets.mark_star')) }}" alt="" class="pointer-events-none absolute -end-16 top-8 h-64 w-64 opacity-[0.07]" aria-hidden="true">
+        <div class="mx-auto grid max-w-6xl gap-10 px-4 py-14 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:py-20">
+            <div data-reveal>
+                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-bader-green">{{ __('home.hero_kicker') }}</p>
+                <h1 class="mt-3 max-w-xl text-3xl font-semibold leading-tight text-bader-ink sm:text-5xl">{{ __('home.hero_title') }}</h1>
+                <p class="mt-4 max-w-xl text-sm leading-relaxed text-bader-ink/75 sm:text-base">{{ __('home.hero_text') }}</p>
+                <p class="mt-3 text-sm font-semibold text-bader-green">{{ __('brand.locations') }}</p>
+                <div class="mt-8 flex flex-wrap gap-3">
+                    <x-bader.button :href="route('donate')">{{ __('nav.donate') }}</x-bader.button>
+                    <x-bader.button :href="route('about')" variant="line">{{ __('home.hero_secondary') }}</x-bader.button>
+                </div>
+            </div>
+            <div class="mx-auto w-full max-w-sm rounded-[2rem] bg-white p-8" data-reveal>
+                <img src="{{ asset(config('bader.assets.mark_star')) }}" alt="{{ __('brand.name') }}" width="180" height="180" class="mx-auto h-40 w-40">
+            </div>
+        </div>
+    </section>
 
-        <img
-            src="{{ asset(config('bader.assets.logo_light')) }}"
-            alt="{{ __('phase0.title') }}"
-            width="420"
-            height="420"
-            class="w-full max-w-[22rem] bg-white"
-        >
+    <section class="border-y border-bader-green/10 bg-white">
+        <div class="mx-auto max-w-6xl px-4 py-14">
+            <x-bader.section-heading :kicker="__('home.facilities_kicker')" :title="__('home.facilities_title')" />
+            <div class="mt-8 grid gap-4 sm:grid-cols-3">
+                @foreach ($facilities as $facility)
+                    <x-bader.program-card
+                        :title="__('facility.'.$facility)"
+                        :text="__('facility.'.$facility.'_text')"
+                        :href="route('about')"
+                    />
+                @endforeach
+            </div>
+        </div>
+    </section>
 
-        <p class="mt-8 text-sm font-semibold text-bader-green">
-            {{ __('phase0.tagline') }}
-        </p>
+    <section class="mx-auto max-w-6xl px-4 py-14">
+        <x-bader.section-heading :kicker="__('home.programs_kicker')" :title="__('home.programs_title')" />
+        <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            @foreach ($programs as $program)
+                <x-bader.program-card
+                    :title="__('program.'.$program)"
+                    :text="__('program.'.$program.'_text')"
+                    :href="route('programs')"
+                />
+            @endforeach
+        </div>
+    </section>
 
-        <ul class="mt-10 flex items-center gap-3" aria-label="{{ __('phase0.swatches') }}">
-            <li class="h-8 w-8 rounded-full bg-bader-green ring-1 ring-black/10" title="Green"></li>
-            <li class="h-8 w-8 rounded-full bg-bader-lime ring-1 ring-black/10" title="Lime"></li>
-            <li class="h-8 w-8 rounded-full bg-bader-gold ring-1 ring-black/10" title="Gold"></li>
-            <li class="h-8 w-8 rounded-full bg-bader-ink ring-1 ring-black/10" title="Ink"></li>
-        </ul>
-    </main>
-</body>
-</html>
+    <x-bader.star-divider />
+
+    <section class="mx-auto max-w-6xl px-4 pb-14">
+        <x-bader.section-heading :kicker="__('home.campaign_kicker')" :title="__('home.campaign_title')" class="mb-6" />
+        <x-bader.campaign-card
+            :title="__('campaign.labbayk')"
+            :text="__('campaign.labbayk_text')"
+            :status="__('campaign.status_active')"
+            :href="route('campaigns')"
+        />
+    </section>
+
+    <section class="border-y border-bader-green/10 bg-white">
+        <div class="mx-auto max-w-6xl px-4 py-14">
+            <x-bader.section-heading :kicker="__('home.impact_kicker')" :title="__('home.impact_title')" align="center" />
+            <div class="mt-10 grid grid-cols-2 gap-6 sm:grid-cols-4">
+                @foreach ($impacts as $impact)
+                    <div class="text-center" data-reveal>
+                        <p class="text-3xl font-semibold text-bader-green">{{ __('home.impact_empty') }}</p>
+                        <p class="mt-1 text-xs font-semibold uppercase tracking-wide text-bader-ink/55">{{ __('impact.'.$impact) }}</p>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <section class="mx-auto max-w-3xl px-4 py-16 text-center" data-reveal>
+        <h2 class="text-2xl font-semibold sm:text-3xl">{{ __('home.cta_title') }}</h2>
+        <p class="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-bader-ink/70">{{ __('home.cta_text') }}</p>
+        <div class="mt-8 flex flex-wrap justify-center gap-3">
+            <x-bader.button :href="route('donate')">{{ __('nav.donate') }}</x-bader.button>
+            <x-bader.button :href="route('partners')" variant="line">{{ __('home.cta_partner') }}</x-bader.button>
+        </div>
+    </section>
+@endsection
