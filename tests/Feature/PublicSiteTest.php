@@ -41,6 +41,20 @@ class PublicSiteTest extends TestCase
             ->assertSee(__('campaign.water'), false);
     }
 
+    public function test_language_switch_preserves_the_current_public_page(): void
+    {
+        $this->from(route('programs'))
+            ->get(route('locale.switch', 'en'))
+            ->assertRedirect(route('programs'));
+
+        $this->get(route('programs'))
+            ->assertOk()
+            ->assertSee('dir="ltr"', false)
+            ->assertSee('Relief and development fields', false)
+            ->assertSee('Economic empowerment', false)
+            ->assertDontSee('program.', false);
+    }
+
     public function test_invalid_locale_is_not_found(): void
     {
         $this->get('/locale/fr')->assertNotFound();
@@ -60,6 +74,20 @@ class PublicSiteTest extends TestCase
         $this->get(route('donate'))
             ->assertOk()
             ->assertSee(__('nav.donate'), false);
+    }
+
+    public function test_all_public_pages_render_in_english_without_translation_keys(): void
+    {
+        foreach (PublicNavigation::all() as $item) {
+            $this->withSession(['locale' => 'en'])
+                ->get(route($item['route']))
+                ->assertOk()
+                ->assertSee('dir="ltr"', false)
+                ->assertSee(__($item['key'], [], 'en'), false)
+                ->assertDontSee('page.', false)
+                ->assertDontSee('program.', false)
+                ->assertDontSee('story.', false);
+        }
     }
 
     public function test_not_found_page_uses_site_layout(): void
