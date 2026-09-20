@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
@@ -11,5 +12,6 @@ abstract class TestCase extends BaseTestCase
         parent::setUp();
 
         $this->withoutVite();
+        $this->withoutMiddleware(PreventRequestForgery::class);
     }
 }
