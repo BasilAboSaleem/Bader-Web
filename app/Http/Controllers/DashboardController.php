@@ -12,14 +12,16 @@ class DashboardController extends Controller
             'modules' => [
                 [
                     'key' => 'site_settings',
+                    'route' => 'dashboard.settings.edit',
                     'stage' => 6,
-                    'status' => 'dashboard.status_soon',
+                    'status' => 'dashboard.status_active',
                     'group' => 'settings',
                 ],
                 [
                     'key' => 'pages',
+                    'route' => 'dashboard.pages.edit',
                     'stage' => 6,
-                    'status' => 'dashboard.status_soon',
+                    'status' => 'dashboard.status_active',
                     'group' => 'content',
                 ],
                 [

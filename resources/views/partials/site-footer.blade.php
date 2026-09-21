@@ -1,5 +1,6 @@
 @php
     use App\Support\PublicNavigation;
+    use App\Support\SiteSettings;
 @endphp
 
 <footer class="bg-bader-black text-bader-on-dark">
@@ -8,8 +9,8 @@
             <img src="{{ asset(config('bader.assets.mark_star')) }}" alt="" width="48" height="48" class="h-12 w-12">
             <p class="mt-4 text-lg font-semibold">{{ __('brand.name') }}</p>
             <p class="mt-1 text-sm text-white/70">{{ __('footer.tagline') }}</p>
-            <p class="mt-4 text-sm text-bader-lime">{{ __('brand.hq') }}</p>
-            <p class="text-sm text-bader-lime">{{ __('brand.field') }}</p>
+            <p class="mt-4 text-sm text-bader-lime">{{ SiteSettings::hqLocation() }}</p>
+            <p class="text-sm text-bader-lime">{{ SiteSettings::fieldLocation() }}</p>
         </div>
 
         <nav class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm" aria-label="{{ __('footer.rights') }}">

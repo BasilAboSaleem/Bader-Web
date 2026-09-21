@@ -100,25 +100,101 @@
             <h2 class="mb-4 flex text-xs font-semibold uppercase leading-5 text-gray-400">
               {{ __('dashboard.content_group') }}
             </h2>
+            @php
+              $navModules = $modules ?? [
+                [
+                  'key' => 'site_settings',
+                  'route' => 'dashboard.settings.edit',
+                  'stage' => 6,
+                  'status' => 'dashboard.status_active',
+                ],
+                [
+                  'key' => 'pages',
+                  'route' => 'dashboard.pages.edit',
+                  'stage' => 6,
+                  'status' => 'dashboard.status_active',
+                ],
+                [
+                  'key' => 'programs',
+                  'stage' => 7,
+                  'status' => 'dashboard.status_soon',
+                ],
+                [
+                  'key' => 'campaigns',
+                  'stage' => 7,
+                  'status' => 'dashboard.status_soon',
+                ],
+                [
+                  'key' => 'stories',
+                  'stage' => 7,
+                  'status' => 'dashboard.status_soon',
+                ],
+                [
+                  'key' => 'inbox',
+                  'stage' => 8,
+                  'status' => 'dashboard.status_soon',
+                ],
+              ];
+            @endphp
+
             <ul class="flex flex-col gap-1">
 
-              @foreach ($modules ?? [] as $module)
-              <li>
-                <div class="group menu-item menu-item-inactive cursor-default justify-between opacity-75">
-                  <div class="flex items-center gap-3">
-                    <span class="menu-item-icon-size menu-item-icon-inactive">
-                      <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                          d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                      </svg>
-                    </span>
-                    <span class="menu-item-text truncate">{{ __('dashboard.module.'.$module['key']) }}</span>
-                  </div>
-                  <span class="ms-auto block rounded-full bg-success-50 px-2.5 py-0.5 text-xs font-medium uppercase text-success-600 dark:bg-success-500/15 dark:text-success-500">
-                    {{ __('dashboard.status_soon') }}
-                  </span>
-                </div>
-              </li>
+              @foreach ($navModules as $module)
+                @php
+                  $hasRoute = !empty($module['route']);
+                  $isActive = $hasRoute && request()->routeIs($module['route']);
+                @endphp
+                <li>
+                  @if ($hasRoute)
+                    <a
+                      href="{{ route($module['route']) }}"
+                      class="group menu-item {{ $isActive ? 'menu-item-active' : 'menu-item-inactive' }} justify-between"
+                    >
+                      <div class="flex items-center gap-3">
+                        <span class="menu-item-icon-size {{ $isActive ? 'menu-item-icon-active' : 'menu-item-icon-inactive' }}">
+                          @if ($module['key'] === 'site_settings')
+                            <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                          @elseif ($module['key'] === 'pages')
+                            <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                          @else
+                            <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                            </svg>
+                          @endif
+                        </span>
+                        <span class="menu-item-text truncate">{{ __('dashboard.module.'.$module['key']) }}</span>
+                      </div>
+                      @if (($module['status'] ?? '') === 'dashboard.status_active')
+                        <span class="ms-auto block rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium uppercase text-brand-600 dark:bg-brand-500/15 dark:text-brand-400">
+                          {{ __('dashboard.status_active') }}
+                        </span>
+                      @endif
+                    </a>
+                  @else
+                    <div class="group menu-item menu-item-inactive cursor-default justify-between opacity-75">
+                      <div class="flex items-center gap-3">
+                        <span class="menu-item-icon-size menu-item-icon-inactive">
+                          <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                          </svg>
+                        </span>
+                        <span class="menu-item-text truncate">{{ __('dashboard.module.'.$module['key']) }}</span>
+                      </div>
+                      <span class="ms-auto block rounded-full bg-success-50 px-2.5 py-0.5 text-xs font-medium uppercase text-success-600 dark:bg-success-500/15 dark:text-success-500">
+                        {{ __('dashboard.status_soon') }}
+                      </span>
+                    </div>
+                  @endif
+                </li>
               @endforeach
 
             </ul>

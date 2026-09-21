@@ -2,6 +2,10 @@
 
 @section('title', __('page.'.$key.'.title').' — '.__('brand.name'))
 
+@php
+    use App\Support\SiteSettings;
+@endphp
+
 @section('content')
     <section class="bg-bader-green-deep text-white">
         <div class="mx-auto max-w-6xl px-4 py-16 sm:py-20">
@@ -10,7 +14,7 @@
                 :title="__('page.'.$key.'.title')"
                 theme="dark"
             />
-            <p class="mt-5 max-w-2xl text-sm leading-relaxed text-white/75 sm:text-base">{{ __('page.'.$key.'.intro') }}</p>
+            <p class="mt-5 max-w-2xl text-sm leading-relaxed text-white/75 sm:text-base">{{ SiteSettings::pageIntro($key) }}</p>
         </div>
     </section>
 
@@ -21,8 +25,8 @@
                     <span class="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-bader-lime/60 text-bader-green" aria-hidden="true">
                         <img src="{{ asset(config('bader.assets.mark_star')) }}" alt="" class="h-6 w-6">
                     </span>
-                    <h2 class="text-xl font-semibold text-bader-green">{{ __('page.'.$key.'.'.$section.'.title') }}</h2>
-                    <p class="mt-3 text-sm leading-relaxed text-bader-ink/70">{{ __('page.'.$key.'.'.$section.'.text') }}</p>
+                    <h2 class="text-xl font-semibold text-bader-green">{{ SiteSettings::institutionalTitle($key, $section) }}</h2>
+                    <p class="mt-3 text-sm leading-relaxed text-bader-ink/70">{{ SiteSettings::institutionalText($key, $section) }}</p>
                 </article>
             @endforeach
         </div>

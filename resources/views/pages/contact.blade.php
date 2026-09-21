@@ -10,12 +10,21 @@
         </div>
     </section>
 
+    @php
+        use App\Support\SiteSettings;
+        $channelValues = [
+            'email' => SiteSettings::contactEmail(),
+            'phone' => SiteSettings::contactPhone(),
+            'location' => SiteSettings::contactAddress(),
+        ];
+    @endphp
+
     <section class="bg-bader-paper">
         <div class="mx-auto grid max-w-6xl gap-6 px-4 py-14 sm:grid-cols-3">
             @foreach (['email', 'phone', 'location'] as $channel)
                 <article class="rounded-2xl border border-bader-green/10 bg-white p-6" data-reveal>
                     <p class="text-xs font-semibold uppercase tracking-[0.18em] text-bader-green">{{ __('contact.'.$channel.'.label') }}</p>
-                    <p class="mt-3 text-lg font-semibold text-bader-ink">{{ __('contact.'.$channel.'.value') }}</p>
+                    <p class="mt-3 text-lg font-semibold text-bader-ink">{{ $channelValues[$channel] ?? __('contact.'.$channel.'.value') }}</p>
                     <p class="mt-2 text-sm leading-relaxed text-bader-ink/65">{{ __('contact.'.$channel.'.note') }}</p>
                 </article>
             @endforeach
