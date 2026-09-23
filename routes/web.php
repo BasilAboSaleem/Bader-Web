@@ -1,8 +1,13 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Dashboard\CampaignController;
+use App\Http\Controllers\Dashboard\FacilityController;
 use App\Http\Controllers\Dashboard\InstitutionalPageController;
+use App\Http\Controllers\Dashboard\MediaAssetController;
+use App\Http\Controllers\Dashboard\ProgramController;
 use App\Http\Controllers\Dashboard\SiteSettingController;
+use App\Http\Controllers\Dashboard\StoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PublicPageController;
@@ -41,5 +46,12 @@ Route::middleware('auth')->group(function () {
     Route::put('/dashboard/settings', [SiteSettingController::class, 'update'])->name('dashboard.settings.update');
     Route::get('/dashboard/pages', [InstitutionalPageController::class, 'edit'])->name('dashboard.pages.edit');
     Route::put('/dashboard/pages', [InstitutionalPageController::class, 'update'])->name('dashboard.pages.update');
+
+    Route::resource('dashboard/programs', ProgramController::class)->names('dashboard.programs')->except(['show']);
+    Route::resource('dashboard/facilities', FacilityController::class)->names('dashboard.facilities')->except(['show']);
+    Route::resource('dashboard/campaigns', CampaignController::class)->names('dashboard.campaigns')->except(['show']);
+    Route::resource('dashboard/stories', StoryController::class)->names('dashboard.stories')->except(['show']);
+    Route::resource('dashboard/media', MediaAssetController::class)->names('dashboard.media')->except(['show']);
+
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
 });
