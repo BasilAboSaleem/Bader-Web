@@ -3,10 +3,13 @@
 namespace Tests\Feature;
 
 use App\Support\PublicNavigation;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class PublicSiteTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_home_renders_brand_structure(): void
     {
         $this->get(route('home'))

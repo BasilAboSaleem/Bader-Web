@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ImpactMetric;
 use Illuminate\View\View;
 
 class HomeController extends Controller
 {
     public function __invoke(): View
     {
+        $approvedMetrics = ImpactMetric::approved()->orderBy('order')->get();
+
         return view('home', [
             'facilities' => ['water_plant', 'bakery', 'school'],
             'programs' => [
@@ -29,6 +32,7 @@ class HomeController extends Controller
                 'currency' => 'campaign.currency',
             ],
             'impacts' => ['families', 'water', 'bread', 'students'],
+            'approvedMetrics' => $approvedMetrics,
             'stories' => [
                 [
                     'key' => 'quran_honor',

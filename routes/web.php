@@ -2,7 +2,10 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Dashboard\CampaignController;
+use App\Http\Controllers\Dashboard\DonationController;
 use App\Http\Controllers\Dashboard\FacilityController;
+use App\Http\Controllers\Dashboard\ImpactMetricController;
+use App\Http\Controllers\Dashboard\InboxController;
 use App\Http\Controllers\Dashboard\InstitutionalPageController;
 use App\Http\Controllers\Dashboard\MediaAssetController;
 use App\Http\Controllers\Dashboard\ProgramController;
@@ -10,6 +13,7 @@ use App\Http\Controllers\Dashboard\SiteSettingController;
 use App\Http\Controllers\Dashboard\StoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PublicFormController;
 use App\Http\Controllers\PublicPageController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +30,14 @@ Route::get('/partners', [PublicPageController::class, 'partners'])->name('partne
 Route::get('/volunteer', [PublicPageController::class, 'volunteer'])->name('volunteer');
 Route::get('/faq', [PublicPageController::class, 'faq'])->name('faq');
 Route::get('/contact', [PublicPageController::class, 'contact'])->name('contact');
+
+// Public Form Submissions
+Route::post('/contact', [PublicFormController::class, 'submitContact'])->name('contact.submit');
+Route::post('/partners', [PublicFormController::class, 'submitPartnership'])->name('partners.submit');
+Route::post('/volunteer', [PublicFormController::class, 'submitVolunteer'])->name('volunteer.submit');
+Route::post('/sponsorship', [PublicFormController::class, 'submitSponsorship'])->name('sponsorship.submit');
+Route::post('/assistance', [PublicFormController::class, 'submitAssistance'])->name('assistance.submit');
+Route::post('/donate/transfer', [PublicFormController::class, 'notifyTransfer'])->name('donate.transfer.submit');
 
 Route::get('/locale/{locale}', function (string $locale) {
     abort_unless(in_array($locale, config('bader.locales'), true), 404);
@@ -52,6 +64,12 @@ Route::middleware('auth')->group(function () {
     Route::resource('dashboard/campaigns', CampaignController::class)->names('dashboard.campaigns')->except(['show']);
     Route::resource('dashboard/stories', StoryController::class)->names('dashboard.stories')->except(['show']);
     Route::resource('dashboard/media', MediaAssetController::class)->names('dashboard.media')->except(['show']);
+
+    Route::resource('dashboard/inbox', InboxController::class)->names('dashboard.inbox')->only(['index', 'show', 'update', 'destroy']);
+    Route::resource('dashboard/impact', ImpactMetricController::class)->names('dashboard.impact')->except(['show']);
+    Route::patch('dashboard/impact/{impact}/toggle', [ImpactMetricController::class, 'toggleApproval'])->name('dashboard.impact.toggle');
+    Route::resource('dashboard/donations', DonationController::class)->names('dashboard.donations')->except(['show']);
+    Route::patch('dashboard/donations/{donation}/verify', [DonationController::class, 'verify'])->name('dashboard.donations.verify');
 
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
 });

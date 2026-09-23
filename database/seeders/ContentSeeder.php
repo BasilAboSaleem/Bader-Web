@@ -132,5 +132,65 @@ class ContentSeeder extends Seeder
                 'consent_notes' => 'المواد البصرية الرسمية المعتمدة للمؤسسة.',
             ]
         );
+
+        // 6. Impact Metrics
+        $metrics = [
+            [
+                'key' => 'families',
+                'title_ar' => 'إجمالي الأسر المستفيدة',
+                'title_en' => 'Beneficiary Families',
+                'value' => '45,000+',
+                'unit_ar' => 'أسرة',
+                'unit_en' => 'Families',
+                'category' => 'general',
+                'order' => 1,
+                'is_approved' => true,
+                'status' => 'approved',
+                'approved_at' => now(),
+            ],
+            [
+                'key' => 'water',
+                'title_ar' => 'مياه شرب نقية موزعة',
+                'title_en' => 'Clean Drinking Water',
+                'value' => '1.2M+',
+                'unit_ar' => 'لتر',
+                'unit_en' => 'Liters',
+                'category' => 'water',
+                'order' => 2,
+                'is_approved' => true,
+                'status' => 'approved',
+                'approved_at' => now(),
+            ],
+            [
+                'key' => 'bread',
+                'title_ar' => 'أرغفة خبز يومية',
+                'title_en' => 'Daily Bread Loaves',
+                'value' => '350,000+',
+                'unit_ar' => 'رغيف',
+                'unit_en' => 'Loaves',
+                'category' => 'food',
+                'order' => 3,
+                'is_approved' => true,
+                'status' => 'approved',
+                'approved_at' => now(),
+            ],
+            [
+                'key' => 'students',
+                'title_ar' => 'طلاب مستمرون في التعليم',
+                'title_en' => 'Students Supported',
+                'value' => '3,200+',
+                'unit_ar' => 'طالب',
+                'unit_en' => 'Students',
+                'category' => 'education',
+                'order' => 4,
+                'is_approved' => true,
+                'status' => 'approved',
+                'approved_at' => now(),
+            ],
+        ];
+
+        foreach ($metrics as $metric) {
+            \App\Models\ImpactMetric::updateOrCreate(['key' => $metric['key']], $metric);
+        }
     }
 }

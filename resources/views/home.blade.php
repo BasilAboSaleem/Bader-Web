@@ -22,12 +22,21 @@
 
     <section class="bg-bader-green text-white" aria-labelledby="impact-strip-title">
         <div class="mx-auto grid max-w-7xl grid-cols-2 gap-8 px-4 py-12 sm:grid-cols-4 sm:gap-10">
-            @foreach ($impacts as $impact)
-                <div data-reveal>
-                    <p class="text-4xl font-semibold text-bader-lime">{{ __('home.impact_empty') }}</p>
-                    <p class="mt-2 text-sm text-white/70">{{ __('impact.'.$impact) }}</p>
-                </div>
-            @endforeach
+            @if (isset($approvedMetrics) && $approvedMetrics->isNotEmpty())
+                @foreach ($approvedMetrics as $metric)
+                    <div data-reveal>
+                        <p class="text-4xl font-semibold text-bader-lime">{{ $metric->value }} <span class="text-sm font-normal text-white/80">{{ $metric->unit() }}</span></p>
+                        <p class="mt-2 text-sm text-white/70">{{ $metric->title() }}</p>
+                    </div>
+                @endforeach
+            @else
+                @foreach ($impacts as $impact)
+                    <div data-reveal>
+                        <p class="text-4xl font-semibold text-bader-lime">{{ __('home.impact_empty') }}</p>
+                        <p class="mt-2 text-sm text-white/70">{{ __('impact.'.$impact) }}</p>
+                    </div>
+                @endforeach
+            @endif
         </div>
     </section>
 
