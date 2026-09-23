@@ -508,5 +508,25 @@
     "dashboard.payment_method_bank_transfer": "تحويل بنكي مباشر",
     "dashboard.payment_method_cash": "إيداع نقدي / إيصال",
     "dashboard.payment_method_cheque": "شيك بنكي",
-    "dashboard.payment_method_other": "طريقة أخرى"
+    "dashboard.payment_method_other": "طريقة أخرى",
+
+    "errors.500.title": "خطأ في الخادم",
+    "errors.500.text": "حدث خطأ غير متوقع. تم إبلاغ فريقنا. يرجى المحاولة مرة أخرى لاحقاً.",
+    "errors.503.title": "الموقع تحت الصيانة",
+    "errors.503.text": "موقع بادر متوقف مؤقتاً للصيانة المجدولة. سنعود قريباً.",
+    "errors.503.note": "إذا استمرت المشكلة، يرجى التواصل عبر قنوات الاتصال الرسمية للمؤسسة.",
+    "errors.503.retry": "إعادة المحاولة",
+
+    "security.role_admin": "مدير النظام",
+    "security.role_editor": "محرر",
+    "security.role_viewer": "مشاهد فقط",
+    "security.2fa_enabled": "التحقق بخطوتين مفعّل",
+    "security.2fa_disabled": "التحقق بخطوتين معطّل",
+    "security.2fa_challenge_title": "التحقق الثنائي",
+    "security.2fa_challenge_desc": "أدخل الرمز المكوّن من 6 أرقام من تطبيق المصادقة للمتابعة.",
+    "security.2fa_code": "رمز التحقق",
+    "security.2fa_submit": "تحقق وتسجيل الدخول",
+    "security.2fa_invalid": "رمز التحقق غير صحيح أو منتهي الصلاحية.",
+    "security.forbidden_title": "وصول مرفوض",
+    "security.forbidden_text": "ليس لديك صلاحية الوصول إلى هذه المنطقة."
 }

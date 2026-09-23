@@ -508,5 +508,25 @@
     "dashboard.payment_method_bank_transfer": "Direct Bank Transfer",
     "dashboard.payment_method_cash": "Cash Deposit / Receipt",
     "dashboard.payment_method_cheque": "Bank Cheque",
-    "dashboard.payment_method_other": "Other Method"
+    "dashboard.payment_method_other": "Other Method",
+
+    "errors.500.title": "Server Error",
+    "errors.500.text": "An unexpected error occurred. Our team has been notified. Please try again later.",
+    "errors.503.title": "Under Maintenance",
+    "errors.503.text": "Bader's website is temporarily offline for scheduled maintenance. We'll be back shortly.",
+    "errors.503.note": "If the issue persists, please reach out via our official contact channels.",
+    "errors.503.retry": "Try Again",
+
+    "security.role_admin": "Administrator",
+    "security.role_editor": "Editor",
+    "security.role_viewer": "Viewer",
+    "security.2fa_enabled": "Two-Factor Authentication Enabled",
+    "security.2fa_disabled": "Two-Factor Authentication Disabled",
+    "security.2fa_challenge_title": "Two-Factor Verification",
+    "security.2fa_challenge_desc": "Enter the 6-digit code from your authenticator app to continue.",
+    "security.2fa_code": "Authentication Code",
+    "security.2fa_submit": "Verify & Sign In",
+    "security.2fa_invalid": "The authentication code is invalid or has expired.",
+    "security.forbidden_title": "Access Denied",
+    "security.forbidden_text": "You do not have permission to access this area."
 }
