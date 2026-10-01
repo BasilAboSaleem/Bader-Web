@@ -153,6 +153,30 @@
   --color-theme-purple-500: #7a5af8;
 
   /* ─── Bader Public Brand ─── */
+  --color-teal-950: #0a2e2f;
+  --color-teal-900: #0f3d3b;
+  --color-teal-800: #15524d;
+  --color-teal-700: #1d6a5f;
+  --color-teal-600: #2b8170;
+  --color-teal-500: #3d9880;
+  --color-forest-900: #17452b;
+  --color-forest-800: #1b5732;
+  --color-forest-700: #1f6b38;
+  --color-forest-600: #31834a;
+  --color-forest-500: #4d9a5e;
+  --color-forest-400: #75b276;
+  --color-gold-500: #d2a84a;
+  --color-gold-400: #e0bb61;
+  --color-gold-300: #ecd28c;
+  --color-gold-600: #b88d2e;
+  --color-sand-50: #f7f8ef;
+  --color-sand-100: #eef2df;
+  --color-sand-200: #dfe6cc;
+  --color-sand-300: #c5d0b4;
+  --color-ink-900: #102418;
+  --color-ink-800: #193126;
+  --color-ink-700: #385244;
+  --color-ink-900\/90: rgb(16 36 24 / 0.9);
   --color-bader-green: #1f6b38;
   --color-bader-green-deep: #0f3d22;
   --color-bader-lime: #d2d63e;
@@ -316,6 +340,75 @@
 .menu-accordion > div {
   overflow: hidden;
   min-height: 0;
+}
+
+/* ─── Public Site Components ─── */
+@layer components {
+  .bader-public .font-display {
+    font-family: var(--font-outfit);
+  }
+
+  .bader-public .section-pad {
+    padding-block: 4rem;
+    padding-inline: 1rem;
+  }
+
+  .bader-public .btn-primary,
+  .bader-public .btn-secondary,
+  .bader-public .btn-dark {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    padding-inline: 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1.25rem;
+    transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+  }
+
+  .bader-public .btn-primary {
+    border: 1px solid var(--color-gold-500);
+    background-color: var(--color-gold-500);
+    color: var(--color-teal-950);
+    box-shadow: 0 8px 20px rgb(210 168 74 / 0.18);
+  }
+
+  .bader-public .btn-primary:hover {
+    background-color: var(--color-gold-400);
+    border-color: var(--color-gold-400);
+    box-shadow: 0 10px 24px rgb(210 168 74 / 0.24);
+  }
+
+  .bader-public .btn-secondary {
+    border: 1px solid rgb(247 248 239 / 0.55);
+    background-color: rgb(10 46 47 / 0.15);
+    color: var(--color-sand-50);
+  }
+
+  .bader-public .btn-secondary:hover {
+    border-color: var(--color-sand-50);
+    background-color: rgb(247 248 239 / 0.12);
+  }
+
+  .bader-public .btn-dark {
+    border: 1px solid var(--color-teal-950);
+    background-color: var(--color-teal-950);
+    color: var(--color-sand-50);
+  }
+
+  .bader-public .btn-dark:hover {
+    background-color: var(--color-teal-800);
+    border-color: var(--color-teal-800);
+  }
+
+  .bader-public .card,
+  .bader-public .bader-card {
+    border: 1px solid var(--color-sand-200);
+    background-color: #fff;
+    box-shadow: 0 1px 3px rgb(16 36 24 / 0.06);
+  }
 }
 
 /* ─── Public Site Body Override ─── */

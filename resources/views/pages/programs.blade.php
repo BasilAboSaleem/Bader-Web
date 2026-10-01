@@ -16,8 +16,8 @@
                 @foreach ($programs as $program)
                     @php
                         $isModel = $program instanceof \App\Models\Program;
-                        $title = $isModel ? $program->title() : __('program.'.$program);
-                        $text = $isModel ? $program->description() : __('program.'.$program.'_text');
+                        $title = $isModel ? $program->title : __('program.'.$program);
+                        $text = $isModel ? $program->description : __('program.'.$program.'_text');
                     @endphp
                     <article class="card p-6 sm:p-7 hover:border-gold-500/40 transition-all group flex flex-col justify-between" data-reveal>
                         <div>

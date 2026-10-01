@@ -17,9 +17,9 @@
                     @php
                         $isModel = $campaign instanceof \App\Models\Campaign;
                         $key = $isModel ? $campaign->key : $campaign['key'];
-                        $title = $isModel ? $campaign->title() : __('campaign.'.$key);
-                        $desc = $isModel ? $campaign->description() : __('campaign.'.$key.'_text');
-                        $goal = $isModel ? ($campaign->target_amount ? number_format($campaign->target_amount) : null) : $campaign['goal'];
+                        $title = $isModel ? $campaign->title : __('campaign.'.$key);
+                        $desc = $isModel ? $campaign->description : __('campaign.'.$key.'_text');
+                        $goal = $isModel ? ($campaign->goal_amount ? number_format($campaign->goal_amount) : null) : $campaign['goal'];
                         $currency = $isModel ? $campaign->currency : __($campaign['currency'] ?? 'campaign.currency');
                     @endphp
                     <article class="overflow-hidden rounded-3xl bg-teal-900 border border-teal-800 p-8 text-sand-50 shadow-lg flex flex-col justify-between" data-reveal>
