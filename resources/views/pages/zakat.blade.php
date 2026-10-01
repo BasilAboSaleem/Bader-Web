@@ -18,7 +18,7 @@
     />
 
     <section class="band-base section-y">
-        <div class="container-bader grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_24rem]"
+        <div class="container-bader grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_24rem]"
             data-zakat
             data-mode="both"
             data-gold-price="{{ $goldPricePerGram }}"

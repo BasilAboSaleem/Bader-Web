@@ -49,7 +49,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('donate.checkout') }}" class="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_23rem]" data-payment-form data-gift>
+            <form method="POST" action="{{ route('donate.checkout') }}" class="grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_23rem]" data-payment-form data-gift>
                 @csrf
                 <input type="hidden" name="target_type" value="{{ $target['type'] }}">
                 @if ($target['id'])

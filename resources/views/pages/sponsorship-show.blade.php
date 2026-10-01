@@ -13,7 +13,7 @@
     />
 
     <section class="band-base section-y">
-        <div class="container-bader grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <div class="container-bader grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
             <div class="min-w-0 space-y-6">
                 <div class="surface-card flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:p-8" data-reveal>
                     <div class="h-36 w-36 shrink-0 overflow-hidden rounded-3xl bg-paper-3">

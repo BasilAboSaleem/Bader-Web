@@ -23,7 +23,7 @@
                                 <x-bader.icon name="map-pin" class="h-5 w-5" />
                             </span>
                             <span class="min-w-0">
-                                <span class="block truncate font-extrabold text-ink-900 group-hover:text-forest-700">{{ $region->name }}</span>
+                                <span class="block font-extrabold leading-snug text-ink-900 group-hover:text-forest-700">{{ $region->name }}</span>
                                 <span class="block text-xs text-subtle">{{ trans_choice('region.projects_count', $region->campaigns_count, ['count' => $region->campaigns_count]) }}</span>
                             </span>
                         </a>

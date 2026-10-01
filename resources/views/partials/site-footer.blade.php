@@ -80,29 +80,29 @@
 
         <div>
             <p class="text-sm font-extrabold text-white">{{ __('nav.about') }}</p>
-            <nav class="mt-4 flex flex-col gap-2.5 text-sm" aria-label="{{ __('nav.about') }}">
+            <nav class="mt-3 flex flex-col items-start gap-0.5 text-sm" aria-label="{{ __('nav.about') }}">
                 @foreach (PublicNavigation::aboutLinks() as $link)
-                    <a href="{{ route($link['route']) }}" class="transition-colors hover:text-gold-400">{{ __($link['key']) }}</a>
+                    <a href="{{ route($link['route']) }}" class="py-1.5 transition-colors hover:text-gold-400">{{ __($link['key']) }}</a>
                 @endforeach
-                <a href="{{ route('news') }}" class="transition-colors hover:text-gold-400">{{ __('nav.news') }}</a>
+                <a href="{{ route('news') }}" class="py-1.5 transition-colors hover:text-gold-400">{{ __('nav.news') }}</a>
             </nav>
         </div>
 
         <div>
             <p class="text-sm font-extrabold text-white">{{ __('nav.programs') }}</p>
-            <nav class="mt-4 flex flex-col gap-2.5 text-sm" aria-label="{{ __('nav.programs') }}">
+            <nav class="mt-3 flex flex-col items-start gap-0.5 text-sm" aria-label="{{ __('nav.programs') }}">
                 @foreach ($menus['programs']->take(6) as $program)
-                    <a href="{{ route('programs.show', $program->key) }}" class="transition-colors hover:text-gold-400">{{ $program->title }}</a>
+                    <a href="{{ route('programs.show', $program->key) }}" class="py-1.5 transition-colors hover:text-gold-400">{{ $program->title }}</a>
                 @endforeach
-                <a href="{{ route('programs') }}" class="font-bold text-gold-400 hover:text-gold-300">{{ __('header.all_programs') }}</a>
+                <a href="{{ route('programs') }}" class="py-1.5 font-bold text-gold-400 hover:text-gold-300">{{ __('header.all_programs') }}</a>
             </nav>
         </div>
 
         <div>
             <p class="text-sm font-extrabold text-white">{{ __('footer.give_title') }}</p>
-            <nav class="mt-4 flex flex-col gap-2.5 text-sm" aria-label="{{ __('footer.give_title') }}">
+            <nav class="mt-3 flex flex-col items-start gap-0.5 text-sm" aria-label="{{ __('footer.give_title') }}">
                 @foreach ($givingLinks as $link)
-                    <a href="{{ route($link['route']) }}" class="transition-colors hover:text-gold-400">{{ __($link['key']) }}</a>
+                    <a href="{{ route($link['route']) }}" class="py-1.5 transition-colors hover:text-gold-400">{{ __($link['key']) }}</a>
                 @endforeach
             </nav>
         </div>

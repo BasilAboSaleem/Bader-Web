@@ -51,11 +51,11 @@
     />
 
     <section class="band-base section-y">
-        <div class="container-bader grid items-start gap-8 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+        <div class="container-bader grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
             <div data-reveal>
                 <p class="kicker">{{ __('contact_page.channels_kicker') }}</p>
                 <h2 class="section-title mt-2">{{ __('contact_page.channels_title') }}</h2>
-                <ul class="mt-6 grid gap-3">
+                <ul class="mt-6 grid grid-cols-1 gap-3">
                     @foreach ($channels as $channel)
                         @php $channelTag = $channel['href'] ? 'a' : 'div'; @endphp
                         <li>

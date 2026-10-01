@@ -109,7 +109,7 @@
             </div>
 
             @if ($presidentText || $visionText)
-                <div @class(['mt-10 grid gap-5', 'lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]' => $presidentText && $visionText])>
+                <div @class(['mt-10 grid grid-cols-1 gap-5', 'lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]' => $presidentText && $visionText])>
                     @if ($visionText)
                         <article class="relative overflow-hidden rounded-3xl bg-teal-950 p-8 text-white sm:p-10" data-reveal>
                             <span class="pointer-events-none absolute -end-16 -top-16 h-56 w-56 rounded-full bg-gold-500/15 blur-3xl" aria-hidden="true"></span>
@@ -164,7 +164,7 @@
 
     @if ($hasForm)
         <section id="{{ $key }}-form" class="band-tint section-y scroll-mt-28" aria-labelledby="{{ $key }}-form-title">
-            <div class="container-bader grid items-start gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+            <div class="container-bader grid grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
                 <div class="lg:sticky lg:top-28" data-reveal>
                     <p class="kicker">{{ __('form.'.$key.'.kicker') }}</p>
                     <h2 id="{{ $key }}-form-title" class="section-title mt-2">{{ __('form.'.$key.'.heading') }}</h2>

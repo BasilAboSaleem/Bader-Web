@@ -50,7 +50,7 @@
     </x-bader.page-hero>
 
     <section class="band-base section-y">
-        <div class="container-bader grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <div class="container-bader grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
             <div class="min-w-0">
                 <figure class="overflow-hidden rounded-3xl bg-paper-3 shadow-card-md" data-reveal>
                     @if ($facility->image)

@@ -21,7 +21,7 @@
         </div>
 
         @if ($leadStory)
-            <div class="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+            <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
                 <article class="group relative isolate flex min-h-[24rem] overflow-hidden rounded-3xl bg-teal-950 text-white shadow-card-md" data-reveal>
                     <img src="{{ $storyImage($leadStory) }}" alt="" loading="lazy" class="absolute inset-0 -z-10 h-full w-full object-cover transition duration-700 ease-bader group-hover:scale-105">
                     <div class="absolute inset-0 -z-10 bg-gradient-to-t from-teal-950 via-teal-950/50 to-transparent"></div>

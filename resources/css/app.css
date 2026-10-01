@@ -1273,6 +1273,15 @@
   }
 
   /* ── Rich text & lightbox ── */
+  /* Dashboard-entered text can contain long unbroken words or URLs; they must wrap instead of widening the page on phones. */
+  .bader-public {
+    overflow-wrap: break-word;
+  }
+
+  .bader-public :is(h1, h2, h3, h4, .prose-bader) {
+    overflow-wrap: anywhere;
+  }
+
   .bader-public .prose-bader > * + * {
     margin-top: 1.25rem;
   }

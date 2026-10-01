@@ -20,7 +20,7 @@
     />
 
     <section class="band-base section-y">
-        <form method="GET" action="{{ route('donate') }}" class="container-bader grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_24rem]"
+        <form method="GET" action="{{ route('donate') }}" class="container-bader grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_24rem]"
             data-gift
             data-amount-picker
             data-amount="{{ $defaultAmount }}"
