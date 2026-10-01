@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\Facility;
+use App\Models\Region;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -22,6 +23,7 @@ class FacilityController extends Controller
     {
         return view('dashboard.facilities.form', [
             'facility' => new Facility,
+            'regions' => Region::query()->orderBy('order')->get(['id', 'name_ar']),
             'isEdit' => false,
         ]);
     }
@@ -38,6 +40,7 @@ class FacilityController extends Controller
             'content_en' => ['nullable', 'string'],
             'location_ar' => ['nullable', 'string', 'max:255'],
             'location_en' => ['nullable', 'string', 'max:255'],
+            'region_id' => ['nullable', 'exists:regions,id'],
             'image' => ['nullable', 'string', 'max:255'],
             'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg', 'max:5120'],
             'video_url' => ['nullable', 'url', 'max:500'],
@@ -80,6 +83,7 @@ class FacilityController extends Controller
     {
         return view('dashboard.facilities.form', [
             'facility' => $facility,
+            'regions' => Region::query()->orderBy('order')->get(['id', 'name_ar']),
             'isEdit' => true,
         ]);
     }
@@ -96,6 +100,7 @@ class FacilityController extends Controller
             'content_en' => ['nullable', 'string'],
             'location_ar' => ['nullable', 'string', 'max:255'],
             'location_en' => ['nullable', 'string', 'max:255'],
+            'region_id' => ['nullable', 'exists:regions,id'],
             'image' => ['nullable', 'string', 'max:255'],
             'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg', 'max:5120'],
             'video_url' => ['nullable', 'url', 'max:500'],

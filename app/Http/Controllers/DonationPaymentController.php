@@ -7,9 +7,12 @@ use App\Models\Donation;
 use App\Models\Facility;
 use App\Models\FormSubmission;
 use App\Models\Program;
+use App\Models\SponsorshipCase;
 use App\Services\StripePaymentService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class DonationPaymentController extends Controller
@@ -19,63 +22,69 @@ class DonationPaymentController extends Controller
     ) {}
 
     /**
-     * Initiate online donation (Stripe Checkout or Bank Transfer notice).
+     * Initiate a donation: Stripe Checkout for cards, or a pending record for bank transfers.
      */
     public function checkout(Request $request): RedirectResponse
     {
+        $paymentMethods = $this->stripeService->isAvailable() ? ['stripe', 'bank_transfer'] : ['bank_transfer'];
+
         $validated = $request->validate([
-            'target_type' => ['required', 'string', 'in:campaign,program,facility,general'],
+            'target_type' => ['required', 'string', 'in:campaign,program,facility,sponsorship,general'],
             'target_id' => ['nullable', 'integer'],
-            'donation_category' => ['required', 'string', 'max:50'],
-            'amount' => ['required', 'numeric', 'min:1'],
-            'currency' => ['required', 'string', 'in:USD'],
+            'donation_category' => ['required', 'string', Rule::in(config('bader.donation_categories'))],
+            'amount' => ['required', 'numeric', 'min:1', 'max:1000000'],
+            'frequency' => ['nullable', Rule::in([Donation::FREQUENCY_ONCE, Donation::FREQUENCY_MONTHLY])],
+            'currency' => ['nullable', 'string', 'in:USD'],
             'donor_name' => ['nullable', 'string', 'max:255'],
-            'donor_email' => ['nullable', 'email', 'max:255'],
+            'donor_email' => ['nullable', 'email', 'max:255', 'required_if:payment_method,stripe'],
             'donor_phone' => ['nullable', 'string', 'max:50'],
             'is_anonymous' => ['nullable', 'boolean'],
-            'payment_method' => ['required', 'string', 'in:stripe,bank_transfer'],
+            'payment_method' => ['required', 'string', Rule::in($paymentMethods)],
             'reference_number' => ['required_if:payment_method,bank_transfer', 'nullable', 'string', 'max:100'],
             'transfer_date' => ['nullable', 'date'],
             'notes' => ['nullable', 'string', 'max:1000'],
+            'is_gift' => ['nullable', 'boolean'],
+            'gift_recipient_name' => ['required_if_accepted:is_gift', 'nullable', 'string', 'max:255'],
+            'gift_recipient_contact' => ['nullable', 'string', 'max:255'],
+            'gift_sender_name' => ['nullable', 'string', 'max:255'],
+            'gift_message' => ['nullable', 'string', 'max:500'],
+            'gift_card_design' => ['nullable', 'string', Rule::in(array_keys(config('bader.gift_designs')))],
         ]);
 
-        $currencyAr = 'دولار أمريكي';
-        $currencyEn = $validated['currency'];
-
-        $campaignId = null;
-        $programId = null;
-        $facilityId = null;
-
-        if ($validated['target_type'] === 'campaign' && ! empty($validated['target_id'])) {
-            $campaignId = Campaign::where('id', $validated['target_id'])->value('id');
-        } elseif ($validated['target_type'] === 'program' && ! empty($validated['target_id'])) {
-            $programId = Program::where('id', $validated['target_id'])->value('id');
-        } elseif ($validated['target_type'] === 'facility' && ! empty($validated['target_id'])) {
-            $facilityId = Facility::where('id', $validated['target_id'])->value('id');
-        }
+        $target = $this->resolveTarget($validated['target_type'], $validated['target_id'] ?? null);
+        $isStripe = $validated['payment_method'] === 'stripe';
+        $isGift = (bool) ($validated['is_gift'] ?? false);
 
         $donation = Donation::create([
             'donor_name' => $validated['donor_name'] ?? null,
             'donor_email' => $validated['donor_email'] ?? null,
             'donor_phone' => $validated['donor_phone'] ?? null,
             'is_anonymous' => (bool) ($validated['is_anonymous'] ?? false),
-            'target_type' => $validated['target_type'],
-            'campaign_id' => $campaignId,
-            'program_id' => $programId,
-            'facility_id' => $facilityId,
+            'target_type' => $target['type'],
+            'campaign_id' => $target['campaign_id'],
+            'program_id' => $target['program_id'],
+            'facility_id' => $target['facility_id'],
+            'sponsorship_case_id' => $target['sponsorship_case_id'],
             'donation_category' => $validated['donation_category'],
             'amount' => $validated['amount'],
-            'currency_ar' => $currencyAr,
-            'currency_en' => $currencyEn,
+            'frequency' => $validated['frequency'] ?? Donation::FREQUENCY_ONCE,
+            'currency_ar' => 'دولار أمريكي',
+            'currency_en' => 'USD',
             'payment_method' => $validated['payment_method'],
-            'payment_gateway' => $validated['payment_method'] === 'stripe' ? 'stripe' : 'manual_transfer',
+            'payment_gateway' => $isStripe ? 'stripe' : 'manual_transfer',
             'reference_number' => $validated['reference_number'] ?? null,
             'transfer_date' => $validated['transfer_date'] ?? now()->toDateString(),
             'notes' => $validated['notes'] ?? null,
-            'status' => $validated['payment_method'] === 'stripe' ? 'pending' : 'pending',
+            'status' => 'pending',
+            'is_gift' => $isGift,
+            'gift_recipient_name' => $isGift ? $validated['gift_recipient_name'] : null,
+            'gift_recipient_contact' => $isGift ? ($validated['gift_recipient_contact'] ?? null) : null,
+            'gift_sender_name' => $isGift ? ($validated['gift_sender_name'] ?? null) : null,
+            'gift_message' => $isGift ? ($validated['gift_message'] ?? null) : null,
+            'gift_card_design' => $isGift ? ($validated['gift_card_design'] ?? array_key_first(config('bader.gift_designs'))) : null,
         ]);
 
-        if ($validated['payment_method'] === 'stripe') {
+        if ($isStripe) {
             $session = $this->stripeService->createCheckoutSession(
                 $donation,
                 route('donate.success'),
@@ -87,7 +96,6 @@ class DonationPaymentController extends Controller
             return redirect()->away($session['url']);
         }
 
-        // Bank Transfer Submission Notification to Inbox
         FormSubmission::create([
             'type' => 'donation_transfer',
             'name' => $donation->display_name,
@@ -102,6 +110,7 @@ class DonationPaymentController extends Controller
                 'donation_id' => $donation->id,
                 'receipt_number' => $donation->receipt_number,
                 'target_type' => $donation->target_type,
+                'frequency' => $donation->frequency,
             ],
             'status' => 'unread',
         ]);
@@ -110,7 +119,7 @@ class DonationPaymentController extends Controller
     }
 
     /**
-     * Donation Success Return Page.
+     * Donation success return page.
      */
     public function success(Request $request): View
     {
@@ -119,25 +128,19 @@ class DonationPaymentController extends Controller
 
         $donation = null;
 
-        if ($sessionId) {
-            $donation = $this->stripeService->handleSessionCompletion($sessionId);
+        if (is_string($sessionId) && $sessionId !== '') {
+            $donation = $this->stripeService->confirmSession($sessionId);
         }
 
-        if (! $donation && $receiptNumber) {
+        if (! $donation && is_string($receiptNumber) && $receiptNumber !== '') {
             $donation = Donation::where('receipt_number', $receiptNumber)->first();
         }
 
-        if (! $donation && $sessionId) {
-            $donation = Donation::where('stripe_session_id', $sessionId)->first();
-        }
-
-        return view('pages.donate-success', [
-            'donation' => $donation,
-        ]);
+        return view('pages.donate-success', ['donation' => $donation]);
     }
 
     /**
-     * Donation Cancellation Return Page.
+     * Donation cancellation return page.
      */
     public function cancel(): RedirectResponse
     {
@@ -145,19 +148,49 @@ class DonationPaymentController extends Controller
     }
 
     /**
-     * Handle Stripe Webhook Events.
+     * Handle signed Stripe webhook events.
      */
-    public function webhook(Request $request)
+    public function webhook(Request $request): JsonResponse
     {
-        $payload = $request->all();
+        if (! $this->stripeService->hasValidSignature($request->getContent(), $request->header('Stripe-Signature'))) {
+            return response()->json(['status' => 'invalid_signature'], 400);
+        }
 
-        if (isset($payload['type']) && $payload['type'] === 'checkout.session.completed') {
-            $sessionId = $payload['data']['object']['id'] ?? null;
-            if ($sessionId) {
-                $this->stripeService->handleSessionCompletion($sessionId);
-            }
+        $event = json_decode($request->getContent(), true);
+
+        if (($event['type'] ?? null) === 'checkout.session.completed' && is_array($event['data']['object'] ?? null)) {
+            $this->stripeService->handleCompletedSession($event['data']['object']);
         }
 
         return response()->json(['status' => 'success']);
+    }
+
+    /**
+     * @return array{type: string, campaign_id: ?int, program_id: ?int, facility_id: ?int, sponsorship_case_id: ?int}
+     */
+    private function resolveTarget(string $type, ?int $targetId): array
+    {
+        $target = ['type' => 'general', 'campaign_id' => null, 'program_id' => null, 'facility_id' => null, 'sponsorship_case_id' => null];
+
+        if ($targetId === null) {
+            return $target;
+        }
+
+        [$column, $id] = match ($type) {
+            'campaign' => ['campaign_id', Campaign::published()->whereKey($targetId)->value('id')],
+            'program' => ['program_id', Program::where('status', 'published')->whereKey($targetId)->value('id')],
+            'facility' => ['facility_id', Facility::where('status', 'published')->whereKey($targetId)->value('id')],
+            'sponsorship' => ['sponsorship_case_id', SponsorshipCase::available()->whereKey($targetId)->value('id')],
+            default => [null, null],
+        };
+
+        if ($id === null) {
+            return $target;
+        }
+
+        $target['type'] = $type;
+        $target[$column] = $id;
+
+        return $target;
     }
 }

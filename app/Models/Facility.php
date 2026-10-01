@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Facility extends Model
 {
@@ -12,6 +13,7 @@ class Facility extends Model
 
     protected $fillable = [
         'key',
+        'region_id',
         'name_ar',
         'name_en',
         'description_ar',
@@ -37,6 +39,11 @@ class Facility extends Model
     public function scopePublished(Builder $query): Builder
     {
         return $query->where('status', 'published')->orderBy('order');
+    }
+
+    public function region(): BelongsTo
+    {
+        return $this->belongsTo(Region::class);
     }
 
     public function getNameAttribute(): string

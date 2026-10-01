@@ -1,138 +1,282 @@
 @php
     use App\Support\PublicNavigation;
-    $primary = PublicNavigation::primary();
-    $secondary = PublicNavigation::secondary();
-    $dark = $dark ?? true;
+
+    $menus = $navMenus ?? PublicNavigation::menus();
+    $aboutLinks = PublicNavigation::aboutLinks();
+    $otherLocale = app()->isLocale('ar') ? 'en' : 'ar';
+    $megaMenus = [
+        'about' => ['label' => __('nav.about'), 'active' => request()->routeIs('about', 'impact', 'partners', 'volunteer', 'faq', 'contact')],
+        'regions' => ['label' => __('nav.regions'), 'active' => request()->routeIs('regions.*')],
+        'programs' => ['label' => __('nav.programs'), 'active' => request()->routeIs('programs', 'programs.*')],
+        'projects' => ['label' => __('nav.campaigns'), 'active' => request()->routeIs('campaigns', 'campaigns.*')],
+        'sponsorship' => ['label' => __('nav.sponsorship'), 'active' => request()->routeIs('sponsorship', 'sponsorship.*')],
+    ];
 @endphp
 
-<header
-    data-site-header
-    class="sticky top-0 z-50 transition-all duration-300 bg-teal-950/90 backdrop-blur-md shadow-lg border-b border-teal-800 text-sand-50"
->
-    <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-        {{-- Brand Logo & Names --}}
-        <a href="{{ route('home') }}" class="flex min-w-0 items-center gap-3 group" aria-label="{{ __('brand.name') }}">
-            <span class="relative flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-gold-500/20 via-teal-900 to-teal-950 border border-gold-500/30 p-2 shadow-inner group-hover:border-gold-400 group-hover:scale-105 transition-all">
-                <img src="{{ asset(config('bader.assets.mark_star')) }}" alt="" class="h-full w-full object-contain">
+{{-- Utility bar --}}
+<div class="relative z-[51] bg-teal-950 text-sand-100 print:hidden">
+    <div class="container-bader flex h-10 items-center justify-between gap-4 text-xs">
+        <p class="hidden items-center gap-2 font-medium text-sand-100/85 sm:flex">
+            <span class="h-1.5 w-1.5 rounded-full bg-gold-500 animate-pulse-dot" aria-hidden="true"></span>
+            {{ __('header.topbar_text') }}
+        </p>
+        <nav class="flex items-center gap-1 ms-auto" aria-label="{{ __('header.utility_nav') }}">
+            <a href="{{ route('gift') }}" class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-semibold transition-colors hover:bg-white/10 hover:text-white">
+                <x-bader.icon name="gift" class="h-3.5 w-3.5 text-gold-400" />
+                <span>{{ __('nav.gift') }}</span>
+            </a>
+            <a href="{{ route('zakat') }}" class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-semibold transition-colors hover:bg-white/10 hover:text-white">
+                <x-bader.icon name="calculator" class="h-3.5 w-3.5 text-gold-400" />
+                <span>{{ __('nav.zakat') }}</span>
+            </a>
+            <span class="mx-1 h-4 w-px bg-white/15" aria-hidden="true"></span>
+            <a href="{{ route('locale.switch', $otherLocale) }}" lang="{{ $otherLocale }}" class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-bold transition-colors hover:bg-white/10 hover:text-white">
+                <x-bader.icon name="globe" class="h-3.5 w-3.5 text-gold-400" />
+                <span>{{ __('locale.'.$otherLocale) }}</span>
+            </a>
+        </nav>
+    </div>
+</div>
+
+<header data-site-header class="site-header sticky top-0 z-50">
+    <div class="container-bader flex h-[4.5rem] items-center gap-4">
+        <a href="{{ route('home') }}" class="group flex shrink-0 items-center gap-3" aria-label="{{ __('brand.name') }}">
+            <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-950 p-2 shadow-card-sm transition-transform duration-300 ease-bader group-hover:scale-105">
+                <img src="{{ asset(config('bader.assets.mark_star')) }}" alt="" width="28" height="28" class="h-full w-full object-contain">
             </span>
             <span class="leading-tight">
-                <span class="block font-display text-base sm:text-lg font-bold tracking-tight text-white group-hover:text-gold-400 transition-colors">{{ __('brand.name') }}</span>
-                <span class="block text-[10px] sm:text-[11px] font-sans text-gold-400/90 tracking-wider">{{ __('brand.tagline') }}</span>
+                <span class="block text-lg font-extrabold text-ink-900">{{ __('brand.name') }}</span>
+                <span class="block text-[11px] font-semibold text-forest-700">{{ __('brand.name_en') }}</span>
             </span>
         </a>
 
-        {{-- Desktop Navigation Links --}}
-        <nav class="hidden items-center gap-1.5 lg:flex font-sans" aria-label="{{ __('nav.home') }}">
-            @foreach ($primary as $item)
-                @php
-                    $isActive = request()->routeIs($item['route']);
-                @endphp
-                <a
-                    href="{{ route($item['route']) }}"
-                    @if ($isActive) aria-current="page" @endif
-                    class="px-3.5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 {{ $isActive ? 'bg-gold-500 text-teal-950 shadow-md shadow-gold-500/20 font-bold' : 'text-sand-100 hover:text-white hover:bg-teal-900/60' }}"
-                >{{ __($item['key']) }}</a>
+        <nav class="hidden h-full items-stretch gap-0.5 ms-4 lg:flex" aria-label="{{ __('header.main_nav') }}">
+            @foreach ($megaMenus as $menuKey => $menu)
+                <div data-mega class="flex items-center">
+                    <button
+                        type="button"
+                        data-mega-trigger
+                        aria-expanded="false"
+                        aria-controls="mega-{{ $menuKey }}"
+                        @class(['nav-link', 'is-current' => $menu['active']])
+                    >
+                        <span>{{ $menu['label'] }}</span>
+                        <x-bader.icon name="chevron-down" class="h-4 w-4 transition-transform duration-200" />
+                    </button>
+
+                    <div id="mega-{{ $menuKey }}" data-mega-panel hidden class="mega-panel">
+                        <div class="container-bader py-8">
+                            @switch($menuKey)
+                                @case('about')
+                                    <div class="grid gap-8 lg:grid-cols-[1fr_20rem]">
+                                        <ul class="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                                            @foreach ($aboutLinks as $link)
+                                                <li>
+                                                    <a href="{{ route($link['route']) }}" class="mega-link">
+                                                        <span class="mega-link-icon"><x-bader.nav-icon :route="$link['route']" class="h-5 w-5" /></span>
+                                                        <span>
+                                                            <span class="block font-bold text-ink-900">{{ __($link['key']) }}</span>
+                                                            <span class="mt-0.5 block text-xs leading-relaxed text-muted">{{ __('header.about_desc.'.$link['route']) }}</span>
+                                                        </span>
+                                                    </a>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                        <div class="rounded-2xl bg-teal-950 p-6 text-sand-50">
+                                            <p class="text-xs font-bold text-gold-400">{{ __('brand.name') }}</p>
+                                            <p class="mt-2 text-lg font-extrabold leading-snug">{{ __('brand.tagline') }}</p>
+                                            <a href="{{ route('donate') }}" class="btn-primary mt-5">{{ __('nav.donate') }}</a>
+                                        </div>
+                                    </div>
+                                    @break
+
+                                @case('regions')
+                                    <div class="flex items-end justify-between gap-4">
+                                        <div>
+                                            <p class="kicker">{{ __('nav.regions') }}</p>
+                                            <p class="mt-2 max-w-xl text-sm text-muted">{{ __('header.regions_intro') }}</p>
+                                        </div>
+                                        <a href="{{ route('home') }}#regions-map" class="mega-more">{{ __('header.view_map') }} <x-bader.icon name="arrow" class="h-4 w-4" /></a>
+                                    </div>
+                                    <ul class="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+                                        @forelse ($menus['regions'] as $region)
+                                            <li>
+                                                <a href="{{ route('regions.show', $region->key) }}" class="mega-tile">
+                                                    <x-bader.icon name="map-pin" class="h-5 w-5 text-forest-700" />
+                                                    <span class="mt-3 block font-bold text-ink-900">{{ $region->name }}</span>
+                                                    <span class="mt-1 block text-xs text-muted">{{ trans_choice('region.projects_count', $region->campaigns_count, ['count' => $region->campaigns_count]) }}</span>
+                                                </a>
+                                            </li>
+                                        @empty
+                                            <li class="text-sm text-muted">{{ __('header.coming_soon') }}</li>
+                                        @endforelse
+                                    </ul>
+                                    @break
+
+                                @case('programs')
+                                    <div class="flex items-end justify-between gap-4">
+                                        <p class="kicker">{{ __('nav.programs') }}</p>
+                                        <a href="{{ route('programs') }}" class="mega-more">{{ __('header.all_programs') }} <x-bader.icon name="arrow" class="h-4 w-4" /></a>
+                                    </div>
+                                    <ul class="mt-6 grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                                        @foreach ($menus['programs'] as $program)
+                                            <li>
+                                                <a href="{{ route('programs.show', $program->key) }}" class="mega-link !items-center">
+                                                    <span class="h-11 w-11 shrink-0 overflow-hidden rounded-xl bg-paper-2">
+                                                        @if ($program->image)
+                                                            <img src="{{ asset($program->image) }}" alt="" class="h-full w-full object-cover" loading="lazy">
+                                                        @else
+                                                            <span class="flex h-full w-full items-center justify-center text-forest-700"><x-bader.icon name="sprout" class="h-5 w-5" /></span>
+                                                        @endif
+                                                    </span>
+                                                    <span class="min-w-0">
+                                                        <span class="block truncate font-bold text-ink-900">{{ $program->title }}</span>
+                                                        <span class="block text-xs text-muted">{{ trans_choice('region.projects_count', $program->campaigns_count, ['count' => $program->campaigns_count]) }}</span>
+                                                    </span>
+                                                </a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                    @break
+
+                                @case('projects')
+                                    <div class="flex items-end justify-between gap-4">
+                                        <p class="kicker">{{ __('header.featured_projects') }}</p>
+                                        <a href="{{ route('campaigns') }}" class="mega-more">{{ __('header.all_projects') }} <x-bader.icon name="arrow" class="h-4 w-4" /></a>
+                                    </div>
+                                    <ul class="mt-6 grid gap-4 md:grid-cols-3">
+                                        @forelse ($menus['campaigns'] as $campaign)
+                                            <li>
+                                                <a href="{{ route('campaigns.show', $campaign->key) }}" class="group block overflow-hidden rounded-2xl border border-hairline bg-white transition hover:shadow-card-md">
+                                                    <span class="block aspect-[16/9] overflow-hidden bg-paper-2">
+                                                        <img src="{{ asset($campaign->image ?: 'images/programs/water.jpg') }}" alt="" class="h-full w-full object-cover transition duration-500 ease-bader group-hover:scale-105" loading="lazy">
+                                                    </span>
+                                                    <span class="block p-4">
+                                                        @if ($campaign->region)
+                                                            <span class="flex items-center gap-1 text-xs font-semibold text-forest-700"><x-bader.icon name="map-pin" class="h-3.5 w-3.5" />{{ $campaign->region->name }}</span>
+                                                        @endif
+                                                        <span class="mt-1 block font-bold text-ink-900">{{ $campaign->title }}</span>
+                                                    </span>
+                                                </a>
+                                            </li>
+                                        @empty
+                                            <li class="text-sm text-muted">{{ __('header.coming_soon') }}</li>
+                                        @endforelse
+                                    </ul>
+                                    @break
+
+                                @case('sponsorship')
+                                    <div class="grid gap-8 lg:grid-cols-[18rem_1fr]">
+                                        <div>
+                                            <p class="kicker">{{ __('nav.sponsorship') }}</p>
+                                            <p class="mt-3 text-lg font-extrabold leading-snug text-ink-900">{{ __('header.sponsorship_title') }}</p>
+                                            <p class="mt-2 text-sm leading-relaxed text-muted">{{ __('header.sponsorship_intro') }}</p>
+                                            <a href="{{ route('sponsorship') }}" class="btn-brand mt-5">{{ __('header.all_cases') }}</a>
+                                        </div>
+                                        <ul class="grid gap-3 md:grid-cols-3">
+                                            @forelse ($menus['waitingCases'] as $case)
+                                                <li>
+                                                    <a href="{{ route('sponsorship.show', $case->code) }}" class="mega-tile h-full">
+                                                        <span class="flex items-center justify-between gap-2">
+                                                            <span class="rounded-full bg-paper-2 px-2.5 py-0.5 text-[11px] font-bold text-forest-700">{{ $case->type_label }}</span>
+                                                            <span class="font-mono text-[11px] text-subtle" dir="ltr">{{ $case->code }}</span>
+                                                        </span>
+                                                        <span class="mt-3 block font-bold text-ink-900">{{ $case->name }}</span>
+                                                        <span class="mt-1 block text-xs text-muted">
+                                                            @if ($case->age){{ __('sponsorship.age_years', ['age' => $case->age]) }} · @endif{{ $case->region?->name }}
+                                                        </span>
+                                                        <span class="mt-3 block text-sm font-extrabold text-forest-700">{{ __('sponsorship.per_month', ['amount' => '$'.number_format((float) $case->monthly_amount)]) }}</span>
+                                                    </a>
+                                                </li>
+                                            @empty
+                                                <li class="text-sm text-muted md:col-span-3">{{ __('header.no_waiting_cases') }}</li>
+                                            @endforelse
+                                        </ul>
+                                    </div>
+                                    @break
+                            @endswitch
+                        </div>
+                    </div>
+                </div>
             @endforeach
 
-            {{-- Secondary Pages Dropdown --}}
-            <details class="relative group/drop">
-                <summary class="cursor-pointer list-none flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold text-sand-100 hover:text-white hover:bg-teal-900/60 transition-colors">
-                    <span>{{ __('nav.more') }}</span>
-                    <svg class="h-4 w-4 text-gold-400 transition-transform group-open/drop:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </summary>
-                <div class="absolute end-0 top-full z-50 mt-2 w-52 rounded-2xl border border-teal-800 bg-teal-950 p-2 text-sand-100 shadow-2xl backdrop-blur-xl animate-rise">
-                    @foreach ($secondary as $item)
-                        @php
-                            $isSecActive = request()->routeIs($item['route']);
-                        @endphp
-                        <a
-                            href="{{ route($item['route']) }}"
-                            class="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-medium transition-colors {{ $isSecActive ? 'bg-teal-800/80 text-gold-400 font-bold' : 'hover:bg-teal-900/80 hover:text-white' }}"
-                        >
-                            <span class="h-1.5 w-1.5 rounded-full {{ $isSecActive ? 'bg-gold-400' : 'bg-teal-700' }}"></span>
-                            <span>{{ __($item['key']) }}</span>
-                        </a>
+            <div class="flex items-center">
+                <a href="{{ route('news') }}" @class(['nav-link', 'is-current' => request()->routeIs('news', 'news.*')]) @if (request()->routeIs('news', 'news.*')) aria-current="page" @endif>{{ __('nav.news') }}</a>
+            </div>
+        </nav>
+
+        <div class="flex items-center gap-2 ms-auto">
+            <a href="{{ route('donate') }}" class="btn-primary hidden !min-h-11 sm:inline-flex">
+                <x-bader.icon name="heart" class="h-4 w-4" />
+                <span>{{ __('nav.donate') }}</span>
+            </a>
+            <button type="button" data-drawer-open aria-expanded="false" aria-controls="site-drawer" class="flex h-11 w-11 items-center justify-center rounded-xl border border-hairline-strong bg-white text-ink-900 transition hover:border-forest-700 hover:text-forest-700 lg:hidden">
+                <span class="sr-only">{{ __('nav.menu') }}</span>
+                <x-bader.icon name="menu" class="h-6 w-6" />
+            </button>
+        </div>
+    </div>
+</header>
+
+{{-- Mobile drawer --}}
+<div id="site-drawer" data-drawer hidden class="drawer lg:hidden" role="dialog" aria-modal="true" aria-label="{{ __('nav.menu') }}">
+    <div class="drawer-backdrop" data-drawer-close></div>
+    <div class="drawer-panel">
+        <div class="flex items-center justify-between border-b border-hairline px-5 py-4">
+            <span class="text-base font-extrabold text-ink-900">{{ __('brand.name') }}</span>
+            <button type="button" data-drawer-close class="flex h-10 w-10 items-center justify-center rounded-xl border border-hairline text-ink-700 hover:text-forest-700">
+                <span class="sr-only">{{ __('header.close_menu') }}</span>
+                <x-bader.icon name="close" class="h-5 w-5" />
+            </button>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto px-3 py-4" aria-label="{{ __('header.main_nav') }}">
+            <a href="{{ route('home') }}" class="drawer-link">{{ __('nav.home') }}</a>
+
+            <details class="drawer-group" @if ($megaMenus['about']['active']) open @endif>
+                <summary class="drawer-link">{{ __('nav.about') }} <x-bader.icon name="chevron-down" class="h-4 w-4" /></summary>
+                <div class="drawer-sub">
+                    @foreach ($aboutLinks as $link)
+                        <a href="{{ route($link['route']) }}">{{ __($link['key']) }}</a>
                     @endforeach
                 </div>
             </details>
+
+            <details class="drawer-group" @if ($megaMenus['regions']['active']) open @endif>
+                <summary class="drawer-link">{{ __('nav.regions') }} <x-bader.icon name="chevron-down" class="h-4 w-4" /></summary>
+                <div class="drawer-sub">
+                    @foreach ($menus['regions'] as $region)
+                        <a href="{{ route('regions.show', $region->key) }}">{{ $region->name }}</a>
+                    @endforeach
+                </div>
+            </details>
+
+            <details class="drawer-group" @if ($megaMenus['programs']['active']) open @endif>
+                <summary class="drawer-link">{{ __('nav.programs') }} <x-bader.icon name="chevron-down" class="h-4 w-4" /></summary>
+                <div class="drawer-sub">
+                    <a href="{{ route('programs') }}" class="font-bold">{{ __('header.all_programs') }}</a>
+                    @foreach ($menus['programs'] as $program)
+                        <a href="{{ route('programs.show', $program->key) }}">{{ $program->title }}</a>
+                    @endforeach
+                </div>
+            </details>
+
+            <a href="{{ route('campaigns') }}" class="drawer-link">{{ __('nav.campaigns') }}</a>
+            <a href="{{ route('sponsorship') }}" class="drawer-link">{{ __('nav.sponsorship') }}</a>
+            <a href="{{ route('news') }}" class="drawer-link">{{ __('nav.news') }}</a>
+            <a href="{{ route('gift') }}" class="drawer-link">{{ __('nav.gift') }}</a>
+            <a href="{{ route('zakat') }}" class="drawer-link">{{ __('nav.zakat') }}</a>
         </nav>
 
-        {{-- Desktop Action Items (Lang & Donate) --}}
-        <div class="hidden items-center gap-3 sm:flex">
-            {{-- Language Switcher Pills --}}
-            <div class="flex items-center rounded-xl bg-teal-900/80 border border-teal-800/80 p-1 text-xs font-semibold">
-                <a
-                    href="{{ route('locale.switch', 'ar') }}"
-                    class="rounded-lg px-2.5 py-1 transition-all {{ app()->isLocale('ar') ? 'bg-gold-500 text-teal-950 font-bold shadow-sm' : 'text-sand-200 hover:text-white' }}"
-                >{{ __('locale.ar') }}</a>
-                <a
-                    href="{{ route('locale.switch', 'en') }}"
-                    class="rounded-lg px-2.5 py-1 transition-all {{ app()->isLocale('en') ? 'bg-gold-500 text-teal-950 font-bold shadow-sm' : 'text-sand-200 hover:text-white' }}"
-                >{{ __('locale.en') }}</a>
-            </div>
-
-            {{-- Main Header CTA --}}
-            <a
-                href="{{ route('donate') }}"
-                class="btn-primary !px-5 !py-2.5 text-xs sm:text-sm font-bold shadow-lg shadow-gold-500/20 flex items-center gap-2"
-            >
-                <svg class="h-4 w-4 text-teal-950" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
+        <div class="grid gap-3 border-t border-hairline p-5">
+            <a href="{{ route('donate') }}" class="btn-primary w-full">
+                <x-bader.icon name="heart" class="h-4 w-4" />
                 <span>{{ __('nav.donate') }}</span>
             </a>
+            <a href="{{ route('locale.switch', $otherLocale) }}" lang="{{ $otherLocale }}" class="btn-outline w-full">
+                <x-bader.icon name="globe" class="h-4 w-4" />
+                <span>{{ __('locale.'.$otherLocale) }}</span>
+            </a>
         </div>
-
-        {{-- Mobile Hamburger Menu --}}
-        <details class="lg:hidden relative group/mobile">
-            <summary class="flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-xl border border-teal-700 bg-teal-900/60 text-sand-50 transition-colors hover:bg-teal-800">
-                <span class="sr-only">{{ __('nav.menu') }}</span>
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-            </summary>
-            <div class="absolute inset-x-0 -start-4 end-0 top-full mt-3 w-screen max-w-sm rounded-2xl border border-teal-800 bg-teal-950/95 p-5 shadow-2xl backdrop-blur-xl animate-rise text-sand-50 z-50">
-                <div class="flex items-center justify-between pb-4 mb-4 border-b border-teal-800/80">
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs font-bold text-gold-400">{{ __('brand.name') }}</span>
-                    </div>
-                    <div class="flex items-center rounded-lg bg-teal-900 border border-teal-800 p-0.5 text-xs font-semibold">
-                        <a href="{{ route('locale.switch', 'ar') }}" class="rounded px-2.5 py-1 {{ app()->isLocale('ar') ? 'bg-gold-500 text-teal-950 font-bold' : 'text-sand-300' }}">عربي</a>
-                        <a href="{{ route('locale.switch', 'en') }}" class="rounded px-2.5 py-1 {{ app()->isLocale('en') ? 'bg-gold-500 text-teal-950 font-bold' : 'text-sand-300' }}">EN</a>
-                    </div>
-                </div>
-
-                <nav class="grid gap-1 text-sm font-semibold">
-                    @foreach (PublicNavigation::all() as $item)
-                        @php
-                            $isMobActive = request()->routeIs($item['route']);
-                        @endphp
-                        <a
-                            href="{{ route($item['route']) }}"
-                            class="flex items-center justify-between rounded-xl px-3.5 py-2.5 transition-colors {{ $isMobActive ? 'bg-gold-500 text-teal-950 font-bold' : 'text-sand-100 hover:bg-teal-900/60' }}"
-                        >
-                            <span>{{ __($item['key']) }}</span>
-                            @if ($isMobActive)
-                                <span class="h-2 w-2 rounded-full bg-teal-950"></span>
-                            @endif
-                        </a>
-                    @endforeach
-                </nav>
-
-                <div class="mt-5 pt-4 border-t border-teal-800/80">
-                    <a
-                        href="{{ route('donate') }}"
-                        class="btn-primary w-full text-center !py-3 text-sm font-bold shadow-lg shadow-gold-500/20 flex items-center justify-center gap-2"
-                    >
-                        <svg class="h-4 w-4 text-teal-950" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                        <span>{{ __('nav.donate') }}</span>
-                    </a>
-                </div>
-            </div>
-        </details>
     </div>
-</header>
+</div>

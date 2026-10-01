@@ -2,8 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Models\Campaign;
+use App\Models\Region;
+use App\Models\SponsorshipCase;
 use App\Models\Story;
 use App\Support\PublicNavigation;
+use App\Support\SiteSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -11,28 +15,49 @@ class PublicSiteTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_home_renders_brand_structure(): void
+    public function test_home_renders_the_giving_sections_from_published_content(): void
+    {
+        $region = Region::factory()->create();
+        $campaign = Campaign::factory()->featured()->create(['region_id' => $region->id, 'goal_amount' => 120000]);
+        $draftCampaign = Campaign::factory()->featured()->draft()->create();
+        $case = SponsorshipCase::factory()->create(['region_id' => $region->id]);
+        $story = Story::create([
+            'key' => 'field-update',
+            'title_ar' => 'تحديث من الميدان',
+            'title_en' => 'Field update',
+            'published_at' => now()->toDateString(),
+            'status' => 'published',
+        ]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('dir="rtl"', false)
+            ->assertSee(SiteSettings::hqLocation(), false)
+            ->assertSee(SiteSettings::fieldLocation(), false)
+            ->assertSee(__('home.quick_give.title'), false)
+            ->assertSee($campaign->title_ar, false)
+            ->assertSee('$120,000', false)
+            ->assertSee($region->name_ar, false)
+            ->assertSee('id="regions-map"', false)
+            ->assertSee($case->name_ar, false)
+            ->assertSee($story->title_ar, false)
+            ->assertSee('data-zakat', false)
+            ->assertViewHas('heroCampaigns', fn ($campaigns): bool => ! $campaigns->contains($draftCampaign));
+    }
+
+    public function test_home_renders_without_any_published_content(): void
     {
         $this->get(route('home'))
             ->assertOk()
-            ->assertSee(__('brand.hq'), false)
-            ->assertSee(__('brand.field'), false)
-            ->assertSee(__('nav.donate'), false)
             ->assertSee(__('home.hero_title'), false)
-            ->assertSee(__('campaign.water'), false)
-            ->assertSee(__('campaign.goal'), false)
-            ->assertSee('120,000', false)
-            ->assertSee(__('home.stories_title'), false)
-            ->assertSee(__('story.quran_honor.title'), false)
-            ->assertSee('data-home-section="stories"', false)
-            ->assertSee('bg-bader-green-deep', false)
-            ->assertDontSee('border-white/10 bg-black/20', false)
-            ->assertDontSee('10400', false)
-            ->assertSee('dir="rtl"', false);
+            ->assertSee(__('page.news.empty'), false)
+            ->assertSee(__('header.no_waiting_cases'), false);
     }
 
     public function test_language_can_switch_to_english(): void
     {
+        Campaign::factory()->featured()->create(['title_en' => 'Clean Water Wells']);
+
         $this->from(route('home'))
             ->get(route('locale.switch', 'en'))
             ->assertRedirect(route('home'));
@@ -40,9 +65,10 @@ class PublicSiteTest extends TestCase
         $this->get(route('home'))
             ->assertOk()
             ->assertSee('dir="ltr"', false)
-            ->assertSee('Sultanate of Oman, Muscat', false)
-            ->assertSee('Palestine, Gaza Strip', false)
-            ->assertSee(__('campaign.water'), false);
+            ->assertSee(SiteSettings::hqLocation('en'), false)
+            ->assertSee(SiteSettings::fieldLocation('en'), false)
+            ->assertSee('Clean Water Wells', false)
+            ->assertDontSee('home.', false);
     }
 
     public function test_language_switch_preserves_the_current_public_page(): void

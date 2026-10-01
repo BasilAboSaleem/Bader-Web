@@ -1,6 +1,14 @@
 @extends('layouts.public')
 
 @section('title', __('page.campaigns.title').' — '.__('brand.name'))
+@section('meta_description', __('page.campaigns.intro'))
+
+@php
+    $filterUrl = fn (array $overrides) => route('campaigns', array_filter(array_merge([
+        'program' => $selectedProgram?->key,
+        'region' => $selectedRegion?->key,
+    ], $overrides)));
+@endphp
 
 @section('content')
     <x-bader.page-hero
@@ -9,45 +17,81 @@
         :intro="__('page.campaigns.intro')"
     />
 
-    <section class="bg-sand-50 section-pad">
-        <div class="mx-auto max-w-6xl">
-            <div class="grid gap-6 md:grid-cols-2">
-                @foreach ($campaigns as $campaign)
-                    @php
-                        $isModel = $campaign instanceof \App\Models\Campaign;
-                        $key = $isModel ? $campaign->key : $campaign['key'];
-                        $title = $isModel ? $campaign->title : __('campaign.'.$key);
-                        $desc = $isModel ? $campaign->description : __('campaign.'.$key.'_text');
-                        $goal = $isModel ? ($campaign->goal_amount ? number_format($campaign->goal_amount) : null) : $campaign['goal'];
-                        $currency = $isModel ? $campaign->currency : __($campaign['currency'] ?? 'campaign.currency');
-                    @endphp
-                    <article class="overflow-hidden rounded-3xl bg-teal-900 border border-teal-800 p-8 text-sand-50 shadow-lg flex flex-col justify-between" data-reveal>
-                        <div>
-                            <span class="mb-4 inline-flex rounded-full bg-gold-500/20 border border-gold-500/40 px-3 py-1 text-xs font-bold text-gold-300">{{ __('campaign.status_active') }}</span>
-                            <h2 class="font-display text-2xl font-bold text-white">{{ $title }}</h2>
-                            <p class="mt-3 text-sm leading-relaxed text-sand-100/80">{{ $desc }}</p>
+    <section class="band-base section-y">
+        <div class="container-bader">
+            <div class="space-y-4" data-reveal>
+                @if ($programs->isNotEmpty())
+                    <nav aria-label="{{ __('campaigns_page.filter_program') }}">
+                        <p class="field-label">{{ __('campaigns_page.filter_program') }}</p>
+                        <div class="-mx-4 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
+                            <ul class="flex w-max gap-2">
+                                <li><a href="{{ $filterUrl(['program' => null]) }}" class="chip {{ $selectedProgram ? '' : 'is-active' }}" @unless ($selectedProgram) aria-current="true" @endunless>{{ __('campaigns_page.all') }}</a></li>
+                                @foreach ($programs as $program)
+                                    @php $isSelected = $selectedProgram?->is($program); @endphp
+                                    <li><a href="{{ $filterUrl(['program' => $program->key]) }}" class="chip whitespace-nowrap {{ $isSelected ? 'is-active' : '' }}" @if ($isSelected) aria-current="true" @endif>{{ $program->title }}</a></li>
+                                @endforeach
+                            </ul>
                         </div>
-                        <div class="mt-6 pt-5 border-t border-teal-800/80 flex items-center justify-between flex-wrap gap-4">
-                            @if ($goal)
-                                <p class="text-sm text-sand-100/70">{{ __('campaign.goal') }}: <strong class="text-lg text-gold-400 font-mono">{{ $goal }} {{ $currency }}</strong></p>
-                            @else
-                                <p class="text-sm text-sand-100/70">{{ __('page.campaigns.details_pending') }}</p>
-                            @endif
-                            <a href="{{ route('donate') }}" class="btn-primary !px-6 !py-2.5 text-xs sm:text-sm font-bold shadow-md">{{ __('nav.donate') }}</a>
+                    </nav>
+                @endif
+
+                @if ($regions->isNotEmpty())
+                    <nav aria-label="{{ __('campaigns_page.filter_region') }}">
+                        <p class="field-label">{{ __('campaigns_page.filter_region') }}</p>
+                        <div class="-mx-4 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
+                            <ul class="flex w-max gap-2">
+                                <li><a href="{{ $filterUrl(['region' => null]) }}" class="chip {{ $selectedRegion ? '' : 'is-active' }}" @unless ($selectedRegion) aria-current="true" @endunless>{{ __('campaigns_page.all_regions') }}</a></li>
+                                @foreach ($regions as $region)
+                                    @php $isSelected = $selectedRegion?->is($region); @endphp
+                                    <li>
+                                        <a href="{{ $filterUrl(['region' => $region->key]) }}" class="chip whitespace-nowrap {{ $isSelected ? 'is-active' : '' }}" @if ($isSelected) aria-current="true" @endif>
+                                            <x-bader.icon name="map-pin" class="h-3.5 w-3.5" />
+                                            {{ $region->name }}
+                                        </a>
+                                    </li>
+                                @endforeach
+                            </ul>
                         </div>
-                    </article>
-                @endforeach
+                    </nav>
+                @endif
             </div>
+
+            <p class="mt-8 text-sm font-semibold text-subtle" aria-live="polite">
+                {{ trans_choice('region.projects_count', $campaigns->total(), ['count' => $campaigns->total()]) }}
+            </p>
+
+            @if ($campaigns->isNotEmpty())
+                <div class="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    @foreach ($campaigns as $campaign)
+                        <x-bader.project-card :campaign="$campaign" />
+                    @endforeach
+                </div>
+
+                @if ($campaigns->hasPages())
+                    <div class="mt-10">{{ $campaigns->links() }}</div>
+                @endif
+            @else
+                <div class="mt-4 rounded-3xl border border-dashed border-hairline-strong bg-white p-10 text-center">
+                    <x-bader.icon name="grid" class="mx-auto h-10 w-10 text-forest-600" />
+                    <p class="mt-4 text-muted">{{ __('campaigns_page.empty') }}</p>
+                    <div class="mt-6 flex flex-wrap justify-center gap-3">
+                        @if ($selectedProgram || $selectedRegion)
+                            <a href="{{ route('campaigns') }}" class="btn-outline">{{ __('campaigns_page.clear_filters') }}</a>
+                        @endif
+                        <a href="{{ route('donate') }}" class="btn-primary">{{ __('nav.donate') }}</a>
+                    </div>
+                </div>
+            @endif
         </div>
     </section>
 
-    <section class="border-t border-sand-200 bg-sand-100 section-pad text-center">
-        <div class="mx-auto max-w-2xl" data-reveal>
-            <h2 class="font-display text-2xl font-bold text-ink-900 sm:text-3xl">{{ __('home.support_title') }}</h2>
-            <p class="mt-3 text-sm leading-relaxed text-ink-700/75">{{ __('home.support_intro') }}</p>
+    <section class="band-tint section-y text-center">
+        <div class="container-bader max-w-2xl" data-reveal>
+            <h2 class="section-title">{{ __('home.support_title') }}</h2>
+            <p class="section-lead mt-3">{{ __('home.support_intro') }}</p>
             <div class="mt-7 flex flex-wrap justify-center gap-3">
                 <a href="{{ route('donate') }}" class="btn-primary">{{ __('nav.donate') }}</a>
-                <a href="{{ route('contact') }}" class="btn-dark">{{ __('nav.contact') }}</a>
+                <a href="{{ route('contact') }}" class="btn-brand">{{ __('nav.contact') }}</a>
             </div>
         </div>
     </section>

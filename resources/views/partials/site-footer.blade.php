@@ -2,77 +2,116 @@
     use App\Support\PublicNavigation;
     use App\Support\SiteSettings;
 
-    $primaryLinks = PublicNavigation::primary();
-    $secondaryLinks = PublicNavigation::secondary();
+    $menus = $navMenus ?? PublicNavigation::menus();
+    $givingLinks = [
+        ['route' => 'donate', 'key' => 'nav.donate'],
+        ['route' => 'campaigns', 'key' => 'nav.campaigns'],
+        ['route' => 'sponsorship', 'key' => 'nav.sponsorship'],
+        ['route' => 'gift', 'key' => 'nav.gift'],
+        ['route' => 'zakat', 'key' => 'nav.zakat'],
+    ];
 @endphp
 
-<footer class="site-footer relative overflow-hidden border-t border-teal-800 bg-teal-950 text-sand-100/80 section-pad !py-14 sm:!py-16">
-    <div class="pointer-events-none absolute -end-24 -top-24 h-72 w-72 rounded-full bg-forest-500/5 blur-3xl"></div>
+<footer class="site-footer relative overflow-hidden bg-teal-950 text-sand-100/80">
+    <div class="pointer-events-none absolute -end-32 -top-32 h-96 w-96 rounded-full bg-forest-500/10 blur-3xl" aria-hidden="true"></div>
 
-    <div class="relative z-10 mx-auto max-w-7xl">
-        <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-12">
-            <div class="space-y-4 lg:col-span-2">
-                <a href="{{ route('home') }}" class="inline-flex items-center gap-3">
-                    <span class="flex h-12 w-12 items-center justify-center rounded-2xl border border-gold-500/30 bg-teal-900 p-2.5 shadow-sm">
-                        <img src="{{ asset(config('bader.assets.mark_star')) }}" alt="" class="h-full w-full object-contain">
-                    </span>
-                    <span class="leading-tight">
-                        <span class="block font-display text-xl font-bold tracking-tight text-white">{{ __('brand.name') }}</span>
-                        <span class="mt-1 block font-mono text-xs font-semibold tracking-wider text-gold-400">{{ __('brand.tagline') }}</span>
-                    </span>
-                </a>
-
-                <p class="max-w-sm text-sm leading-relaxed text-sand-100/70">{{ __('footer.tagline') }}</p>
-
-                <div class="grid max-w-sm gap-2 pt-2 text-xs sm:grid-cols-2">
-                    <div class="rounded-xl border border-teal-800/80 bg-teal-900/40 px-3 py-2">
-                        <span class="block text-[10px] font-bold uppercase tracking-wider text-gold-400">{{ __('home.trust_hq_label') }}</span>
-                        <span class="mt-1 block text-sand-100/75">{{ SiteSettings::hqLocation() }}</span>
-                    </div>
-                    <div class="rounded-xl border border-teal-800/80 bg-teal-900/40 px-3 py-2">
-                        <span class="block text-[10px] font-bold uppercase tracking-wider text-forest-400">{{ __('home.trust_field_label') }}</span>
-                        <span class="mt-1 block text-sand-100/75">{{ SiteSettings::fieldLocation() }}</span>
-                    </div>
-                </div>
+    {{-- Call to action strip --}}
+    <div class="relative border-b border-white/10">
+        <div class="container-bader flex flex-col gap-6 py-10 md:flex-row md:items-center md:justify-between">
+            <div>
+                <p class="text-2xl font-extrabold text-white">{{ __('footer.action_title') }}</p>
+                <p class="mt-2 max-w-xl text-sm leading-relaxed text-sand-100/70">{{ __('footer.action_desc') }}</p>
             </div>
-
-            <div class="space-y-3">
-                <p class="font-display text-sm font-bold uppercase tracking-wider text-gold-400">{{ __('footer.nav_title') }}</p>
-                <nav class="flex flex-col gap-2 text-sm" aria-label="{{ __('footer.nav_title') }}">
-                    @foreach ($primaryLinks as $link)
-                        <a href="{{ route($link['route']) }}" class="text-sand-100/70 transition-colors hover:text-gold-400">
-                            {{ __($link['key']) }}
-                        </a>
-                    @endforeach
-                </nav>
-            </div>
-
-            <div class="space-y-4">
-                <p class="font-display text-sm font-bold uppercase tracking-wider text-gold-400">{{ __('nav.more') }}</p>
-                <nav class="flex flex-col gap-2 text-sm" aria-label="{{ __('nav.more') }}">
-                    @foreach ($secondaryLinks as $link)
-                        <a href="{{ route($link['route']) }}" class="text-sand-100/70 transition-colors hover:text-gold-400">
-                            {{ __($link['key']) }}
-                        </a>
-                    @endforeach
-                </nav>
-
-                <div class="border-t border-teal-800/80 pt-4 text-xs text-sand-100/65">
-                    <p class="mb-2 font-bold text-sand-100/85">{{ __('footer.action_title') }}</p>
-                    <p class="leading-relaxed">{{ __('footer.action_desc') }}</p>
-                </div>
-                <a href="{{ route('donate') }}" class="btn-primary block w-full text-center !py-3 text-xs font-bold sm:text-sm">
-                    {{ __('nav.donate') }}
+            <div class="flex flex-wrap gap-3">
+                <a href="{{ route('donate') }}" class="btn-primary">
+                    <x-bader.icon name="heart" class="h-4 w-4" />
+                    <span>{{ __('nav.donate') }}</span>
                 </a>
+                <a href="{{ route('sponsorship') }}" class="btn-ghost">{{ __('footer.sponsor_cta') }}</a>
             </div>
         </div>
+    </div>
 
-        <div class="mt-10 flex flex-col gap-4 border-t border-teal-800/80 pt-6 text-xs text-sand-100/50 sm:flex-row sm:items-center sm:justify-between">
-            <p>{{ __('footer.copyright', ['year' => date('Y')]) }}</p>
-            <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
-                <a href="mailto:{{ SiteSettings::contactEmail() }}" dir="ltr" class="transition-colors hover:text-sand-100">{{ SiteSettings::contactEmail() }}</a>
-                <a href="tel:{{ SiteSettings::contactPhone() }}" dir="ltr" class="transition-colors hover:text-sand-100">{{ SiteSettings::contactPhone() }}</a>
-                <a href="{{ route('login') }}" class="font-mono transition-colors hover:text-gold-400">{{ __('footer.staff_access') }}</a>
+    <div class="relative container-bader grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr] lg:gap-12">
+        <div class="space-y-5">
+            <a href="{{ route('home') }}" class="inline-flex items-center gap-3">
+                <span class="flex h-12 w-12 items-center justify-center rounded-2xl border border-gold-500/30 bg-teal-900 p-2.5">
+                    <img src="{{ asset(config('bader.assets.mark_star')) }}" alt="" width="28" height="28" class="h-full w-full object-contain">
+                </span>
+                <span class="leading-tight">
+                    <span class="block text-xl font-extrabold text-white">{{ __('brand.name') }}</span>
+                    <span class="mt-1 block text-xs font-semibold text-gold-400">{{ __('brand.tagline') }}</span>
+                </span>
+            </a>
+            <p class="max-w-sm text-sm leading-relaxed text-sand-100/70">{{ __('footer.tagline') }}</p>
+            <ul class="grid gap-2.5 text-sm">
+                <li class="flex items-start gap-2.5">
+                    <x-bader.icon name="building" class="mt-0.5 h-4 w-4 text-gold-400" />
+                    <span><span class="font-bold text-sand-50">{{ __('home.trust_hq_label') }}:</span> {{ SiteSettings::hqLocation() }}</span>
+                </li>
+                <li class="flex items-start gap-2.5">
+                    <x-bader.icon name="map-pin" class="mt-0.5 h-4 w-4 text-gold-400" />
+                    <span><span class="font-bold text-sand-50">{{ __('home.trust_field_label') }}:</span> {{ SiteSettings::fieldLocation() }}</span>
+                </li>
+                <li class="flex items-center gap-2.5">
+                    <x-bader.icon name="mail" class="h-4 w-4 text-gold-400" />
+                    <a href="mailto:{{ SiteSettings::contactEmail() }}" dir="ltr" class="transition-colors hover:text-gold-400">{{ SiteSettings::contactEmail() }}</a>
+                </li>
+                <li class="flex items-center gap-2.5">
+                    <x-bader.icon name="phone" class="h-4 w-4 text-gold-400" />
+                    <a href="tel:{{ SiteSettings::contactPhone() }}" dir="ltr" class="transition-colors hover:text-gold-400">{{ SiteSettings::contactPhone() }}</a>
+                </li>
+            </ul>
+        </div>
+
+        <div>
+            <p class="text-sm font-extrabold text-white">{{ __('nav.about') }}</p>
+            <nav class="mt-4 flex flex-col gap-2.5 text-sm" aria-label="{{ __('nav.about') }}">
+                @foreach (PublicNavigation::aboutLinks() as $link)
+                    <a href="{{ route($link['route']) }}" class="transition-colors hover:text-gold-400">{{ __($link['key']) }}</a>
+                @endforeach
+                <a href="{{ route('news') }}" class="transition-colors hover:text-gold-400">{{ __('nav.news') }}</a>
+            </nav>
+        </div>
+
+        <div>
+            <p class="text-sm font-extrabold text-white">{{ __('nav.programs') }}</p>
+            <nav class="mt-4 flex flex-col gap-2.5 text-sm" aria-label="{{ __('nav.programs') }}">
+                @foreach ($menus['programs']->take(6) as $program)
+                    <a href="{{ route('programs.show', $program->key) }}" class="transition-colors hover:text-gold-400">{{ $program->title }}</a>
+                @endforeach
+                <a href="{{ route('programs') }}" class="font-bold text-gold-400 hover:text-gold-300">{{ __('header.all_programs') }}</a>
+            </nav>
+        </div>
+
+        <div>
+            <p class="text-sm font-extrabold text-white">{{ __('footer.give_title') }}</p>
+            <nav class="mt-4 flex flex-col gap-2.5 text-sm" aria-label="{{ __('footer.give_title') }}">
+                @foreach ($givingLinks as $link)
+                    <a href="{{ route($link['route']) }}" class="transition-colors hover:text-gold-400">{{ __($link['key']) }}</a>
+                @endforeach
+            </nav>
+        </div>
+    </div>
+
+    <div class="relative border-t border-white/10">
+        <div class="container-bader flex flex-col gap-5 py-6 text-xs text-sand-100/55 md:flex-row md:items-center md:justify-between">
+            <div class="flex flex-wrap items-center gap-2" aria-label="{{ __('footer.payment_methods') }}">
+                <span class="me-1 font-semibold text-sand-100/70">{{ __('footer.payment_methods') }}</span>
+                <span class="payment-badge" title="Visa"><span class="font-black italic tracking-tight text-[#1a1f71]">VISA</span></span>
+                <span class="payment-badge" title="Mastercard">
+                    <span class="relative flex">
+                        <span class="h-3.5 w-3.5 rounded-full bg-[#eb001b]"></span>
+                        <span class="-ms-1.5 h-3.5 w-3.5 rounded-full bg-[#f79e1b] mix-blend-multiply"></span>
+                    </span>
+                </span>
+                <span class="payment-badge" title="Apple Pay"><span class="text-[10px] font-bold text-ink-900">Apple Pay</span></span>
+                <span class="payment-badge gap-1" title="{{ __('donation.method.bank_transfer') }}"><x-bader.icon name="bank" class="h-3.5 w-3.5 text-ink-700" /></span>
+                <span class="ms-2 inline-flex items-center gap-1 text-sand-100/60"><x-bader.icon name="lock" class="h-3.5 w-3.5" /> {{ __('footer.secure_payments') }}</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
+                <p>{{ __('footer.copyright', ['year' => date('Y')]) }}</p>
+                <a href="{{ route('login') }}" class="transition-colors hover:text-gold-400">{{ __('footer.staff_access') }}</a>
             </div>
         </div>
     </div>

@@ -214,6 +214,39 @@
           @enderror
         </div>
 
+        {{-- Icon & Featured --}}
+        <div>
+          <label for="icon" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">
+            أيقونة البرنامج
+          </label>
+          <input
+            type="text"
+            id="icon"
+            name="icon"
+            value="{{ old('icon', $program->icon) }}"
+            dir="ltr"
+            placeholder="water, education, health..."
+            class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+          >
+          @error('icon')
+            <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p>
+          @enderror
+        </div>
+
+        <label class="flex items-center gap-3 self-end rounded-lg border border-gray-200 px-4 py-3 dark:border-gray-700">
+          <input
+            type="checkbox"
+            name="is_flagship"
+            value="1"
+            class="size-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/20"
+            {{ old('is_flagship', $program->is_flagship) ? 'checked' : '' }}
+          >
+          <span>
+            <span class="block text-theme-sm font-medium text-gray-700 dark:text-gray-300">برنامج مميز</span>
+            <span class="block text-theme-xs text-gray-500 dark:text-gray-400">يظهر ضمن سلايدر البرامج في الصفحة الرئيسية</span>
+          </span>
+        </label>
+
         {{-- Status --}}
         <div>
           <label for="status" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">

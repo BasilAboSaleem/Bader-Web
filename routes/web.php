@@ -9,13 +9,17 @@ use App\Http\Controllers\Dashboard\InboxController;
 use App\Http\Controllers\Dashboard\InstitutionalPageController;
 use App\Http\Controllers\Dashboard\MediaAssetController;
 use App\Http\Controllers\Dashboard\ProgramController;
+use App\Http\Controllers\Dashboard\RegionController;
 use App\Http\Controllers\Dashboard\SiteSettingController;
+use App\Http\Controllers\Dashboard\SponsorshipCaseController;
 use App\Http\Controllers\Dashboard\StoryController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DonationPaymentController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PublicFormController;
 use App\Http\Controllers\PublicPageController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\SponsorshipPageController;
 use Illuminate\Support\Facades\Route;
 
 // SEO: Sitemap & robots.txt (no caching — always fresh)
@@ -28,14 +32,18 @@ Route::middleware('cache.public')->group(function () {
 
     Route::get('/about', [PublicPageController::class, 'about'])->name('about');
     Route::get('/programs', [PublicPageController::class, 'programs'])->name('programs');
+    Route::get('/programs/{key}', [PublicPageController::class, 'programShow'])->name('programs.show');
     Route::get('/campaigns', [PublicPageController::class, 'campaigns'])->name('campaigns');
+    Route::get('/campaigns/{key}', [PublicPageController::class, 'campaignShow'])->name('campaigns.show');
+    Route::get('/regions/{key}', [PublicPageController::class, 'regionShow'])->name('regions.show');
     Route::get('/impact', [PublicPageController::class, 'impact'])->name('impact');
     Route::get('/news', [PublicPageController::class, 'news'])->name('news');
     Route::get('/news/{key}', [PublicPageController::class, 'newsShow'])->name('news.show');
     Route::get('/facilities/{key}', [PublicPageController::class, 'facilityShow'])->name('facilities.show');
-    Route::get('/facilities/{key}', [PublicPageController::class, 'facilityShow'])->name('facilities.show');
-    Route::get('/sponsorship', [PublicPageController::class, 'sponsorship'])->name('sponsorship');
-    Route::get('/donate', [PublicPageController::class, 'donate'])->name('donate');
+    Route::get('/sponsorship', [SponsorshipPageController::class, 'index'])->name('sponsorship');
+    Route::get('/sponsorship/{code}', [SponsorshipPageController::class, 'show'])->name('sponsorship.show');
+    Route::get('/gift', [PublicPageController::class, 'gift'])->name('gift');
+    Route::get('/zakat-calculator', [PublicPageController::class, 'zakat'])->name('zakat');
     Route::get('/partners', [PublicPageController::class, 'partners'])->name('partners');
     Route::get('/volunteer', [PublicPageController::class, 'volunteer'])->name('volunteer');
     Route::get('/faq', [PublicPageController::class, 'faq'])->name('faq');
@@ -49,6 +57,13 @@ Route::post('/volunteer', [PublicFormController::class, 'submitVolunteer'])->nam
 Route::post('/sponsorship', [PublicFormController::class, 'submitSponsorship'])->name('sponsorship.submit');
 Route::post('/assistance', [PublicFormController::class, 'submitAssistance'])->name('assistance.submit');
 Route::post('/donate/transfer', [PublicFormController::class, 'notifyTransfer'])->name('donate.transfer.submit');
+
+// Online donations (the donate form carries a CSRF token, so it is never publicly cached)
+Route::get('/donate', [PublicPageController::class, 'donate'])->name('donate');
+Route::post('/donate/checkout', [DonationPaymentController::class, 'checkout'])->middleware('throttle:20,1')->name('donate.checkout');
+Route::get('/donate/success', [DonationPaymentController::class, 'success'])->name('donate.success');
+Route::get('/donate/cancel', [DonationPaymentController::class, 'cancel'])->name('donate.cancel');
+Route::post('/donate/webhook', [DonationPaymentController::class, 'webhook'])->name('donate.webhook');
 
 Route::get('/locale/{locale}', function (string $locale) {
     abort_unless(in_array($locale, config('bader.locales'), true), 404);
@@ -72,7 +87,9 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('dashboard/programs', ProgramController::class)->names('dashboard.programs')->except(['show']);
     Route::resource('dashboard/facilities', FacilityController::class)->names('dashboard.facilities')->except(['show']);
+    Route::resource('dashboard/regions', RegionController::class)->names('dashboard.regions')->except(['show']);
     Route::resource('dashboard/campaigns', CampaignController::class)->names('dashboard.campaigns')->except(['show']);
+    Route::resource('dashboard/sponsorship-cases', SponsorshipCaseController::class)->names('dashboard.sponsorship-cases')->except(['show']);
     Route::resource('dashboard/stories', StoryController::class)->names('dashboard.stories')->except(['show']);
     Route::resource('dashboard/media', MediaAssetController::class)->names('dashboard.media')->except(['show']);
 

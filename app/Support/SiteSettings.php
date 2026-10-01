@@ -237,7 +237,63 @@ class SiteSettings
         $loc = $locale ?? app()->getLocale();
         $custom = Setting::get("faq_{$key}_a_{$loc}");
 
+        if (! empty($custom)) {
+            return $custom;
+        }
+
         return __("faq.{$key}.answer", [], $loc);
+    }
+
+    /**
+     * WhatsApp number in international format (digits only), falling back to the contact phone.
+     */
+    public static function whatsappNumber(): ?string
+    {
+        $number = Setting::get('whatsapp_number');
+
+        if (empty($number)) {
+            $number = Setting::get('contact_phone');
+        }
+
+        $digits = preg_replace('/\D+/', '', (string) $number);
+
+        return $digits !== '' ? $digits : null;
+    }
+
+    /**
+     * Gold price per gram in USD, used to compute the zakat nisab.
+     */
+    public static function goldPricePerGram(): float
+    {
+        $price = Setting::get('gold_price_per_gram');
+
+        return is_numeric($price) && (float) $price > 0
+            ? (float) $price
+            : (float) config('bader.zakat.default_gold_price_per_gram');
+    }
+
+    /**
+     * Quick-give options shown under the homepage hero.
+     *
+     * @return list<array{category: string, amount: float, label: string, label_ar: string, label_en: string}>
+     */
+    public static function quickGiveOptions(?string $locale = null): array
+    {
+        $loc = $locale ?? app()->getLocale();
+        $stored = json_decode((string) Setting::get('quick_give_options', ''), true);
+        $options = is_array($stored) && $stored !== [] ? $stored : config('bader.quick_give', []);
+
+        return collect($options)
+            ->filter(fn ($option) => is_array($option) && is_numeric($option['amount'] ?? null) && (float) $option['amount'] > 0)
+            ->map(fn (array $option): array => [
+                'category' => (string) ($option['category'] ?? 'general'),
+                'amount' => (float) $option['amount'],
+                'label_ar' => (string) ($option['label_ar'] ?? ''),
+                'label_en' => (string) ($option['label_en'] ?? ''),
+                'label' => (string) (($loc === 'en' && ! empty($option['label_en'])) ? $option['label_en'] : ($option['label_ar'] ?? '')),
+            ])
+            ->values()
+            ->all();
     }
 
     /**

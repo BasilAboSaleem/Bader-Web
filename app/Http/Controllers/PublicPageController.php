@@ -3,9 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Campaign;
+use App\Models\Donation;
 use App\Models\Facility;
 use App\Models\Program;
+use App\Models\Region;
+use App\Models\SponsorshipCase;
 use App\Models\Story;
+use App\Services\StripePaymentService;
+use App\Support\SiteSettings;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class PublicPageController extends Controller
@@ -21,28 +29,102 @@ class PublicPageController extends Controller
 
     public function programs(): View
     {
-        $programs = Program::published()->get();
-        if ($programs->isEmpty()) {
-            $programs = [
-                'water', 'food', 'shelter', 'winter', 'health', 'education',
-                'social_protection', 'economic_empowerment', 'community_partnerships', 'zakat', 'sacrifices',
-            ];
-        }
+        $programs = Program::published()
+            ->withCount(['campaigns' => fn (Builder $campaigns) => $campaigns->published()])
+            ->get();
 
-        return view('pages.programs', compact('programs'));
+        $fallbackPrograms = $programs->isEmpty() ? [
+            'water', 'food', 'shelter', 'winter', 'health', 'education',
+            'social_protection', 'economic_empowerment', 'community_partnerships', 'zakat', 'sacrifices',
+        ] : [];
+
+        return view('pages.programs', compact('programs', 'fallbackPrograms'));
     }
 
-    public function campaigns(): View
+    public function programShow(string $key): View
     {
-        $campaigns = Campaign::published()->get();
-        if ($campaigns->isEmpty()) {
-            $campaigns = [
-                ['key' => 'water', 'goal' => '120,000', 'currency' => 'campaign.currency'],
-                ['key' => 'education', 'goal' => null, 'currency' => null],
-            ];
-        }
+        $program = Program::published()->where('key', $key)->firstOrFail();
 
-        return view('pages.campaigns', compact('campaigns'));
+        $campaigns = $program->campaigns()
+            ->published()
+            ->ordered()
+            ->withDonorsCount()
+            ->with(['program', 'region'])
+            ->get();
+
+        $otherPrograms = Program::published()
+            ->whereKeyNot($program->getKey())
+            ->withCount(['campaigns' => fn (Builder $campaigns) => $campaigns->published()])
+            ->take(4)
+            ->get();
+
+        return view('pages.program-show', compact('program', 'campaigns', 'otherPrograms'));
+    }
+
+    public function campaigns(Request $request): View
+    {
+        $programs = Program::published()->get();
+        $regions = Region::published()->get();
+
+        $selectedProgram = $programs->firstWhere('key', $request->query('program'));
+        $selectedRegion = $regions->firstWhere('key', $request->query('region'));
+
+        $campaigns = Campaign::published()
+            ->ordered()
+            ->withDonorsCount()
+            ->with(['program', 'region'])
+            ->when($selectedProgram, fn (Builder $query) => $query->where('program_id', $selectedProgram->id))
+            ->when($selectedRegion, fn (Builder $query) => $query->where('region_id', $selectedRegion->id))
+            ->paginate(12)
+            ->withQueryString();
+
+        return view('pages.campaigns', compact('campaigns', 'programs', 'regions', 'selectedProgram', 'selectedRegion'));
+    }
+
+    public function campaignShow(string $key): View
+    {
+        $campaign = Campaign::published()
+            ->where('key', $key)
+            ->withDonorsCount()
+            ->with(['program', 'region'])
+            ->firstOrFail();
+
+        $relatedCampaigns = Campaign::published()
+            ->whereKeyNot($campaign->getKey())
+            ->when($campaign->program_id, fn (Builder $query) => $query->orderByRaw('program_id = ? desc', [$campaign->program_id]))
+            ->ordered()
+            ->withDonorsCount()
+            ->with(['program', 'region'])
+            ->take(3)
+            ->get();
+
+        return view('pages.campaign-show', compact('campaign', 'relatedCampaigns'));
+    }
+
+    public function regionShow(string $key): View
+    {
+        $region = Region::published()
+            ->where('key', $key)
+            ->with(['facilities' => fn ($facilities) => $facilities->published()])
+            ->firstOrFail();
+
+        $campaigns = $region->campaigns()
+            ->published()
+            ->ordered()
+            ->withDonorsCount()
+            ->with(['program', 'region'])
+            ->get();
+
+        $cases = $region->sponsorshipCases()
+            ->available()
+            ->longestWaiting()
+            ->with('region')
+            ->take(3)
+            ->get();
+
+        $otherRegions = Region::published()->whereKeyNot($region->getKey())->get();
+
+        return view('pages.region-show', compact('region', 'campaigns', 'cases', 'otherRegions'));
     }
 
     public function impact(): View
@@ -103,6 +185,7 @@ class PublicPageController extends Controller
     public function facilityShow(string $key): View
     {
         $facility = Facility::where('status', 'published')
+            ->with('region')
             ->where(function ($query) use ($key) {
                 $query->where('key', $key);
                 if (is_numeric($key)) {
@@ -119,26 +202,69 @@ class PublicPageController extends Controller
         return view('pages.facility-show', compact('facility', 'relatedFacilities'));
     }
 
-    public function sponsorship(): View
+    /**
+     * Donate form, prefilled from the query string (target, amount, frequency, category and gift card fields).
+     */
+    public function donate(Request $request, StripePaymentService $stripe): View
     {
-        return $this->page('sponsorship', [
-            'sponsorship.orphans',
-            'sponsorship.widows',
-            'sponsorship.dignity',
+        $query = fn (string $key): string => is_string($value = $request->query($key)) ? trim($value) : '';
+
+        $target = $this->donationTarget($query('target_type'), is_numeric($query('target_id')) ? (int) $query('target_id') : null);
+
+        $requestedAmount = is_numeric($query('amount')) ? (float) $query('amount') : 0;
+        $amount = $requestedAmount >= 1 && $requestedAmount <= 1000000
+            ? $requestedAmount + 0
+            : ($target['amounts'][1] ?? $target['amounts'][0]);
+
+        $defaultFrequency = $target['type'] === 'sponsorship' ? Donation::FREQUENCY_MONTHLY : Donation::FREQUENCY_ONCE;
+        $frequency = in_array($query('frequency'), [Donation::FREQUENCY_ONCE, Donation::FREQUENCY_MONTHLY], true) ? $query('frequency') : $defaultFrequency;
+        if (! $target['allows_monthly']) {
+            $frequency = Donation::FREQUENCY_ONCE;
+        }
+
+        $categories = config('bader.donation_categories');
+        $category = in_array($query('category'), $categories, true) ? $query('category') : 'general';
+
+        $giftDesigns = config('bader.gift_designs');
+
+        return view('pages.donate', [
+            'target' => $target,
+            'amount' => $amount,
+            'frequency' => $frequency,
+            'category' => $category,
+            'categories' => $categories,
+            'paymentMethods' => $stripe->isAvailable() ? ['stripe', 'bank_transfer'] : ['bank_transfer'],
+            'giftDesigns' => $giftDesigns,
+            'gift' => [
+                'enabled' => $request->boolean('gift'),
+                'design' => array_key_exists($query('gift_design'), $giftDesigns) ? $query('gift_design') : array_key_first($giftDesigns),
+                'recipient_name' => Str::limit($query('gift_recipient_name'), 255, ''),
+                'recipient_contact' => Str::limit($query('gift_recipient_contact'), 255, ''),
+                'sender_name' => Str::limit($query('gift_sender_name'), 255, ''),
+                'message' => Str::limit($query('gift_message'), 500, ''),
+            ],
         ]);
     }
 
-    public function donate(): View
+    public function gift(Request $request): View
     {
-        $campaigns = Campaign::published()->get();
-        $programs = Program::published()->get();
-        $facilities = Facility::published()->get();
+        $target = $this->donationTarget(
+            is_string($request->query('target_type')) ? $request->query('target_type') : '',
+            is_numeric($request->query('target_id')) ? (int) $request->query('target_id') : null,
+        );
 
-        return view('pages.donate', [
-            'campaignKey' => 'water',
-            'campaigns' => $campaigns,
-            'programs' => $programs,
-            'facilities' => $facilities,
+        return view('pages.gift', [
+            'target' => $target,
+            'giftDesigns' => config('bader.gift_designs'),
+            'categories' => config('bader.donation_categories'),
+        ]);
+    }
+
+    public function zakat(): View
+    {
+        return view('pages.zakat', [
+            'goldPricePerGram' => SiteSettings::goldPricePerGram(),
+            'nisabGrams' => config('bader.zakat.nisab_gold_grams'),
         ]);
     }
 
@@ -178,5 +304,83 @@ class PublicPageController extends Controller
     private function page(string $key, array $sections): View
     {
         return view('pages.public', compact('key', 'sections'));
+    }
+
+    /**
+     * Resolve a public donation target; unknown or unpublished targets fall back to general giving.
+     *
+     * @return array{type: string, id: ?int, title: string, description: ?string, image: ?string, url: ?string, amounts: list<int|float>, allows_monthly: bool}
+     */
+    private function donationTarget(string $type, ?int $id): array
+    {
+        $general = [
+            'type' => 'general',
+            'id' => null,
+            'title' => __('donation.target_general'),
+            'description' => __('donate_page.general_description'),
+            'image' => null,
+            'url' => null,
+            'amounts' => Campaign::DEFAULT_PRESET_AMOUNTS,
+            'allows_monthly' => true,
+        ];
+
+        if ($id === null) {
+            return $general;
+        }
+
+        $model = match ($type) {
+            'campaign' => Campaign::published()->find($id),
+            'program' => Program::published()->find($id),
+            'facility' => Facility::published()->find($id),
+            'sponsorship' => SponsorshipCase::available()->find($id),
+            default => null,
+        };
+
+        if ($model === null) {
+            return $general;
+        }
+
+        return match (true) {
+            $model instanceof Campaign => [
+                'type' => 'campaign',
+                'id' => $model->id,
+                'title' => $model->title,
+                'description' => $model->description,
+                'image' => $model->image,
+                'url' => route('campaigns.show', $model->key),
+                'amounts' => $model->amount_options,
+                'allows_monthly' => $model->allows_monthly,
+            ],
+            $model instanceof Program => [
+                'type' => 'program',
+                'id' => $model->id,
+                'title' => $model->title,
+                'description' => $model->description,
+                'image' => $model->image,
+                'url' => route('programs.show', $model->key),
+                'amounts' => Campaign::DEFAULT_PRESET_AMOUNTS,
+                'allows_monthly' => true,
+            ],
+            $model instanceof Facility => [
+                'type' => 'facility',
+                'id' => $model->id,
+                'title' => $model->name,
+                'description' => $model->description,
+                'image' => $model->image ?? null,
+                'url' => route('facilities.show', $model->key),
+                'amounts' => Campaign::DEFAULT_PRESET_AMOUNTS,
+                'allows_monthly' => true,
+            ],
+            default => [
+                'type' => 'sponsorship',
+                'id' => $model->id,
+                'title' => __('sponsorship.donation_target', ['name' => $model->name, 'code' => $model->code]),
+                'description' => $model->bio,
+                'image' => $model->photo,
+                'url' => route('sponsorship.show', $model->code),
+                'amounts' => [$model->monthly_amount + 0],
+                'allows_monthly' => true,
+            ],
+        };
     }
 }

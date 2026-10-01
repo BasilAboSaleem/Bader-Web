@@ -7,6 +7,7 @@ use App\Models\Setting;
 use App\Support\SiteSettings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class SiteSettingController extends Controller
@@ -30,6 +31,9 @@ class SiteSettingController extends Controller
             'urgentTextAr' => SiteSettings::urgentText('ar'),
             'urgentTextEn' => SiteSettings::urgentText('en'),
             'urgentUrl' => SiteSettings::urgentUrl(),
+            'whatsappNumber' => Setting::get('whatsapp_number', ''),
+            'goldPricePerGram' => SiteSettings::goldPricePerGram(),
+            'quickGiveOptions' => SiteSettings::quickGiveOptions(),
         ]);
     }
 
@@ -52,6 +56,13 @@ class SiteSettingController extends Controller
             'urgent_text_ar' => ['nullable', 'string', 'max:500'],
             'urgent_text_en' => ['nullable', 'string', 'max:500'],
             'urgent_url' => ['nullable', 'url', 'max:500'],
+            'whatsapp_number' => ['nullable', 'string', 'max:30', 'regex:/^\+?[\d\s()-]{6,}$/'],
+            'gold_price_per_gram' => ['nullable', 'numeric', 'min:1', 'max:100000'],
+            'quick_give' => ['nullable', 'array', 'max:4'],
+            'quick_give.*.label_ar' => ['nullable', 'string', 'max:60', 'required_with:quick_give.*.amount'],
+            'quick_give.*.label_en' => ['nullable', 'string', 'max:60'],
+            'quick_give.*.category' => ['nullable', Rule::in(config('bader.donation_categories'))],
+            'quick_give.*.amount' => ['nullable', 'numeric', 'min:1', 'max:100000', 'required_with:quick_give.*.label_ar'],
         ]);
 
         $generalFields = [
@@ -88,6 +99,20 @@ class SiteSettingController extends Controller
         foreach ($urgentFields as $field) {
             Setting::set($field, $validated[$field] ?? '', 'urgent');
         }
+
+        $quickGiveOptions = collect($validated['quick_give'] ?? [])
+            ->filter(fn (array $option): bool => filled($option['label_ar'] ?? null) && filled($option['amount'] ?? null))
+            ->map(fn (array $option): array => [
+                'category' => $option['category'] ?? 'general',
+                'amount' => (float) $option['amount'],
+                'label_ar' => $option['label_ar'],
+                'label_en' => $option['label_en'] ?? '',
+            ])
+            ->values();
+
+        Setting::set('whatsapp_number', $validated['whatsapp_number'] ?? '', 'giving');
+        Setting::set('gold_price_per_gram', $validated['gold_price_per_gram'] ?? '', 'giving');
+        Setting::set('quick_give_options', $quickGiveOptions->isEmpty() ? '' : $quickGiveOptions->toJson(JSON_UNESCAPED_UNICODE), 'giving');
 
         return redirect()->route('dashboard.settings.edit')
             ->with('status', __('dashboard.settings_saved'));

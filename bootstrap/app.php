@@ -19,6 +19,10 @@ return Application::configure(basePath: dirname(__DIR__))
             SetLocale::class,
         ]);
 
+        $middleware->validateCsrfTokens(except: [
+            'donate/webhook',
+        ]);
+
         $middleware->alias([
             'role' => EnsureUserRole::class,
             'cache.public' => CachePublicResponse::class,

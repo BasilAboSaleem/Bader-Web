@@ -354,6 +354,53 @@
       </div>
     </div>
 
+    {{-- 4. Giving tools --}}
+    @php
+      $settingsInput = 'h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800';
+    @endphp
+    <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
+      <div class="mb-5 border-b border-gray-100 pb-4 dark:border-gray-800">
+        <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('dashboard.section_giving_title') }}</h2>
+        <p class="mt-0.5 text-theme-xs text-gray-500 dark:text-gray-400">{{ __('dashboard.section_giving_desc') }}</p>
+      </div>
+
+      <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+        <div>
+          <label for="whatsapp_number" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">{{ __('dashboard.field_whatsapp') }}</label>
+          <input type="text" id="whatsapp_number" name="whatsapp_number" value="{{ old('whatsapp_number', $whatsappNumber) }}" placeholder="+968 9000 0000" dir="ltr" class="{{ $settingsInput }}">
+          <p class="mt-1 text-theme-xs text-gray-400">{{ __('dashboard.hint.whatsapp') }}</p>
+          @error('whatsapp_number') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+        </div>
+        <div>
+          <label for="gold_price_per_gram" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">{{ __('dashboard.field_gold_price') }}</label>
+          <input type="number" id="gold_price_per_gram" name="gold_price_per_gram" value="{{ old('gold_price_per_gram', $goldPricePerGram) }}" min="1" step="0.01" dir="ltr" class="{{ $settingsInput }}">
+          <p class="mt-1 text-theme-xs text-gray-400">{{ __('dashboard.hint.gold_price', ['grams' => config('bader.zakat.nisab_gold_grams')]) }}</p>
+          @error('gold_price_per_gram') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+        </div>
+      </div>
+
+      <div class="mt-6">
+        <p class="mb-1 text-theme-sm font-semibold text-gray-800 dark:text-white/90">{{ __('dashboard.field_quick_give') }}</p>
+        <p class="mb-3 text-theme-xs text-gray-400">{{ __('dashboard.hint.quick_give') }}</p>
+        <div class="space-y-3">
+          @for ($row = 0; $row < 4; $row++)
+            @php $option = $quickGiveOptions[$row] ?? []; @endphp
+            <div class="grid grid-cols-1 gap-3 rounded-xl border border-gray-100 p-3 dark:border-gray-800 md:grid-cols-[1fr_1fr_12rem_8rem]">
+              <input type="text" name="quick_give[{{ $row }}][label_ar]" value="{{ old("quick_give.$row.label_ar", $option['label_ar'] ?? '') }}" placeholder="{{ __('dashboard.field.label_ar') }}" aria-label="{{ __('dashboard.field.label_ar') }}" class="{{ $settingsInput }}">
+              <input type="text" name="quick_give[{{ $row }}][label_en]" value="{{ old("quick_give.$row.label_en", $option['label_en'] ?? '') }}" placeholder="{{ __('dashboard.field.label_en') }}" aria-label="{{ __('dashboard.field.label_en') }}" dir="ltr" class="{{ $settingsInput }}">
+              <select name="quick_give[{{ $row }}][category]" aria-label="{{ __('dashboard.field.category') }}" class="{{ $settingsInput }}">
+                @foreach (config('bader.donation_categories') as $category)
+                  <option value="{{ $category }}" @selected(old("quick_give.$row.category", $option['category'] ?? 'general') === $category)>{{ __('donation.category.'.$category) }}</option>
+                @endforeach
+              </select>
+              <input type="number" name="quick_give[{{ $row }}][amount]" value="{{ old("quick_give.$row.amount", isset($option['amount']) ? $option['amount'] + 0 : '') }}" min="1" step="1" placeholder="USD" aria-label="{{ __('dashboard.field.amount') }}" dir="ltr" class="{{ $settingsInput }}">
+            </div>
+          @endfor
+        </div>
+        @error('quick_give.*') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+      </div>
+    </div>
+
     {{-- Form Submit Actions --}}
     <div class="flex items-center justify-end gap-3 pt-2">
       <a

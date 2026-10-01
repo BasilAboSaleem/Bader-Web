@@ -38,6 +38,8 @@ class LaunchReadinessTest extends TestCase
             'impact' => ['impact'],
             'news' => ['news'],
             'sponsorship' => ['sponsorship'],
+            'gift' => ['gift'],
+            'zakat' => ['zakat'],
             'donate' => ['donate'],
             'partners' => ['partners'],
             'volunteer' => ['volunteer'],
@@ -56,6 +58,7 @@ class LaunchReadinessTest extends TestCase
             ->assertOk()
             ->assertSee('dir="ltr"', false)
             ->assertDontSee('page.', false)
+            ->assertDontSee('page_', false)
             ->assertDontSee('errors.', false);
     }
 

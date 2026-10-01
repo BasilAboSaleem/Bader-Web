@@ -1,26 +1,41 @@
-@props(['kicker', 'title', 'intro'])
+@props(['kicker', 'title', 'intro' => null, 'breadcrumbs' => []])
 
 @php
-    $iconRoute = request()->route()?->getName() ?? 'about';
+    $iconRoute = \Illuminate\Support\Str::before(request()->route()?->getName() ?? 'about', '.');
 @endphp
 
-<section class="relative isolate overflow-hidden border-b border-sand-200 bg-white section-pad !py-12 sm:!py-16">
-    <div class="pointer-events-none absolute -end-16 -top-20 -z-10 h-64 w-64 rounded-full bg-sand-50 blur-2xl sm:h-80 sm:w-80" aria-hidden="true"></div>
-    <div class="mx-auto max-w-7xl">
-        <div class="flex items-center gap-3">
-            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-forest-700/10 bg-forest-700/10 text-forest-700 shadow-sm">
+<section class="relative isolate overflow-hidden border-b border-hairline bg-paper-2">
+    <div class="pointer-events-none absolute -end-24 -top-24 -z-10 h-72 w-72 rounded-full bg-gold-300/40 blur-3xl" aria-hidden="true"></div>
+    <div class="pointer-events-none absolute -bottom-28 -start-16 -z-10 h-64 w-64 rounded-full bg-forest-500/10 blur-3xl" aria-hidden="true"></div>
+    <img src="{{ asset(config('bader.assets.mark_star')) }}" alt="" class="pointer-events-none absolute -end-10 top-1/2 -z-10 hidden h-72 w-72 -translate-y-1/2 opacity-[0.05] md:block" aria-hidden="true">
+
+    <div class="container-bader py-10 sm:py-14">
+        <nav aria-label="{{ __('common.breadcrumb') }}" class="animate-fade-up">
+            <ol class="flex flex-wrap items-center gap-1.5 text-xs font-semibold text-subtle">
+                <li><a href="{{ route('home') }}" class="transition hover:text-forest-700">{{ __('nav.home') }}</a></li>
+                @foreach ($breadcrumbs as $crumb)
+                    <li aria-hidden="true"><x-bader.icon name="chevron-end" class="h-3 w-3" /></li>
+                    <li><a href="{{ $crumb['url'] }}" class="transition hover:text-forest-700">{{ $crumb['label'] }}</a></li>
+                @endforeach
+                <li aria-hidden="true"><x-bader.icon name="chevron-end" class="h-3 w-3" /></li>
+                <li class="text-ink-800" aria-current="page">{{ $title }}</li>
+            </ol>
+        </nav>
+
+        <div class="mt-6 flex animate-fade-up items-center gap-3 [animation-delay:60ms]">
+            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-forest-700 shadow-card-sm ring-1 ring-hairline">
                 <x-bader.nav-icon :route="$iconRoute" class="h-5 w-5" />
             </span>
-            <p class="{{ app()->isLocale('ar') ? 'text-sm font-bold text-forest-700' : 'eyebrow' }}">{{ $kicker }}</p>
+            <p class="kicker">{{ $kicker }}</p>
         </div>
-        <h1 class="mt-3 max-w-4xl font-display text-4xl font-semibold leading-tight text-ink-900 sm:text-5xl lg:text-6xl">
+        <h1 class="mt-4 max-w-4xl animate-fade-up text-3xl font-extrabold leading-tight text-ink-900 [animation-delay:120ms] sm:text-4xl lg:text-5xl">
             {{ $title }}
         </h1>
         @if (filled($intro))
-            <p class="mt-5 max-w-3xl text-base leading-8 text-ink-700/80 sm:mt-6 sm:text-lg">
+            <p class="mt-4 max-w-3xl animate-fade-up text-base leading-8 text-muted [animation-delay:180ms] sm:text-lg">
                 {{ $intro }}
             </p>
         @endif
-        <div class="mt-8 h-1 w-16 rounded-full bg-gold-500" aria-hidden="true"></div>
+        {{ $slot }}
     </div>
 </section>

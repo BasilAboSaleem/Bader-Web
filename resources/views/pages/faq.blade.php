@@ -1,30 +1,73 @@
 @extends('layouts.public')
 
+@use('App\Support\SiteSettings')
+
 @section('title', __('page.faq.title').' — '.__('brand.name'))
+@section('meta_description', SiteSettings::pageIntro('faq'))
 
 @php
-    use App\Support\SiteSettings;
+    $whatsappNumber = SiteSettings::whatsappNumber();
 @endphp
 
 @section('content')
-    <section class="bg-bader-green-deep text-white">
-        <div class="mx-auto max-w-6xl px-4 py-16 sm:py-20">
-            <x-bader.section-heading :kicker="__('page.faq.kicker')" :title="__('page.faq.title')" theme="dark" />
-            <p class="mt-5 max-w-2xl text-sm leading-relaxed text-white/75 sm:text-base">{{ SiteSettings::pageIntro('faq') }}</p>
-        </div>
-    </section>
+    <x-bader.page-hero
+        :kicker="__('page.faq.kicker')"
+        :title="__('page.faq.title')"
+        :intro="SiteSettings::pageIntro('faq')"
+    />
 
-    <section class="bg-bader-paper">
-        <div class="mx-auto max-w-4xl space-y-3 px-4 py-14">
-            @foreach ($questions as $question)
-                <details class="group rounded-2xl border border-bader-green/10 bg-white p-5" data-reveal>
-                    <summary class="flex cursor-pointer items-center justify-between gap-4 text-base font-semibold text-bader-green">
-                        {{ SiteSettings::faqQuestion($question) }}
-                        <span class="text-bader-gold transition-transform group-open:rotate-45">+</span>
-                    </summary>
-                    <p class="mt-4 max-w-3xl text-sm leading-relaxed text-bader-ink/70">{{ SiteSettings::faqAnswer($question) }}</p>
-                </details>
-            @endforeach
+    <section class="band-base section-y">
+        <div class="container-bader grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
+            <div class="divide-y divide-hairline overflow-hidden rounded-3xl border border-hairline bg-white shadow-card-sm" data-reveal>
+                @foreach ($questions as $question)
+                    <details class="group" @if ($loop->first) open @endif>
+                        <summary class="flex cursor-pointer items-center gap-4 p-5 transition hover:bg-paper sm:p-6">
+                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-forest-600/10 text-sm font-extrabold text-forest-700 transition group-open:bg-forest-700 group-open:text-white">{{ $loop->iteration }}</span>
+                            <span class="flex-1 text-base font-extrabold leading-7 text-ink-900 sm:text-lg">{{ SiteSettings::faqQuestion($question) }}</span>
+                            <x-bader.icon name="chevron-down" class="h-5 w-5 shrink-0 text-forest-700 transition-transform duration-300 group-open:rotate-180" />
+                        </summary>
+                        <div class="px-5 pb-6 sm:px-6 sm:ps-[4.75rem]">
+                            <p class="leading-8 text-muted">{{ SiteSettings::faqAnswer($question) }}</p>
+                        </div>
+                    </details>
+                @endforeach
+            </div>
+
+            <aside class="space-y-4 lg:sticky lg:top-28" data-reveal>
+                <div class="relative isolate overflow-hidden rounded-3xl bg-teal-950 p-6 text-white shadow-card-md">
+                    <div class="pointer-events-none absolute -end-16 -top-16 -z-10 h-48 w-48 rounded-full bg-forest-600/40 blur-3xl" aria-hidden="true"></div>
+                    <x-bader.icon name="info" class="h-8 w-8 text-gold-400" />
+                    <p class="mt-4 text-xl font-extrabold">{{ __('faq_page.more_title') }}</p>
+                    <p class="mt-2 text-sm leading-7 text-white/75">{{ __('faq_page.more_text') }}</p>
+                    <div class="mt-6 grid gap-3">
+                        <a href="{{ route('contact') }}" class="btn-primary w-full">
+                            <x-bader.icon name="mail" class="h-4 w-4" />
+                            {{ __('faq_page.contact_cta') }}
+                        </a>
+                        @if ($whatsappNumber)
+                            <a href="https://wa.me/{{ $whatsappNumber }}" target="_blank" rel="noopener" class="btn-ghost w-full">
+                                <x-bader.icon name="whatsapp" class="h-4 w-4" />
+                                {{ __('common.whatsapp_contact') }}
+                            </a>
+                        @endif
+                    </div>
+                </div>
+
+                <nav class="rounded-3xl border border-hairline bg-white p-5" aria-label="{{ __('faq_page.related') }}">
+                    <p class="text-sm font-extrabold text-ink-900">{{ __('faq_page.related') }}</p>
+                    <ul class="mt-3 space-y-1">
+                        @foreach (['about', 'sponsorship', 'zakat', 'impact'] as $route)
+                            <li>
+                                <a href="{{ route($route) }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-ink-800 transition hover:bg-paper hover:text-forest-700">
+                                    <x-bader.nav-icon :route="$route" class="h-4 w-4 text-forest-600" />
+                                    {{ __('nav.'.$route) }}
+                                    <x-bader.icon name="chevron-end" class="ms-auto h-4 w-4 text-subtle" />
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </nav>
+            </aside>
         </div>
     </section>
 @endsection
