@@ -3,24 +3,11 @@
 @section('title', __('page.news.title').' — '.__('brand.name'))
 
 @section('content')
-    {{-- Hero Banner --}}
-    <section class="bg-teal-950 text-sand-50 section-pad !py-20 relative overflow-hidden">
-        <div class="pointer-events-none absolute -end-24 top-0 h-96 w-96 rounded-full bg-forest-700/20 blur-3xl" aria-hidden="true"></div>
-        <div class="pointer-events-none absolute start-0 bottom-0 h-80 w-80 rounded-full bg-gold-500/10 blur-3xl" aria-hidden="true"></div>
-
-        <div class="max-w-6xl mx-auto relative z-10 text-center">
-            <div class="inline-flex items-center gap-2 rounded-full bg-teal-900/90 border border-teal-700/60 px-4 py-1.5 text-xs font-mono text-gold-400 font-semibold mb-4 shadow-sm">
-                <span class="h-2 w-2 rounded-full bg-gold-400 animate-pulse"></span>
-                <span>{{ __('page.news.kicker') }}</span>
-            </div>
-            <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-sand-50 max-w-3xl mx-auto leading-tight">
-                {{ __('page.news.title') }}
-            </h1>
-            <p class="mt-5 text-base sm:text-lg text-sand-100/80 max-w-2xl mx-auto leading-relaxed">
-                {{ __('page.news.intro') }}
-            </p>
-        </div>
-    </section>
+    <x-bader.page-hero
+        :kicker="__('page.news.kicker')"
+        :title="__('page.news.title')"
+        :intro="__('page.news.intro')"
+    />
 
     {{-- News Grid --}}
     <section class="bg-sand-50 section-pad">
@@ -105,6 +92,14 @@
                     </div>
                 @endif
             @endif
+        </div>
+    </section>
+
+    <section class="border-t border-sand-200 bg-white section-pad text-center">
+        <div class="mx-auto max-w-2xl" data-reveal>
+            <h2 class="font-display text-2xl font-bold text-ink-900 sm:text-3xl">{{ __('home.trust_updates_title') }}</h2>
+            <p class="mt-3 text-sm leading-relaxed text-ink-700/75">{{ __('home.trust_updates_text') }}</p>
+            <a href="{{ route('donate') }}" class="btn-primary mt-7">{{ __('nav.donate') }}</a>
         </div>
     </section>
 @endsection

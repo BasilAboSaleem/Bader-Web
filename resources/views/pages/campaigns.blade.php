@@ -3,12 +3,11 @@
 @section('title', __('page.campaigns.title').' — '.__('brand.name'))
 
 @section('content')
-    <section class="bg-teal-950 text-sand-50 py-16 sm:py-20 border-b border-teal-800 relative overflow-hidden">
-        <div class="mx-auto max-w-6xl px-4 relative z-10">
-            <x-bader.section-heading :kicker="__('page.campaigns.kicker')" :title="__('page.campaigns.title')" theme="dark" />
-            <p class="mt-5 max-w-2xl text-sm leading-relaxed text-sand-100/80 sm:text-base">{{ __('page.campaigns.intro') }}</p>
-        </div>
-    </section>
+    <x-bader.page-hero
+        :kicker="__('page.campaigns.kicker')"
+        :title="__('page.campaigns.title')"
+        :intro="__('page.campaigns.intro')"
+    />
 
     <section class="bg-sand-50 section-pad">
         <div class="mx-auto max-w-6xl">
@@ -38,6 +37,17 @@
                         </div>
                     </article>
                 @endforeach
+            </div>
+        </div>
+    </section>
+
+    <section class="border-t border-sand-200 bg-sand-100 section-pad text-center">
+        <div class="mx-auto max-w-2xl" data-reveal>
+            <h2 class="font-display text-2xl font-bold text-ink-900 sm:text-3xl">{{ __('home.support_title') }}</h2>
+            <p class="mt-3 text-sm leading-relaxed text-ink-700/75">{{ __('home.support_intro') }}</p>
+            <div class="mt-7 flex flex-wrap justify-center gap-3">
+                <a href="{{ route('donate') }}" class="btn-primary">{{ __('nav.donate') }}</a>
+                <a href="{{ route('contact') }}" class="btn-dark">{{ __('nav.contact') }}</a>
             </div>
         </div>
     </section>

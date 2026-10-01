@@ -3,12 +3,11 @@
 @section('title', __('page.programs.title').' — '.__('brand.name'))
 
 @section('content')
-    <section class="bg-teal-950 text-sand-50 py-16 sm:py-20 border-b border-teal-800 relative overflow-hidden">
-        <div class="mx-auto max-w-6xl px-4 relative z-10">
-            <x-bader.section-heading :kicker="__('page.programs.kicker')" :title="__('page.programs.title')" theme="dark" />
-            <p class="mt-5 max-w-2xl text-sm leading-relaxed text-sand-100/80 sm:text-base">{{ __('page.programs.intro') }}</p>
-        </div>
-    </section>
+    <x-bader.page-hero
+        :kicker="__('page.programs.kicker')"
+        :title="__('page.programs.title')"
+        :intro="__('page.programs.intro')"
+    />
 
     <section class="bg-sand-50 section-pad">
         <div class="mx-auto max-w-7xl">
@@ -30,6 +29,14 @@
                     </article>
                 @endforeach
             </div>
+        </div>
+    </section>
+
+    <section class="border-t border-sand-200 bg-teal-950 section-pad text-center text-sand-50">
+        <div class="mx-auto max-w-2xl" data-reveal>
+            <h2 class="font-display text-2xl font-bold sm:text-3xl">{{ __('home.programs_explore_more_desc') }}</h2>
+            <p class="mt-3 text-sm leading-relaxed text-sand-100/75">{{ __('home.programs_overview_text') }}</p>
+            <a href="{{ route('donate') }}" class="btn-primary mt-7">{{ __('nav.donate') }}</a>
         </div>
     </section>
 @endsection

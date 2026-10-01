@@ -623,8 +623,93 @@
         });
     </script>
 
+    {{-- 6. WAYS TO TAKE PART --}}
+    <section class="bg-white section-pad border-y border-sand-200" data-home-section="ways-to-help">
+        <div class="mx-auto max-w-7xl">
+            <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between" data-reveal>
+                <div class="max-w-2xl">
+                    <p class="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-forest-700">{{ __('home.support_kicker') }}</p>
+                    <h2 class="font-display text-3xl font-extrabold leading-tight text-ink-900 sm:text-4xl">{{ __('home.support_title') }}</h2>
+                    <p class="mt-3 text-base leading-relaxed text-ink-700/80">{{ __('home.support_intro') }}</p>
+                </div>
+                <a href="{{ route('contact') }}" class="inline-flex shrink-0 items-center gap-2 text-sm font-bold text-forest-700 hover:text-forest-800">
+                    <span>{{ __('home.support_link') }}</span>
+                    <span aria-hidden="true" class="rtl:rotate-180">&rarr;</span>
+                </a>
+            </div>
+
+            <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                @foreach ([
+                    ['route' => 'donate', 'icon' => 'heart', 'title' => 'home.support_donate_title', 'text' => 'home.support_donate_text', 'tone' => 'bg-forest-700'],
+                    ['route' => 'sponsorship', 'icon' => 'users', 'title' => 'home.support_sponsorship_title', 'text' => 'home.support_sponsorship_text', 'tone' => 'bg-teal-900'],
+                    ['route' => 'partners', 'icon' => 'link', 'title' => 'home.support_partner_title', 'text' => 'home.support_partner_text', 'tone' => 'bg-teal-950'],
+                    ['route' => 'volunteer', 'icon' => 'hands', 'title' => 'home.support_volunteer_title', 'text' => 'home.support_volunteer_text', 'tone' => 'bg-forest-900'],
+                ] as $support)
+                    <a href="{{ route($support['route']) }}" class="group flex min-h-56 flex-col justify-between rounded-2xl p-6 text-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg {{ $support['tone'] }}" data-reveal>
+                        <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-gold-400 ring-1 ring-white/10" aria-hidden="true">
+                            @if ($support['icon'] === 'heart')
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20.8 8.6c0 5.1-8.8 11-8.8 11s-8.8-5.9-8.8-11A4.6 4.6 0 0 1 12 6a4.6 4.6 0 0 1 8.8 2.6Z" /></svg>
+                            @elseif ($support['icon'] === 'users')
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2m9-10a4 4 0 1 0-8 0 4 4 0 0 0 8 0Zm5 10v-2a4 4 0 0 0-3-3.87m1-8.13a4 4 0 0 1 0 7.75" /></svg>
+                            @elseif ($support['icon'] === 'link')
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m10 13.5 4-4m-6.5 8H6a4 4 0 0 1 0-8h2m8-5h1.5a4 4 0 0 1 0 8H16" /></svg>
+                            @else
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 21s-8-4.7-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6.3-8 11-8 11Z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 12h2l1-2 2 4 1-2h2" /></svg>
+                            @endif
+                        </span>
+                        <span>
+                            <span class="mt-8 block text-lg font-bold text-white">{{ __($support['title']) }}</span>
+                            <span class="mt-2 block text-sm leading-relaxed text-sand-100/75">{{ __($support['text']) }}</span>
+                            <span class="mt-5 inline-flex items-center gap-2 text-xs font-bold text-gold-400 group-hover:text-gold-300">
+                                {{ __('home.support_action') }} <span aria-hidden="true" class="rtl:rotate-180">&rarr;</span>
+                            </span>
+                        </span>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    {{-- 7. WHERE WE WORK AND HOW WE REPORT --}}
+    <section class="bg-sand-50 section-pad" data-home-section="trust">
+        <div class="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+            <div data-reveal>
+                <p class="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-forest-700">{{ __('home.trust_kicker') }}</p>
+                <h2 class="font-display text-3xl font-extrabold leading-tight text-ink-900 sm:text-4xl">{{ __('home.trust_title') }}</h2>
+                <p class="mt-4 max-w-2xl text-base leading-relaxed text-ink-700/80">{{ __('home.trust_text') }}</p>
+
+                <div class="mt-8 grid gap-4 sm:grid-cols-2">
+                    <div class="rounded-2xl border border-sand-200 bg-white p-5">
+                        <p class="text-xs font-bold uppercase tracking-wider text-forest-700">{{ __('home.trust_hq_label') }}</p>
+                        <p class="mt-2 text-lg font-bold text-ink-900">{{ \App\Support\SiteSettings::hqLocation() }}</p>
+                    </div>
+                    <div class="rounded-2xl border border-sand-200 bg-white p-5">
+                        <p class="text-xs font-bold uppercase tracking-wider text-forest-700">{{ __('home.trust_field_label') }}</p>
+                        <p class="mt-2 text-lg font-bold text-ink-900">{{ \App\Support\SiteSettings::fieldLocation() }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-3 lg:grid-cols-1" data-reveal>
+                @foreach ([
+                    ['title' => 'home.trust_verified_title', 'text' => 'home.trust_verified_text'],
+                    ['title' => 'home.trust_dignity_title', 'text' => 'home.trust_dignity_text'],
+                    ['title' => 'home.trust_updates_title', 'text' => 'home.trust_updates_text'],
+                ] as $trust)
+                    <div class="flex gap-4 rounded-2xl border border-forest-700/15 bg-white p-5 shadow-sm">
+                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-forest-700 text-gold-400">&#10003;</span>
+                        <div>
+                            <h3 class="font-bold text-ink-900">{{ __($trust['title']) }}</h3>
+                            <p class="mt-1 text-sm leading-relaxed text-ink-700/75">{{ __($trust['text']) }}</p>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
     {{-- ══════════════════════════════════════════════════════════
-         5. INSTITUTIONAL CALL TO ACTION (Warm Sand Banner)
+         8. INSTITUTIONAL CALL TO ACTION (Warm Sand Banner)
          ══════════════════════════════════════════════════════════ --}}
     <section class="bg-sand-100 border-t border-sand-200 section-pad text-center">
         <div class="max-w-3xl mx-auto" data-reveal>
