@@ -39,7 +39,7 @@
            -translate-x-full rtl:translate-x-full xl:translate-x-0 xl:rtl:translate-x-0"
   >
     {{-- Sidebar Logo --}}
-    <div class="flex items-center py-8">
+    <div class="flex shrink-0 items-center py-8">
       <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
         {{-- Light logo --}}
         <img
@@ -65,7 +65,7 @@
     </div>
 
     {{-- Scrollable Nav --}}
-    <div class="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
+    <div class="custom-scrollbar -me-3 flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain pe-3 duration-300 ease-linear">
       <nav class="mb-6">
         <div class="flex flex-col gap-4">
 
