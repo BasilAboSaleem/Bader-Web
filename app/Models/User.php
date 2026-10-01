@@ -14,6 +14,8 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     // ── Role constants ──────────────────────────────────────────────────────────
+    const ROLE_SUPER_ADMIN = 'super_admin';
+
     const ROLE_ADMIN = 'admin';
 
     const ROLE_EDITOR = 'editor';
@@ -65,6 +67,12 @@ class User extends Authenticatable
 
     // ── Role helpers ────────────────────────────────────────────────────────────
 
+    /** The single owner account that manages the other administrators. */
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === self::ROLE_SUPER_ADMIN;
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === self::ROLE_ADMIN;
@@ -83,13 +91,13 @@ class User extends Authenticatable
     /** Admin and Editor can create / edit live content. */
     public function canManageContent(): bool
     {
-        return in_array($this->role, [self::ROLE_ADMIN, self::ROLE_EDITOR], true);
+        return in_array($this->role, [self::ROLE_SUPER_ADMIN, self::ROLE_ADMIN, self::ROLE_EDITOR], true);
     }
 
-    /** Only Admins can touch site-wide settings and users. */
+    /** Only Admins (and the Super Admin) can touch site-wide settings. */
     public function canManageSettings(): bool
     {
-        return $this->role === self::ROLE_ADMIN;
+        return in_array($this->role, [self::ROLE_SUPER_ADMIN, self::ROLE_ADMIN], true);
     }
 
     // ── Two-Factor helpers ──────────────────────────────────────────────────────

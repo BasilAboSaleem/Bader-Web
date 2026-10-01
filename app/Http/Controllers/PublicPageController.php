@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Campaign;
 use App\Models\Donation;
 use App\Models\Facility;
+use App\Models\Faq;
 use App\Models\Program;
 use App\Models\Region;
 use App\Models\SponsorshipCase;
@@ -225,7 +226,7 @@ class PublicPageController extends Controller
         $categories = config('bader.donation_categories');
         $category = in_array($query('category'), $categories, true) ? $query('category') : 'general';
 
-        $giftDesigns = config('bader.gift_designs');
+        $giftDesigns = SiteSettings::giftDesigns();
 
         return view('pages.donate', [
             'target' => $target,
@@ -255,7 +256,7 @@ class PublicPageController extends Controller
 
         return view('pages.gift', [
             'target' => $target,
-            'giftDesigns' => config('bader.gift_designs'),
+            'giftDesigns' => SiteSettings::giftDesigns(),
             'categories' => config('bader.donation_categories'),
         ]);
     }
@@ -289,7 +290,7 @@ class PublicPageController extends Controller
     public function faq(): View
     {
         return view('pages.faq', [
-            'questions' => ['identity', 'politics', 'location', 'work', 'long_term'],
+            'faqs' => Faq::published()->get(),
         ]);
     }
 

@@ -12,6 +12,8 @@ use Illuminate\View\View;
 
 class SiteSettingController extends Controller
 {
+    private const MAX_GIFT_DESIGNS = 8;
+
     /**
      * Display the site settings edit form.
      */
@@ -34,6 +36,9 @@ class SiteSettingController extends Controller
             'whatsappNumber' => Setting::get('whatsapp_number', ''),
             'goldPricePerGram' => SiteSettings::goldPricePerGram(),
             'quickGiveOptions' => SiteSettings::quickGiveOptions(),
+            'socialLinks' => SiteSettings::socialLinks(),
+            'giftDesigns' => array_values(SiteSettings::giftDesigns()),
+            'maxGiftDesigns' => self::MAX_GIFT_DESIGNS,
         ]);
     }
 
@@ -63,6 +68,15 @@ class SiteSettingController extends Controller
             'quick_give.*.label_en' => ['nullable', 'string', 'max:60'],
             'quick_give.*.category' => ['nullable', Rule::in(config('bader.donation_categories'))],
             'quick_give.*.amount' => ['nullable', 'numeric', 'min:1', 'max:100000', 'required_with:quick_give.*.label_ar'],
+            'social' => ['nullable', 'array'],
+            'social.*' => ['nullable', 'url:http,https', 'max:500'],
+            'gift_designs' => ['nullable', 'array', 'max:'.self::MAX_GIFT_DESIGNS],
+            'gift_designs.*.key' => ['nullable', 'string', 'max:40', 'regex:/^[a-z0-9_]+$/', 'distinct', 'required_with:gift_designs.*.label_ar'],
+            'gift_designs.*.label_ar' => ['nullable', 'string', 'max:60', 'required_with:gift_designs.*.key'],
+            'gift_designs.*.label_en' => ['nullable', 'string', 'max:60'],
+            'gift_designs.*.from' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'gift_designs.*.to' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'gift_designs.*.accent' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
         ]);
 
         $generalFields = [
@@ -113,6 +127,24 @@ class SiteSettingController extends Controller
         Setting::set('whatsapp_number', $validated['whatsapp_number'] ?? '', 'giving');
         Setting::set('gold_price_per_gram', $validated['gold_price_per_gram'] ?? '', 'giving');
         Setting::set('quick_give_options', $quickGiveOptions->isEmpty() ? '' : $quickGiveOptions->toJson(JSON_UNESCAPED_UNICODE), 'giving');
+
+        foreach (config('bader.social_platforms') as $platform) {
+            Setting::set("social_{$platform}", $validated['social'][$platform] ?? '', 'social');
+        }
+
+        $giftDesigns = collect($validated['gift_designs'] ?? [])
+            ->filter(fn (array $design): bool => filled($design['key'] ?? null) && filled($design['label_ar'] ?? null))
+            ->map(fn (array $design): array => [
+                'key' => $design['key'],
+                'label_ar' => $design['label_ar'],
+                'label_en' => $design['label_en'] ?? '',
+                'from' => $design['from'] ?? '#0a2e2f',
+                'to' => $design['to'] ?? '#1f6b38',
+                'accent' => $design['accent'] ?? '#e1e56b',
+            ])
+            ->values();
+
+        Setting::set('gift_designs', $giftDesigns->isEmpty() ? '' : $giftDesigns->toJson(JSON_UNESCAPED_UNICODE), 'giving');
 
         return redirect()->route('dashboard.settings.edit')
             ->with('status', __('dashboard.settings_saved'));

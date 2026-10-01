@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\SiteSettings;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -113,7 +114,7 @@ class Donation extends Model
     }
 
     /**
-     * @return array{key: string, label_ar: string, label_en: string, accent: string}|null
+     * @return array{key: string, label_ar: string, label_en: string, from: string, to: string, accent: string}|null
      */
     public function giftCard(): ?array
     {
@@ -121,7 +122,7 @@ class Donation extends Model
             return null;
         }
 
-        $designs = config('bader.gift_designs', []);
+        $designs = SiteSettings::giftDesigns();
 
         return $designs[$this->gift_card_design] ?? reset($designs) ?: null;
     }

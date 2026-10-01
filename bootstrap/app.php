@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\CachePublicResponse;
 use App\Http\Middleware\EnsureUserRole;
+use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -15,8 +16,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Cloudways terminates HTTPS at Nginx/Varnish in front of Apache.
+        $middleware->trustProxies(at: '*');
+
         $middleware->web(append: [
             SetLocale::class,
+            SecurityHeaders::class,
         ]);
 
         $middleware->validateCsrfTokens(except: [

@@ -7,7 +7,12 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Adds HTTP cache-control headers to public GET responses.
+ * Adds revalidation headers (ETag + 304) to public GET responses for guests.
+ *
+ * Pages are "private, max-age=0" on purpose: the same URL renders in Arabic or English
+ * depending on the session, and forms embed a per-session CSRF token, so neither the
+ * browser nor a shared proxy (e.g. Cloudways Varnish) may serve a stored copy without
+ * asking the server first. Unchanged pages still cost only an empty 304 response.
  *
  * Skipped automatically for:
  *  - Authenticated users (personalised dashboard content)
@@ -15,13 +20,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class CachePublicResponse
 {
-    /** Default max-age in seconds (10 minutes). */
-    private const MAX_AGE = 600;
-
-    /** stale-while-revalidate window in seconds (1 minute). */
-    private const STALE_WHILE_REVALIDATE = 60;
-
-    public function handle(Request $request, Closure $next, int $maxAge = self::MAX_AGE): Response
+    public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);
 
@@ -31,14 +30,7 @@ class CachePublicResponse
             ! $request->user() &&
             $response->isSuccessful()
         ) {
-            $response->headers->set(
-                'Cache-Control',
-                sprintf(
-                    'public, max-age=%d, stale-while-revalidate=%d',
-                    $maxAge,
-                    self::STALE_WHILE_REVALIDATE,
-                )
-            );
+            $response->headers->set('Cache-Control', 'private, max-age=0, must-revalidate');
 
             // Add ETag based on response content hash for conditional requests.
             $etag = '"'.md5($response->getContent()).'"';

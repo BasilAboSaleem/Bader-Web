@@ -199,6 +199,25 @@ class SiteSettings
     }
 
     /**
+     * Optional institutional block field (e.g. the president's speech) that has no translation fallback;
+     * falls back to the Arabic value, and returns null when the team has not filled it in.
+     */
+    public static function optionalInstitutional(string $page, string $section, string $field, ?string $locale = null): ?string
+    {
+        $loc = $locale ?? app()->getLocale();
+
+        foreach (array_unique([$loc, 'ar']) as $candidate) {
+            $value = trim((string) Setting::get("inst_{$page}_{$section}_{$field}_{$candidate}", ''));
+
+            if ($value !== '') {
+                return $value;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Get institutional page intro text with fallback.
      */
     public static function pageIntro(string $page, ?string $locale = null): string
@@ -212,36 +231,6 @@ class SiteSettings
         }
 
         return __("page.{$page}.intro", [], $loc);
-    }
-
-    /**
-     * Get FAQ question with fallback.
-     */
-    public static function faqQuestion(string $key, ?string $locale = null): string
-    {
-        $loc = $locale ?? app()->getLocale();
-        $custom = Setting::get("faq_{$key}_q_{$loc}");
-
-        if (! empty($custom)) {
-            return $custom;
-        }
-
-        return __("faq.{$key}.question", [], $loc);
-    }
-
-    /**
-     * Get FAQ answer with fallback.
-     */
-    public static function faqAnswer(string $key, ?string $locale = null): string
-    {
-        $loc = $locale ?? app()->getLocale();
-        $custom = Setting::get("faq_{$key}_a_{$loc}");
-
-        if (! empty($custom)) {
-            return $custom;
-        }
-
-        return __("faq.{$key}.answer", [], $loc);
     }
 
     /**
@@ -293,6 +282,63 @@ class SiteSettings
                 'label' => (string) (($loc === 'en' && ! empty($option['label_en'])) ? $option['label_en'] : ($option['label_ar'] ?? '')),
             ])
             ->values()
+            ->all();
+    }
+
+    /**
+     * Translation strings overridden from Dashboard → Site texts for the given locale.
+     *
+     * @return array<string, string>
+     */
+    public static function textOverrides(string $locale): array
+    {
+        $stored = json_decode((string) Setting::get("site_texts_{$locale}", ''), true);
+
+        return is_array($stored)
+            ? array_filter($stored, fn ($value, $key): bool => is_string($key) && is_string($value) && $value !== '', ARRAY_FILTER_USE_BOTH)
+            : [];
+    }
+
+    /**
+     * Social profile URLs saved in Site Settings, keyed by platform, in the configured display order.
+     *
+     * @return array<string, string>
+     */
+    public static function socialLinks(): array
+    {
+        $links = [];
+
+        foreach (config('bader.social_platforms', []) as $platform) {
+            $url = trim((string) Setting::get("social_{$platform}", ''));
+
+            if ($url !== '') {
+                $links[$platform] = $url;
+            }
+        }
+
+        return $links;
+    }
+
+    /**
+     * Gift card designs keyed by design key; custom designs from Site Settings replace the config defaults.
+     *
+     * @return array<string, array{key: string, label_ar: string, label_en: string, from: string, to: string, accent: string}>
+     */
+    public static function giftDesigns(): array
+    {
+        $stored = json_decode((string) Setting::get('gift_designs', ''), true);
+        $designs = is_array($stored) && $stored !== [] ? $stored : config('bader.gift_designs', []);
+
+        return collect($designs)
+            ->filter(fn ($design) => is_array($design) && filled($design['key'] ?? null))
+            ->mapWithKeys(fn (array $design): array => [(string) $design['key'] => [
+                'key' => (string) $design['key'],
+                'label_ar' => (string) ($design['label_ar'] ?? ''),
+                'label_en' => (string) ($design['label_en'] ?? ''),
+                'from' => (string) ($design['from'] ?? '#0a2e2f'),
+                'to' => (string) ($design['to'] ?? '#1f6b38'),
+                'accent' => (string) ($design['accent'] ?? '#e1e56b'),
+            ]])
             ->all();
     }
 

@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Support\OverridableTranslationLoader;
 use App\Support\PublicNavigation;
+use Illuminate\Contracts\Translation\Loader;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -13,7 +15,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->extend('translation.loader', fn (Loader $loader): Loader => new OverridableTranslationLoader($loader));
     }
 
     /**

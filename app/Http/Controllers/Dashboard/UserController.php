@@ -43,4 +43,14 @@ class UserController extends Controller
         return redirect()->route('dashboard.users.index')
             ->with('status', __('dashboard.users_created'));
     }
+
+    public function destroy(User $user): RedirectResponse
+    {
+        abort_if($user->isSuperAdmin(), 403);
+
+        $user->delete();
+
+        return redirect()->route('dashboard.users.index')
+            ->with('status', __('dashboard.users_deleted'));
+    }
 }

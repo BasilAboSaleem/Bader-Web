@@ -399,6 +399,47 @@
         </div>
         @error('quick_give.*') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
       </div>
+
+      <div class="mt-6">
+        <p class="mb-1 text-theme-sm font-semibold text-gray-800 dark:text-white/90">{{ __('dashboard.field_gift_designs') }}</p>
+        <p class="mb-3 text-theme-xs text-gray-400">{{ __('dashboard.hint.gift_designs') }}</p>
+        <div class="space-y-3">
+          @for ($row = 0; $row < min(count($giftDesigns) + 2, $maxGiftDesigns); $row++)
+            @php $design = $giftDesigns[$row] ?? []; @endphp
+            <div class="grid grid-cols-1 items-center gap-3 rounded-xl border border-gray-100 p-3 dark:border-gray-800 md:grid-cols-[9rem_1fr_1fr_auto]">
+              <input type="text" name="gift_designs[{{ $row }}][key]" value="{{ old("gift_designs.$row.key", $design['key'] ?? '') }}" placeholder="{{ __('dashboard.field.key') }}" aria-label="{{ __('dashboard.field.key') }}" dir="ltr" class="{{ $settingsInput }}">
+              <input type="text" name="gift_designs[{{ $row }}][label_ar]" value="{{ old("gift_designs.$row.label_ar", $design['label_ar'] ?? '') }}" placeholder="{{ __('dashboard.field.label_ar') }}" aria-label="{{ __('dashboard.field.label_ar') }}" class="{{ $settingsInput }}">
+              <input type="text" name="gift_designs[{{ $row }}][label_en]" value="{{ old("gift_designs.$row.label_en", $design['label_en'] ?? '') }}" placeholder="{{ __('dashboard.field.label_en') }}" aria-label="{{ __('dashboard.field.label_en') }}" dir="ltr" class="{{ $settingsInput }}">
+              <div class="flex items-center gap-2">
+                @foreach (['from' => '#0a2e2f', 'to' => '#1f6b38', 'accent' => '#e1e56b'] as $colorField => $colorDefault)
+                  <label class="flex flex-col items-center gap-0.5 text-[10px] text-gray-400">
+                    <input type="color" name="gift_designs[{{ $row }}][{{ $colorField }}]" value="{{ old("gift_designs.$row.$colorField", $design[$colorField] ?? $colorDefault) }}" class="h-9 w-11 cursor-pointer rounded-md border border-gray-300 bg-white p-0.5 dark:border-gray-700 dark:bg-gray-900">
+                    {{ __('dashboard.gift_color.'.$colorField) }}
+                  </label>
+                @endforeach
+              </div>
+            </div>
+          @endfor
+        </div>
+        @error('gift_designs.*') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+      </div>
+    </div>
+
+    {{-- 5. Social links --}}
+    <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
+      <div class="mb-5 border-b border-gray-100 pb-4 dark:border-gray-800">
+        <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('dashboard.section_social_title') }}</h2>
+        <p class="mt-0.5 text-theme-xs text-gray-500 dark:text-gray-400">{{ __('dashboard.section_social_desc') }}</p>
+      </div>
+      <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+        @foreach (config('bader.social_platforms') as $platform)
+          <div>
+            <label for="social_{{ $platform }}" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">{{ __('footer.social.'.$platform) }}</label>
+            <input type="url" id="social_{{ $platform }}" name="social[{{ $platform }}]" value="{{ old("social.$platform", $socialLinks[$platform] ?? '') }}" placeholder="https://" dir="ltr" class="{{ $settingsInput }}">
+            @error("social.$platform") <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+          </div>
+        @endforeach
+      </div>
     </div>
 
     {{-- Form Submit Actions --}}

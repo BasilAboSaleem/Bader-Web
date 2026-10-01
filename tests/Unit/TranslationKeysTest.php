@@ -45,7 +45,7 @@ class TranslationKeysTest extends TestCase
             foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory)) as $file) {
                 $path = str_replace('\\', '/', $file->getPathname());
 
-                if (str_ends_with($path, '.php') && ! preg_match('#/views/(auth|dashboard/users)/|/UserController\.php$#', $path)) {
+                if (str_ends_with($path, '.php') && ! preg_match('#/views/auth/#', $path)) {
                     $files[] = $path;
                 }
             }

@@ -135,14 +135,17 @@ class LaunchReadinessTest extends TestCase
         $this->assertNotNull($response->headers->get('ETag'));
     }
 
-    public function test_home_returns_cache_control_public_for_guest(): void
+    public function test_switching_language_is_not_served_from_a_cached_page(): void
     {
-        $cacheControl = $this->get(route('home'))
-            ->assertOk()
-            ->headers->get('Cache-Control');
+        $this->get(route('about'))->assertOk()->assertSee(__('page.about.title', [], 'ar'), false);
 
-        $this->assertStringContainsString('public', $cacheControl);
-        $this->assertStringContainsString('max-age', $cacheControl);
+        $this->get(route('locale.switch', 'en'));
+
+        $response = $this->get(route('about'))
+            ->assertOk()
+            ->assertSee(__('page.about.title', [], 'en'), false);
+
+        $this->assertStringContainsString('must-revalidate', $response->headers->get('Cache-Control'));
     }
 
     // ── 404 / Error pages ──────────────────────────────────────────────────────

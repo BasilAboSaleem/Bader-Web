@@ -43,7 +43,7 @@ class ProgramController extends Controller
             'is_flagship' => ['nullable', 'boolean'],
             'icon' => ['nullable', 'string', 'max:100'],
             'image' => ['nullable', 'string', 'max:255'],
-            'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg', 'max:5120'],
+            'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
             'order' => ['nullable', 'integer'],
             'status' => ['required', 'in:draft,under_review,published'],
         ]);
@@ -92,7 +92,7 @@ class ProgramController extends Controller
             'is_flagship' => ['nullable', 'boolean'],
             'icon' => ['nullable', 'string', 'max:100'],
             'image' => ['nullable', 'string', 'max:255'],
-            'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg', 'max:5120'],
+            'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
             'order' => ['nullable', 'integer'],
             'status' => ['required', 'in:draft,under_review,published'],
         ]);

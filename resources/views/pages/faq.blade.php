@@ -18,20 +18,27 @@
 
     <section class="band-base section-y">
         <div class="container-bader grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
-            <div class="divide-y divide-hairline overflow-hidden rounded-3xl border border-hairline bg-white shadow-card-sm" data-reveal>
-                @foreach ($questions as $question)
-                    <details class="group" @if ($loop->first) open @endif>
-                        <summary class="flex cursor-pointer items-center gap-4 p-5 transition hover:bg-paper sm:p-6">
-                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-forest-600/10 text-sm font-extrabold text-forest-700 transition group-open:bg-forest-700 group-open:text-white">{{ $loop->iteration }}</span>
-                            <span class="flex-1 text-base font-extrabold leading-7 text-ink-900 sm:text-lg">{{ SiteSettings::faqQuestion($question) }}</span>
-                            <x-bader.icon name="chevron-down" class="h-5 w-5 shrink-0 text-forest-700 transition-transform duration-300 group-open:rotate-180" />
-                        </summary>
-                        <div class="px-5 pb-6 sm:px-6 sm:ps-[4.75rem]">
-                            <p class="leading-8 text-muted">{{ SiteSettings::faqAnswer($question) }}</p>
-                        </div>
-                    </details>
-                @endforeach
-            </div>
+            @if ($faqs->isNotEmpty())
+                <div class="divide-y divide-hairline overflow-hidden rounded-3xl border border-hairline bg-white shadow-card-sm" data-reveal>
+                    @foreach ($faqs as $faq)
+                        <details class="group" @if ($loop->first) open @endif>
+                            <summary class="flex cursor-pointer items-center gap-4 p-5 transition hover:bg-paper sm:p-6">
+                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-forest-600/10 text-sm font-extrabold text-forest-700 transition group-open:bg-forest-700 group-open:text-white">{{ $loop->iteration }}</span>
+                                <span class="flex-1 text-base font-extrabold leading-7 text-ink-900 sm:text-lg">{{ $faq->question }}</span>
+                                <x-bader.icon name="chevron-down" class="h-5 w-5 shrink-0 text-forest-700 transition-transform duration-300 group-open:rotate-180" />
+                            </summary>
+                            <div class="px-5 pb-6 sm:px-6 sm:ps-[4.75rem]">
+                                <p class="whitespace-pre-line leading-8 text-muted">{{ $faq->answer }}</p>
+                            </div>
+                        </details>
+                    @endforeach
+                </div>
+            @else
+                <div class="rounded-3xl border border-dashed border-hairline-strong bg-white p-10 text-center" data-reveal>
+                    <x-bader.icon name="info" class="mx-auto h-10 w-10 text-forest-600" />
+                    <p class="mx-auto mt-4 max-w-md text-muted">{{ __('faq_page.empty') }}</p>
+                </div>
+            @endif
 
             <aside class="space-y-4 lg:sticky lg:top-28" data-reveal>
                 <div class="relative isolate overflow-hidden rounded-3xl bg-teal-950 p-6 text-white shadow-card-md">

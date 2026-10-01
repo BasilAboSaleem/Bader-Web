@@ -126,9 +126,10 @@ class DashboardSettingsTest extends TestCase
             ->get(route('dashboard.pages.edit'))
             ->assertOk()
             ->assertSee(__('dashboard.pages_title'), false)
-            ->assertSee(__('dashboard.section_about_title'), false)
-            ->assertSee(__('dashboard.section_policies_title'), false)
-            ->assertSee(__('dashboard.section_faq_title'), false);
+            ->assertSee(__('page.partners.title'), false)
+            ->assertSee(__('page.volunteer.title'), false)
+            ->assertSee('name="inst_about_president_speech_text_ar"', false)
+            ->assertSee('name="inst_contact_intro_ar"', false);
     }
 
     public function test_admin_can_update_institutional_pages_and_reflected_on_public_site(): void
@@ -140,25 +141,44 @@ class DashboardSettingsTest extends TestCase
                 'inst_about_intro_ar' => 'مؤسسة بادر الإنسانية - مقدمة محدثة ومخصصة للتعريف بالمؤسسة.',
                 'inst_about_mission_title_ar' => 'رسالتنا الإنسانية المحدثة',
                 'inst_about_mission_text_ar' => 'نص الرسالة المحدث من لوحة التحكم.',
-                'faq_identity_q_ar' => 'سؤال مخصص ومحدث عن هوية مؤسسة بادر؟',
-                'faq_identity_a_ar' => 'إجابة مفصلة ومحدثة تم تحريرها من لوحة التحكم.',
+                'inst_about_president_speech_text_ar' => 'كلمة رئيس المؤسسة المكتوبة من لوحة التحكم.',
+                'inst_about_vision_text_ar' => 'رؤية بادر المكتوبة من لوحة التحكم.',
+                'inst_partners_local_title_ar' => 'شراكات محلية محدثة',
+                'inst_contact_intro_ar' => 'مقدمة صفحة التواصل من لوحة التحكم.',
             ]);
 
         $response->assertRedirect(route('dashboard.pages.edit'));
         $response->assertSessionHas('status', __('dashboard.pages_saved'));
 
-        // Check Public About page
         $this->get(route('about'))
             ->assertOk()
             ->assertSee('مؤسسة بادر الإنسانية - مقدمة محدثة ومخصصة للتعريف بالمؤسسة.', false)
             ->assertSee('رسالتنا الإنسانية المحدثة', false)
-            ->assertSee('نص الرسالة المحدث من لوحة التحكم.', false);
+            ->assertSee('نص الرسالة المحدث من لوحة التحكم.', false)
+            ->assertSee('كلمة رئيس المؤسسة المكتوبة من لوحة التحكم.', false)
+            ->assertSee('رؤية بادر المكتوبة من لوحة التحكم.', false);
 
-        // Check Public FAQ page
-        $this->get(route('faq'))
+        $this->get(route('partners'))->assertOk()->assertSee('شراكات محلية محدثة', false);
+        $this->get(route('contact'))->assertOk()->assertSee('مقدمة صفحة التواصل من لوحة التحكم.', false);
+    }
+
+    public function test_about_page_hides_president_speech_and_vision_until_they_are_filled_in(): void
+    {
+        $this->get(route('about'))
             ->assertOk()
-            ->assertSee('سؤال مخصص ومحدث عن هوية مؤسسة بادر؟', false)
-            ->assertSee('إجابة مفصلة ومحدثة تم تحريرها من لوحة التحكم.', false);
+            ->assertDontSee(__('about_page.president_kicker'), false);
+    }
+
+    public function test_institutional_pages_ignore_fields_outside_the_editable_pages(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->put(route('dashboard.pages.update'), [
+                'inst_about_intro_ar' => 'مقدمة',
+                'inst_unknown_page_intro_ar' => 'لا يجب حفظه',
+            ])
+            ->assertRedirect(route('dashboard.pages.edit'));
+
+        $this->assertDatabaseMissing('settings', ['key' => 'inst_unknown_page_intro_ar']);
     }
 
     public function test_validation_catches_invalid_urls_or_emails(): void

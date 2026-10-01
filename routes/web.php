@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Dashboard\CampaignController;
 use App\Http\Controllers\Dashboard\DonationController;
 use App\Http\Controllers\Dashboard\FacilityController;
+use App\Http\Controllers\Dashboard\FaqController;
 use App\Http\Controllers\Dashboard\ImpactMetricController;
 use App\Http\Controllers\Dashboard\InboxController;
 use App\Http\Controllers\Dashboard\InstitutionalPageController;
@@ -11,8 +12,10 @@ use App\Http\Controllers\Dashboard\MediaAssetController;
 use App\Http\Controllers\Dashboard\ProgramController;
 use App\Http\Controllers\Dashboard\RegionController;
 use App\Http\Controllers\Dashboard\SiteSettingController;
+use App\Http\Controllers\Dashboard\SiteTextController;
 use App\Http\Controllers\Dashboard\SponsorshipCaseController;
 use App\Http\Controllers\Dashboard\StoryController;
+use App\Http\Controllers\Dashboard\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DonationPaymentController;
 use App\Http\Controllers\HomeController;
@@ -20,6 +23,7 @@ use App\Http\Controllers\PublicFormController;
 use App\Http\Controllers\PublicPageController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SponsorshipPageController;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 // SEO: Sitemap & robots.txt (no caching — always fresh)
@@ -51,12 +55,14 @@ Route::middleware('cache.public')->group(function () {
 });
 
 // Public Form Submissions
-Route::post('/contact', [PublicFormController::class, 'submitContact'])->name('contact.submit');
-Route::post('/partners', [PublicFormController::class, 'submitPartnership'])->name('partners.submit');
-Route::post('/volunteer', [PublicFormController::class, 'submitVolunteer'])->name('volunteer.submit');
-Route::post('/sponsorship', [PublicFormController::class, 'submitSponsorship'])->name('sponsorship.submit');
-Route::post('/assistance', [PublicFormController::class, 'submitAssistance'])->name('assistance.submit');
-Route::post('/donate/transfer', [PublicFormController::class, 'notifyTransfer'])->name('donate.transfer.submit');
+Route::middleware('throttle:10,1')->group(function () {
+    Route::post('/contact', [PublicFormController::class, 'submitContact'])->name('contact.submit');
+    Route::post('/partners', [PublicFormController::class, 'submitPartnership'])->name('partners.submit');
+    Route::post('/volunteer', [PublicFormController::class, 'submitVolunteer'])->name('volunteer.submit');
+    Route::post('/sponsorship', [PublicFormController::class, 'submitSponsorship'])->name('sponsorship.submit');
+    Route::post('/assistance', [PublicFormController::class, 'submitAssistance'])->name('assistance.submit');
+    Route::post('/donate/transfer', [PublicFormController::class, 'notifyTransfer'])->name('donate.transfer.submit');
+});
 
 // Online donations (the donate form carries a CSRF token, so it is never publicly cached)
 Route::get('/donate', [PublicPageController::class, 'donate'])->name('donate');
@@ -75,7 +81,7 @@ Route::get('/locale/{locale}', function (string $locale) {
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'create'])->name('login');
-    Route::post('/login', [AuthController::class, 'store'])->name('login.store');
+    Route::post('/login', [AuthController::class, 'store'])->middleware('throttle:5,1')->name('login.store');
 });
 
 Route::middleware('auth')->group(function () {
@@ -84,6 +90,9 @@ Route::middleware('auth')->group(function () {
     Route::put('/dashboard/settings', [SiteSettingController::class, 'update'])->name('dashboard.settings.update');
     Route::get('/dashboard/pages', [InstitutionalPageController::class, 'edit'])->name('dashboard.pages.edit');
     Route::put('/dashboard/pages', [InstitutionalPageController::class, 'update'])->name('dashboard.pages.update');
+    Route::get('/dashboard/site-texts', [SiteTextController::class, 'edit'])->name('dashboard.site-texts.edit');
+    Route::put('/dashboard/site-texts', [SiteTextController::class, 'update'])->name('dashboard.site-texts.update');
+    Route::resource('dashboard/faqs', FaqController::class)->names('dashboard.faqs')->except(['show']);
 
     Route::resource('dashboard/programs', ProgramController::class)->names('dashboard.programs')->except(['show']);
     Route::resource('dashboard/facilities', FacilityController::class)->names('dashboard.facilities')->except(['show']);
@@ -98,6 +107,11 @@ Route::middleware('auth')->group(function () {
     Route::patch('dashboard/impact/{impact}/toggle', [ImpactMetricController::class, 'toggleApproval'])->name('dashboard.impact.toggle');
     Route::resource('dashboard/donations', DonationController::class)->names('dashboard.donations')->except(['show']);
     Route::patch('dashboard/donations/{donation}/verify', [DonationController::class, 'verify'])->name('dashboard.donations.verify');
+
+    Route::resource('dashboard/users', UserController::class)
+        ->names('dashboard.users')
+        ->only(['index', 'create', 'store', 'destroy'])
+        ->middleware('role:'.User::ROLE_SUPER_ADMIN);
 
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
 });

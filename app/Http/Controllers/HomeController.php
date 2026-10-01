@@ -45,7 +45,7 @@ class HomeController extends Controller
             'stories' => Story::published()->take(4)->get(),
             'featuredCase' => SponsorshipCase::available()->longestWaiting()->with('region')->first(),
             'sponsorshipFrom' => SponsorshipCase::available()->min('monthly_amount'),
-            'giftDesigns' => config('bader.gift_designs'),
+            'giftDesigns' => SiteSettings::giftDesigns(),
             'goldPricePerGram' => SiteSettings::goldPricePerGram(),
         ]);
     }

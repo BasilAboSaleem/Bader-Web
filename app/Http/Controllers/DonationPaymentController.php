@@ -9,6 +9,7 @@ use App\Models\FormSubmission;
 use App\Models\Program;
 use App\Models\SponsorshipCase;
 use App\Services\StripePaymentService;
+use App\Support\SiteSettings;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -48,7 +49,7 @@ class DonationPaymentController extends Controller
             'gift_recipient_contact' => ['nullable', 'string', 'max:255'],
             'gift_sender_name' => ['nullable', 'string', 'max:255'],
             'gift_message' => ['nullable', 'string', 'max:500'],
-            'gift_card_design' => ['nullable', 'string', Rule::in(array_keys(config('bader.gift_designs')))],
+            'gift_card_design' => ['nullable', 'string', Rule::in(array_keys(SiteSettings::giftDesigns()))],
         ]);
 
         $target = $this->resolveTarget($validated['target_type'], $validated['target_id'] ?? null);
@@ -81,7 +82,7 @@ class DonationPaymentController extends Controller
             'gift_recipient_contact' => $isGift ? ($validated['gift_recipient_contact'] ?? null) : null,
             'gift_sender_name' => $isGift ? ($validated['gift_sender_name'] ?? null) : null,
             'gift_message' => $isGift ? ($validated['gift_message'] ?? null) : null,
-            'gift_card_design' => $isGift ? ($validated['gift_card_design'] ?? array_key_first(config('bader.gift_designs'))) : null,
+            'gift_card_design' => $isGift ? ($validated['gift_card_design'] ?? array_key_first(SiteSettings::giftDesigns())) : null,
         ]);
 
         if ($isStripe) {

@@ -30,6 +30,20 @@ class DashboardController extends Controller
                 'group' => 'content',
             ],
             [
+                'key' => 'faqs',
+                'route' => 'dashboard.faqs.index',
+                'stage' => 6,
+                'status' => 'dashboard.status_active',
+                'group' => 'content',
+            ],
+            [
+                'key' => 'site_texts',
+                'route' => 'dashboard.site-texts.edit',
+                'stage' => 6,
+                'status' => 'dashboard.status_active',
+                'group' => 'content',
+            ],
+            [
                 'key' => 'programs',
                 'route' => 'dashboard.programs.index',
                 'stage' => 7,
@@ -86,6 +100,16 @@ class DashboardController extends Controller
                 'group' => 'donations',
             ],
         ];
+
+        if (auth()->user()?->isSuperAdmin()) {
+            $modules[] = [
+                'key' => 'users',
+                'route' => 'dashboard.users.index',
+                'stage' => 8,
+                'status' => 'dashboard.status_active',
+                'group' => 'settings',
+            ];
+        }
 
         $counts = [
             'unread_inbox' => FormSubmission::where('status', 'unread')->count(),

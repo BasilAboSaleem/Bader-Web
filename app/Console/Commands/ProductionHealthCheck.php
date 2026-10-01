@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -31,6 +32,8 @@ class ProductionHealthCheck extends Command
         $this->checkCache();
         $this->checkMailConfig();
         $this->checkStorageLink();
+        $this->checkWritableDirectories();
+        $this->checkSuperAdmin();
         $this->checkLocaleFiles();
 
         if ($this->option('json')) {
@@ -135,6 +138,35 @@ class ProductionHealthCheck extends Command
             'Storage link',
             $exists,
             $exists ? 'public/storage symlink exists' : 'Missing — run php artisan storage:link',
+        );
+    }
+
+    private function checkWritableDirectories(): void
+    {
+        $notWritable = array_values(array_filter(
+            [storage_path('app/public'), storage_path('framework/views'), storage_path('logs'), base_path('bootstrap/cache')],
+            fn (string $directory): bool => ! is_writable($directory),
+        ));
+
+        $this->record(
+            'Writable directories',
+            $notWritable === [],
+            $notWritable === [] ? 'storage and bootstrap/cache are writable' : 'Not writable: '.implode(', ', $notWritable),
+        );
+    }
+
+    private function checkSuperAdmin(): void
+    {
+        try {
+            $exists = User::where('role', User::ROLE_SUPER_ADMIN)->exists();
+        } catch (Throwable) {
+            $exists = false;
+        }
+
+        $this->record(
+            'Super admin account',
+            $exists,
+            $exists ? 'Exists' : 'Missing — set SUPER_ADMIN_* in .env and run php artisan db:seed --class=SuperAdminSeeder --force',
         );
     }
 

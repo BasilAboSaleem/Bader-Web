@@ -113,6 +113,16 @@
                   'status' => 'dashboard.status_active',
                 ],
                 [
+                  'key' => 'faqs',
+                  'route' => 'dashboard.faqs.index',
+                  'status' => 'dashboard.status_active',
+                ],
+                [
+                  'key' => 'site_texts',
+                  'route' => 'dashboard.site-texts.edit',
+                  'status' => 'dashboard.status_active',
+                ],
+                [
                   'key' => 'programs',
                   'route' => 'dashboard.programs.index',
                   'status' => 'dashboard.status_active',
@@ -163,6 +173,10 @@
                   'status' => 'dashboard.status_active',
                 ],
               ];
+
+              if (auth()->user()?->isSuperAdmin() && ! collect($navModules)->contains('key', 'users')) {
+                $navModules[] = ['key' => 'users', 'route' => 'dashboard.users.index', 'status' => 'dashboard.status_active'];
+              }
             @endphp
 
             <ul class="flex flex-col gap-1">
@@ -190,6 +204,21 @@
                             <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                          @elseif ($module['key'] === 'faqs')
+                            <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                          @elseif ($module['key'] === 'users')
+                            <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                            </svg>
+                          @elseif ($module['key'] === 'site_texts')
+                            <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
                             </svg>
                           @elseif ($module['key'] === 'programs')
                             <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

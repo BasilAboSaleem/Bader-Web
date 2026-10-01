@@ -22,6 +22,8 @@
         'volunteer.commitment' => 'shield',
     ];
     $hasForm = in_array($key, ['partners', 'volunteer'], true);
+    $presidentText = $key === 'about' ? SiteSettings::optionalInstitutional('about', 'president_speech', 'text') : null;
+    $visionText = $key === 'about' ? SiteSettings::optionalInstitutional('about', 'vision', 'text') : null;
     $approvedMetrics = $key === 'impact' ? ImpactMetric::approved()->orderBy('order')->get() : collect();
     $exploreLinks = [
         ['route' => 'programs', 'text' => 'about_page.explore_programs'],
@@ -105,6 +107,30 @@
                     </article>
                 @endforeach
             </div>
+
+            @if ($presidentText || $visionText)
+                <div @class(['mt-10 grid gap-5', 'lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]' => $presidentText && $visionText])>
+                    @if ($visionText)
+                        <article class="relative overflow-hidden rounded-3xl bg-teal-950 p-8 text-white sm:p-10" data-reveal>
+                            <span class="pointer-events-none absolute -end-16 -top-16 h-56 w-56 rounded-full bg-gold-500/15 blur-3xl" aria-hidden="true"></span>
+                            <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gold-500 text-teal-950">
+                                <x-bader.icon name="eye" class="h-6 w-6" />
+                            </span>
+                            <h2 class="mt-6 text-2xl font-extrabold">{{ SiteSettings::optionalInstitutional('about', 'vision', 'title') ?? __('about_page.vision') }}</h2>
+                            <p class="mt-4 whitespace-pre-line text-lg leading-9 text-white/80">{{ $visionText }}</p>
+                        </article>
+                    @endif
+
+                    @if ($presidentText)
+                        <figure class="surface-card relative p-8 sm:p-10" data-reveal style="animation-delay: 80ms">
+                            <span class="absolute end-8 top-4 font-serif text-8xl leading-none text-gold-500/40" aria-hidden="true">&rdquo;</span>
+                            <p class="kicker">{{ __('about_page.president_kicker') }}</p>
+                            <h2 class="mt-2 text-2xl font-extrabold text-ink-900">{{ SiteSettings::optionalInstitutional('about', 'president_speech', 'title') ?? __('about_page.president_speech') }}</h2>
+                            <blockquote class="mt-5 whitespace-pre-line border-s-4 border-gold-500 ps-5 text-base leading-8 text-muted">{{ $presidentText }}</blockquote>
+                        </figure>
+                    @endif
+                </div>
+            @endif
         </div>
     </section>
 

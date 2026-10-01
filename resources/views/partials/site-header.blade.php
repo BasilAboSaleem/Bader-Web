@@ -50,7 +50,11 @@
             </span>
         </a>
 
-        <nav class="hidden h-full items-stretch gap-0.5 ms-4 lg:flex" aria-label="{{ __('header.main_nav') }}">
+        <nav class="hidden h-full items-stretch gap-0 ms-1 lg:flex xl:gap-0.5 xl:ms-4" aria-label="{{ __('header.main_nav') }}">
+            <div class="flex items-center">
+                <a href="{{ route('home') }}" @class(['nav-link', 'is-current' => request()->routeIs('home')]) @if (request()->routeIs('home')) aria-current="page" @endif>{{ __('nav.home') }}</a>
+            </div>
+
             @foreach ($megaMenus as $menuKey => $menu)
                 <div data-mega class="flex items-center">
                     <button

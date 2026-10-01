@@ -10,6 +10,7 @@
         ['route' => 'gift', 'key' => 'nav.gift'],
         ['route' => 'zakat', 'key' => 'nav.zakat'],
     ];
+    $socialLinks = SiteSettings::socialLinks();
 @endphp
 
 <footer class="site-footer relative overflow-hidden bg-teal-950 text-sand-100/80">
@@ -62,6 +63,19 @@
                     <a href="tel:{{ SiteSettings::contactPhone() }}" dir="ltr" class="transition-colors hover:text-gold-400">{{ SiteSettings::contactPhone() }}</a>
                 </li>
             </ul>
+            @if ($socialLinks !== [])
+                <ul class="flex flex-wrap gap-2" aria-label="{{ __('footer.follow_us') }}">
+                    @foreach ($socialLinks as $platform => $url)
+                        <li>
+                            <a href="{{ $url }}" target="_blank" rel="noopener" title="{{ __('footer.social.'.$platform) }}"
+                                class="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-sand-100/80 transition hover:-translate-y-0.5 hover:border-gold-500/40 hover:bg-gold-500 hover:text-teal-950">
+                                <x-bader.icon :name="$platform" class="h-4 w-4" />
+                                <span class="sr-only">{{ __('footer.social.'.$platform) }}</span>
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
         </div>
 
         <div>

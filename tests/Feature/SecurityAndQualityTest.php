@@ -164,15 +164,51 @@ class SecurityAndQualityTest extends TestCase
 
     // ── HTTP Caching headers (CachePublicResponse) ─────────────────────────────
 
-    public function test_public_homepage_returns_cache_control_header_for_guest(): void
+    public function test_public_pages_must_be_revalidated_so_locale_and_csrf_are_never_stale(): void
     {
         $response = $this->get(route('home'));
 
         $response->assertOk();
         $cacheControl = $response->headers->get('Cache-Control');
         $this->assertNotNull($cacheControl);
-        $this->assertStringContainsString('public', $cacheControl);
-        $this->assertStringContainsString('max-age', $cacheControl);
+        $this->assertStringContainsString('private', $cacheControl);
+        $this->assertStringContainsString('must-revalidate', $cacheControl);
+        $this->assertStringNotContainsString('public', $cacheControl);
+    }
+
+    public function test_unchanged_public_page_returns_not_modified_for_matching_etag(): void
+    {
+        $etag = $this->get(route('about'))->headers->get('ETag');
+
+        $this->withHeaders(['If-None-Match' => $etag])
+            ->get(route('about'))
+            ->assertStatus(304);
+    }
+
+    public function test_web_responses_send_security_headers(): void
+    {
+        $this->get(route('home'))
+            ->assertHeader('X-Content-Type-Options', 'nosniff')
+            ->assertHeader('X-Frame-Options', 'SAMEORIGIN')
+            ->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    }
+
+    public function test_https_is_detected_behind_the_hosting_proxy(): void
+    {
+        $this->withHeaders(['X-Forwarded-Proto' => 'https'])
+            ->get(route('home'))
+            ->assertOk()
+            ->assertSee(str_replace('http://', 'https://', url('/about')), false);
+    }
+
+    public function test_login_is_rate_limited_after_repeated_failures(): void
+    {
+        foreach (range(1, 5) as $attempt) {
+            $this->post(route('login.store'), ['email' => 'attacker@example.com', 'password' => 'wrong-password']);
+        }
+
+        $this->post(route('login.store'), ['email' => 'attacker@example.com', 'password' => 'wrong-password'])
+            ->assertStatus(429);
     }
 
     public function test_authenticated_user_does_not_receive_public_cache_header(): void

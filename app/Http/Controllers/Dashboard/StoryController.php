@@ -43,7 +43,7 @@ class StoryController extends Controller
             'category_en' => ['nullable', 'string', 'max:100'],
             'published_at' => ['nullable', 'date'],
             'image' => ['nullable', 'string', 'max:255'],
-            'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg', 'max:5120'],
+            'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
             'is_featured' => ['nullable', 'boolean'],
             'status' => ['required', 'in:draft,under_review,published'],
         ]);
@@ -90,7 +90,7 @@ class StoryController extends Controller
             'category_en' => ['nullable', 'string', 'max:100'],
             'published_at' => ['nullable', 'date'],
             'image' => ['nullable', 'string', 'max:255'],
-            'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg', 'max:5120'],
+            'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
             'is_featured' => ['nullable', 'boolean'],
             'status' => ['required', 'in:draft,under_review,published'],
         ]);

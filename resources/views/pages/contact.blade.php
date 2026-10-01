@@ -3,7 +3,7 @@
 @use('App\Support\SiteSettings')
 
 @section('title', __('page.contact.title').' — '.__('brand.name'))
-@section('meta_description', __('page.contact.intro'))
+@section('meta_description', SiteSettings::pageIntro('contact'))
 
 @php
     $whatsappNumber = SiteSettings::whatsappNumber();
@@ -47,7 +47,7 @@
     <x-bader.page-hero
         :kicker="__('page.contact.kicker')"
         :title="__('page.contact.title')"
-        :intro="__('page.contact.intro')"
+        :intro="SiteSettings::pageIntro('contact')"
     />
 
     <section class="band-base section-y">
