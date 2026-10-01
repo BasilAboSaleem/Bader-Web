@@ -165,10 +165,10 @@
   --color-forest-600: #31834a;
   --color-forest-500: #4d9a5e;
   --color-forest-400: #75b276;
-  --color-gold-500: #d2a84a;
-  --color-gold-400: #e0bb61;
-  --color-gold-300: #ecd28c;
-  --color-gold-600: #b88d2e;
+  --color-gold-500: #d2d63e;
+  --color-gold-400: #e1e56b;
+  --color-gold-300: #eef0aa;
+  --color-gold-600: #a8a84a;
   --color-sand-50: #f7f8ef;
   --color-sand-100: #eef2df;
   --color-sand-200: #dfe6cc;
@@ -372,13 +372,13 @@
     border: 1px solid var(--color-gold-500);
     background-color: var(--color-gold-500);
     color: var(--color-teal-950);
-    box-shadow: 0 8px 20px rgb(210 168 74 / 0.18);
+    box-shadow: 0 6px 16px rgb(210 214 62 / 0.1) !important;
   }
 
   .bader-public .btn-primary:hover {
     background-color: var(--color-gold-400);
     border-color: var(--color-gold-400);
-    box-shadow: 0 10px 24px rgb(210 168 74 / 0.24);
+    box-shadow: 0 8px 18px rgb(210 214 62 / 0.14) !important;
   }
 
   .bader-public .btn-secondary {
