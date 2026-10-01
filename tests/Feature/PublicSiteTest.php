@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Story;
 use App\Support\PublicNavigation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -101,18 +102,34 @@ class PublicSiteTest extends TestCase
             ->assertSee(__('nav.donate'), false);
     }
 
-    public function test_urgent_bar_stays_hidden_until_enabled(): void
+    public function test_single_news_story_renders_with_details_and_related_content(): void
     {
-        $this->get(route('home'))
-            ->assertDontSee('winter-appeal-test', false);
-
-        config([
-            'bader.urgent.enabled' => true,
-            'bader.urgent.text' => 'winter-appeal-test',
-            'bader.urgent.url' => '/donate',
+        $story = Story::create([
+            'key' => 'gaza-water-distribution',
+            'title_ar' => 'توزيع مياه صالحة للشرب في شمال غزة',
+            'title_en' => 'Clean Water Distribution in North Gaza',
+            'excerpt_ar' => 'ملخص خبر توزيع المياه.',
+            'excerpt_en' => 'Water distribution summary.',
+            'content_ar' => 'تفاصيل موسعة حول سير عمليات التوزيع للمواطنين والنازحين في قطاع غزة.',
+            'content_en' => 'Extended details regarding distribution operations to citizens in Gaza.',
+            'category_ar' => 'إغاثة مائية',
+            'category_en' => 'Water Relief',
+            'published_at' => now()->toDateString(),
+            'status' => 'published',
         ]);
 
-        $this->get(route('home'))
-            ->assertSee('winter-appeal-test', false);
+        $this->get(route('news.show', $story->key))
+            ->assertOk()
+            ->assertSee('توزيع مياه صالحة للشرب في شمال غزة', false)
+            ->assertSee('ملخص خبر توزيع المياه.', false)
+            ->assertSee('تفاصيل موسعة حول سير عمليات التوزيع', false)
+            ->assertSee('إغاثة مائية', false);
+
+        // Test in English
+        $this->withSession(['locale' => 'en'])
+            ->get(route('news.show', $story->key))
+            ->assertOk()
+            ->assertSee('Clean Water Distribution in North Gaza', false)
+            ->assertSee('Extended details regarding distribution operations', false);
     }
 }

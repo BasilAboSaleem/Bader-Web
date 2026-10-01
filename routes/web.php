@@ -31,6 +31,9 @@ Route::middleware('cache.public')->group(function () {
     Route::get('/campaigns', [PublicPageController::class, 'campaigns'])->name('campaigns');
     Route::get('/impact', [PublicPageController::class, 'impact'])->name('impact');
     Route::get('/news', [PublicPageController::class, 'news'])->name('news');
+    Route::get('/news/{key}', [PublicPageController::class, 'newsShow'])->name('news.show');
+    Route::get('/facilities/{key}', [PublicPageController::class, 'facilityShow'])->name('facilities.show');
+    Route::get('/facilities/{key}', [PublicPageController::class, 'facilityShow'])->name('facilities.show');
     Route::get('/sponsorship', [PublicPageController::class, 'sponsorship'])->name('sponsorship');
     Route::get('/donate', [PublicPageController::class, 'donate'])->name('donate');
     Route::get('/partners', [PublicPageController::class, 'partners'])->name('partners');

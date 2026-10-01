@@ -137,7 +137,7 @@ class DashboardSettingsTest extends TestCase
 
         $response = $this->actingAs($user)
             ->put(route('dashboard.pages.update'), [
-                'inst_about_intro_ar' => 'مؤسسة بادر الإنسانية - مقدمة محدثة ومخصصة للتعريف بالجمعية.',
+                'inst_about_intro_ar' => 'مؤسسة بادر الإنسانية - مقدمة محدثة ومخصصة للتعريف بالمؤسسة.',
                 'inst_about_mission_title_ar' => 'رسالتنا الإنسانية المحدثة',
                 'inst_about_mission_text_ar' => 'نص الرسالة المحدث من لوحة التحكم.',
                 'faq_identity_q_ar' => 'سؤال مخصص ومحدث عن هوية مؤسسة بادر؟',
@@ -150,7 +150,7 @@ class DashboardSettingsTest extends TestCase
         // Check Public About page
         $this->get(route('about'))
             ->assertOk()
-            ->assertSee('مؤسسة بادر الإنسانية - مقدمة محدثة ومخصصة للتعريف بالجمعية.', false)
+            ->assertSee('مؤسسة بادر الإنسانية - مقدمة محدثة ومخصصة للتعريف بالمؤسسة.', false)
             ->assertSee('رسالتنا الإنسانية المحدثة', false)
             ->assertSee('نص الرسالة المحدث من لوحة التحكم.', false);
 

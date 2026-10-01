@@ -43,9 +43,15 @@ class StoryController extends Controller
             'category_en' => ['nullable', 'string', 'max:100'],
             'published_at' => ['nullable', 'date'],
             'image' => ['nullable', 'string', 'max:255'],
+            'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg', 'max:5120'],
             'is_featured' => ['nullable', 'boolean'],
             'status' => ['required', 'in:draft,under_review,published'],
         ]);
+
+        if ($request->hasFile('image_file')) {
+            $path = $request->file('image_file')->store('stories', 'public');
+            $validated['image'] = 'storage/'.$path;
+        }
 
         if (empty($validated['key'])) {
             $validated['key'] = Str::slug($validated['title_en'] ?? $validated['title_ar']) ?: 'story-'.time();
@@ -53,6 +59,8 @@ class StoryController extends Controller
 
         $validated['is_featured'] = $request->boolean('is_featured');
         $validated['published_at'] = $validated['published_at'] ?? now()->toDateString();
+
+        unset($validated['image_file']);
 
         Story::create($validated);
 
@@ -82,11 +90,19 @@ class StoryController extends Controller
             'category_en' => ['nullable', 'string', 'max:100'],
             'published_at' => ['nullable', 'date'],
             'image' => ['nullable', 'string', 'max:255'],
+            'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg', 'max:5120'],
             'is_featured' => ['nullable', 'boolean'],
             'status' => ['required', 'in:draft,under_review,published'],
         ]);
 
+        if ($request->hasFile('image_file')) {
+            $path = $request->file('image_file')->store('stories', 'public');
+            $validated['image'] = 'storage/'.$path;
+        }
+
         $validated['is_featured'] = $request->boolean('is_featured');
+
+        unset($validated['image_file']);
 
         $story->update($validated);
 

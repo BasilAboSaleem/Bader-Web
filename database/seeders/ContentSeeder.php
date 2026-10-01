@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Campaign;
 use App\Models\Facility;
+use App\Models\ImpactMetric;
 use App\Models\MediaAsset;
 use App\Models\Program;
 use App\Models\Story;
@@ -83,7 +84,7 @@ class ContentSeeder extends Seeder
                 'key' => 'quran_honor',
                 'title_ar' => 'تكريم حفظة القرآن',
                 'title_en' => 'Honoring Quran Memorizers',
-                'excerpt_ar' => 'جمعية بادر تكرّم المئات من حفظة كتاب الله من طلبة مدرسة بادر التعليمية.',
+                'excerpt_ar' => 'مؤسسة بادر تكرّم المئات من حفظة كتاب الله من طلبة مدرسة بادر التعليمية.',
                 'excerpt_en' => 'Bader Foundation honors hundreds of students for Quran memorization.',
                 'category_ar' => 'تعليم',
                 'category_en' => 'Education',
@@ -95,7 +96,7 @@ class ContentSeeder extends Seeder
                 'key' => 'deir_balah',
                 'title_ar' => 'من قلب دير البلح',
                 'title_en' => 'From the Heart of Deir al-Balah',
-                'excerpt_ar' => 'جمعية بادر الإنسانية تزور بلدية دير البلح لتقديم التهنئة للمجلس المنتخب.',
+                'excerpt_ar' => 'مؤسسة بادر الإنسانية تزور بلدية دير البلح لتقديم التهنئة للمجلس المنتخب.',
                 'excerpt_en' => 'Bader Humanitarian visits Deir al-Balah municipality to congratulate the elected council.',
                 'category_ar' => 'ميدان',
                 'category_en' => 'Field',
@@ -190,7 +191,7 @@ class ContentSeeder extends Seeder
         ];
 
         foreach ($metrics as $metric) {
-            \App\Models\ImpactMetric::updateOrCreate(['key' => $metric['key']], $metric);
+            ImpactMetric::updateOrCreate(['key' => $metric['key']], $metric);
         }
     }
 }

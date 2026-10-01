@@ -237,10 +237,27 @@ class SiteSettings
         $loc = $locale ?? app()->getLocale();
         $custom = Setting::get("faq_{$key}_a_{$loc}");
 
+        return __("faq.{$key}.answer", [], $loc);
+    }
+
+    /**
+     * Get dynamic site content text with key and fallback.
+     */
+    public static function content(string $key, ?string $locale = null): string
+    {
+        $loc = $locale ?? app()->getLocale();
+        $cleanKey = str_replace('.', '_', $key);
+        $custom = Setting::get("content_{$cleanKey}_{$loc}");
+
         if (! empty($custom)) {
             return $custom;
         }
 
-        return __("faq.{$key}.answer", [], $loc);
+        $translated = __($key, [], $loc);
+        if ($translated !== $key) {
+            return $translated;
+        }
+
+        return __($key);
     }
 }

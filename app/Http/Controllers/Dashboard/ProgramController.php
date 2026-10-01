@@ -34,14 +34,32 @@ class ProgramController extends Controller
             'key' => ['nullable', 'string', 'max:100', 'unique:programs,key'],
             'description_ar' => ['nullable', 'string'],
             'description_en' => ['nullable', 'string'],
+            'category_ar' => ['nullable', 'string', 'max:100'],
+            'category_en' => ['nullable', 'string', 'max:100'],
+            'badge_ar' => ['nullable', 'string', 'max:100'],
+            'badge_en' => ['nullable', 'string', 'max:100'],
+            'highlight_ar' => ['nullable', 'string', 'max:255'],
+            'highlight_en' => ['nullable', 'string', 'max:255'],
+            'is_flagship' => ['nullable', 'boolean'],
             'icon' => ['nullable', 'string', 'max:100'],
+            'image' => ['nullable', 'string', 'max:255'],
+            'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg', 'max:5120'],
             'order' => ['nullable', 'integer'],
             'status' => ['required', 'in:draft,under_review,published'],
         ]);
 
+        if ($request->hasFile('image_file')) {
+            $path = $request->file('image_file')->store('programs', 'public');
+            $validated['image'] = 'storage/'.$path;
+        }
+
         if (empty($validated['key'])) {
             $validated['key'] = Str::slug($validated['title_en'] ?? $validated['title_ar']) ?: 'prog-'.time();
         }
+
+        $validated['is_flagship'] = $request->boolean('is_flagship');
+
+        unset($validated['image_file']);
 
         Program::create($validated);
 
@@ -65,10 +83,28 @@ class ProgramController extends Controller
             'key' => ['nullable', 'string', 'max:100', 'unique:programs,key,'.$program->id],
             'description_ar' => ['nullable', 'string'],
             'description_en' => ['nullable', 'string'],
+            'category_ar' => ['nullable', 'string', 'max:100'],
+            'category_en' => ['nullable', 'string', 'max:100'],
+            'badge_ar' => ['nullable', 'string', 'max:100'],
+            'badge_en' => ['nullable', 'string', 'max:100'],
+            'highlight_ar' => ['nullable', 'string', 'max:255'],
+            'highlight_en' => ['nullable', 'string', 'max:255'],
+            'is_flagship' => ['nullable', 'boolean'],
             'icon' => ['nullable', 'string', 'max:100'],
+            'image' => ['nullable', 'string', 'max:255'],
+            'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg', 'max:5120'],
             'order' => ['nullable', 'integer'],
             'status' => ['required', 'in:draft,under_review,published'],
         ]);
+
+        if ($request->hasFile('image_file')) {
+            $path = $request->file('image_file')->store('programs', 'public');
+            $validated['image'] = 'storage/'.$path;
+        }
+
+        $validated['is_flagship'] = $request->boolean('is_flagship');
+
+        unset($validated['image_file']);
 
         $program->update($validated);
 

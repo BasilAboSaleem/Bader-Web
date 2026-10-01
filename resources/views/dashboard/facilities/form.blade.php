@@ -33,6 +33,7 @@
   <form
     action="{{ $isEdit ? route('dashboard.facilities.update', $facility) : route('dashboard.facilities.store') }}"
     method="POST"
+    enctype="multipart/form-data"
     class="space-y-6"
   >
     @csrf
@@ -83,13 +84,23 @@
         </div>
 
         <div>
-          <label for="image" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">
-            {{ __('dashboard.field.image_url') }}
+          <label for="image_file" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">
+            {{ __('dashboard.field.image') }} (رفع من الجهاز)
           </label>
-          <input type="text" id="image" name="image" value="{{ old('image', $facility->image) }}" dir="ltr"
-            placeholder="https://..."
-            class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-          @error('image') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+          <div class="space-y-2">
+            @if ($facility->image)
+              <div class="flex items-center gap-3 p-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
+                <img src="{{ asset($facility->image) }}" alt="Preview" class="h-12 w-16 object-cover rounded-md border border-gray-300 dark:border-gray-600">
+                <span class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-xs">{{ $facility->image }}</span>
+              </div>
+            @endif
+            <input type="file" id="image_file" name="image_file" accept="image/*"
+              class="w-full text-theme-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 dark:file:bg-brand-500/10 dark:file:text-brand-400 text-gray-500">
+            @error('image_file') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+            <input type="text" id="image" name="image" value="{{ old('image', $facility->image) }}" dir="ltr"
+              placeholder="أو رابط مسار الصورة..."
+              class="h-9 w-full rounded-lg border border-gray-200 bg-transparent px-3 text-xs text-gray-700 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/80">
+          </div>
         </div>
 
         <div>
@@ -148,6 +159,176 @@
       </div>
     </div>
 
+    {{-- Extended Content --}}
+    <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
+      <div class="mb-5 border-b border-gray-100 pb-4 dark:border-gray-800">
+        <h2 class="text-base font-semibold text-gray-900 dark:text-white">المحتوى التفصيلي (صفحة الأصل)</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">يظهر في صفحة تفاصيل الأصل المخصصة للزوار</p>
+      </div>
+      <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+        <div>
+          <label for="content_ar" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">المحتوى التفصيلي (عربي)</label>
+          <textarea id="content_ar" name="content_ar" rows="8"
+            class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">{{ old('content_ar', $facility->content_ar) }}</textarea>
+          @error('content_ar') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+        </div>
+        <div>
+          <label for="content_en" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">Detailed Content (English)</label>
+          <textarea id="content_en" name="content_en" rows="8" dir="ltr"
+            class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">{{ old('content_en', $facility->content_en) }}</textarea>
+          @error('content_en') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+        </div>
+      </div>
+    </div>
+
+    {{-- Extra Details --}}
+    <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
+      <div class="mb-5 border-b border-gray-100 pb-4 dark:border-gray-800">
+        <h2 class="text-base font-semibold text-gray-900 dark:text-white">تفاصيل إضافية</h2>
+      </div>
+      <div class="grid grid-cols-1 gap-5 md:grid-cols-3">
+        <div>
+          <label for="established_year" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">سنة التأسيس / الإنشاء</label>
+          <input type="text" id="established_year" name="established_year" value="{{ old('established_year', $facility->established_year) }}" placeholder="مثال: 2022"
+            class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+          @error('established_year') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+        </div>
+        <div>
+          <label for="capacity_ar" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">الطاقة الاستيعابية (عربي)</label>
+          <input type="text" id="capacity_ar" name="capacity_ar" value="{{ old('capacity_ar', $facility->capacity_ar) }}" placeholder="مثال: 500 مستفيد"
+            class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+          @error('capacity_ar') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+        </div>
+        <div>
+          <label for="capacity_en" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">Capacity (English)</label>
+          <input type="text" id="capacity_en" name="capacity_en" value="{{ old('capacity_en', $facility->capacity_en) }}" placeholder="e.g. 500 beneficiaries" dir="ltr"
+            class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+          @error('capacity_en') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+        </div>
+      </div>
+
+      {{-- Video URL --}}
+      <div class="mt-5">
+        <label for="video_url" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">رابط الفيديو (YouTube أو مباشر)</label>
+        <input type="url" id="video_url" name="video_url" value="{{ old('video_url', $facility->video_url) }}" dir="ltr" placeholder="https://www.youtube.com/watch?v=..."
+          class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+        @error('video_url') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+      </div>
+    </div>
+
+    {{-- Gallery --}}
+    <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
+      <div class="mb-5 border-b border-gray-100 pb-4 dark:border-gray-800">
+        <h2 class="text-base font-semibold text-gray-900 dark:text-white">معرض الصور</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">أضف مسارات الصور مفصولة بفاصلة، أو رفع صور متعددة</p>
+      </div>
+
+      {{-- Existing Gallery Preview --}}
+      @if ($facility->gallery && count($facility->gallery) > 0)
+        <div class="mb-4 flex flex-wrap gap-2">
+          @foreach ($facility->gallery as $photo)
+            <img src="{{ asset($photo) }}" alt="" class="h-16 w-20 object-cover rounded-lg border border-gray-200 dark:border-gray-700">
+          @endforeach
+        </div>
+      @endif
+
+      <div>
+        <label for="gallery_paths" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">مسارات الصور (مفصولة بفاصلة)</label>
+        <textarea id="gallery_paths" name="gallery_paths" rows="3" dir="ltr"
+          placeholder="storage/facilities/photo1.jpg, storage/facilities/photo2.jpg"
+          class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">{{ old('gallery_paths', $facility->gallery ? implode(', ', $facility->gallery) : '') }}</textarea>
+        <p class="mt-1 text-[11px] text-gray-400">أو ارفع صور جديدة:</p>
+        <input type="file" id="gallery_files" name="gallery_files[]" accept="image/*" multiple
+          class="mt-1 w-full text-theme-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 dark:file:bg-brand-500/10 dark:file:text-brand-400 text-gray-500">
+        @error('gallery_files.*') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+      </div>
+    </div>
+
+    {{-- Extended Content --}}
+    <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
+      <div class="mb-5 border-b border-gray-100 pb-4 dark:border-gray-800">
+        <h2 class="text-base font-semibold text-gray-900 dark:text-white">المحتوى التفصيلي (صفحة الأصل)</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">يظهر في صفحة تفاصيل الأصل المخصصة للزوار</p>
+      </div>
+      <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+        <div>
+          <label for="content_ar" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">المحتوى التفصيلي (عربي)</label>
+          <textarea id="content_ar" name="content_ar" rows="8"
+            class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">{{ old('content_ar', $facility->content_ar) }}</textarea>
+          @error('content_ar') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+        </div>
+        <div>
+          <label for="content_en" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">Detailed Content (English)</label>
+          <textarea id="content_en" name="content_en" rows="8" dir="ltr"
+            class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">{{ old('content_en', $facility->content_en) }}</textarea>
+          @error('content_en') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+        </div>
+      </div>
+    </div>
+
+    {{-- Extra Details --}}
+    <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
+      <div class="mb-5 border-b border-gray-100 pb-4 dark:border-gray-800">
+        <h2 class="text-base font-semibold text-gray-900 dark:text-white">تفاصيل إضافية</h2>
+      </div>
+      <div class="grid grid-cols-1 gap-5 md:grid-cols-3">
+        <div>
+          <label for="established_year" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">سنة التأسيس / الإنشاء</label>
+          <input type="text" id="established_year" name="established_year" value="{{ old('established_year', $facility->established_year) }}" placeholder="مثال: 2022"
+            class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+          @error('established_year') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+        </div>
+        <div>
+          <label for="capacity_ar" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">الطاقة الاستيعابية (عربي)</label>
+          <input type="text" id="capacity_ar" name="capacity_ar" value="{{ old('capacity_ar', $facility->capacity_ar) }}" placeholder="مثال: 500 مستفيد"
+            class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+          @error('capacity_ar') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+        </div>
+        <div>
+          <label for="capacity_en" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">Capacity (English)</label>
+          <input type="text" id="capacity_en" name="capacity_en" value="{{ old('capacity_en', $facility->capacity_en) }}" placeholder="e.g. 500 beneficiaries" dir="ltr"
+            class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+          @error('capacity_en') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+        </div>
+      </div>
+
+      {{-- Video URL --}}
+      <div class="mt-5">
+        <label for="video_url" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">رابط الفيديو (YouTube أو مباشر)</label>
+        <input type="url" id="video_url" name="video_url" value="{{ old('video_url', $facility->video_url) }}" dir="ltr" placeholder="https://www.youtube.com/watch?v=..."
+          class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+        @error('video_url') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+      </div>
+    </div>
+
+    {{-- Gallery --}}
+    <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
+      <div class="mb-5 border-b border-gray-100 pb-4 dark:border-gray-800">
+        <h2 class="text-base font-semibold text-gray-900 dark:text-white">معرض الصور</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">أضف مسارات الصور مفصولة بفاصلة، أو رفع صور متعددة</p>
+      </div>
+
+      {{-- Existing Gallery Preview --}}
+      @if ($facility->gallery && count($facility->gallery) > 0)
+        <div class="mb-4 flex flex-wrap gap-2">
+          @foreach ($facility->gallery as $photo)
+            <img src="{{ asset($photo) }}" alt="" class="h-16 w-20 object-cover rounded-lg border border-gray-200 dark:border-gray-700">
+          @endforeach
+        </div>
+      @endif
+
+      <div>
+        <label for="gallery_paths" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">مسارات الصور (مفصولة بفاصلة)</label>
+        <textarea id="gallery_paths" name="gallery_paths" rows="3" dir="ltr"
+          placeholder="storage/facilities/photo1.jpg, storage/facilities/photo2.jpg"
+          class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">{{ old('gallery_paths', $facility->gallery ? implode(', ', $facility->gallery) : '') }}</textarea>
+        <p class="mt-1 text-[11px] text-gray-400">أو ارفع صور جديدة:</p>
+        <input type="file" id="gallery_files" name="gallery_files[]" accept="image/*" multiple
+          class="mt-1 w-full text-theme-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 dark:file:bg-brand-500/10 dark:file:text-brand-400 text-gray-500">
+        @error('gallery_files.*') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+      </div>
+    </div>
+
     {{-- Form Actions --}}
     <div class="flex items-center justify-end gap-3 pt-2">
       <a href="{{ route('dashboard.facilities.index') }}"
@@ -166,3 +347,5 @@
   </form>
 </div>
 @endsection
+
+

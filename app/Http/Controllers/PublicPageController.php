@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Campaign;
+use App\Models\Facility;
+use App\Models\Program;
+use App\Models\Story;
 use Illuminate\View\View;
 
 class PublicPageController extends Controller
@@ -17,22 +21,28 @@ class PublicPageController extends Controller
 
     public function programs(): View
     {
-        return view('pages.programs', [
-            'programs' => [
+        $programs = Program::published()->get();
+        if ($programs->isEmpty()) {
+            $programs = [
                 'water', 'food', 'shelter', 'winter', 'health', 'education',
                 'social_protection', 'economic_empowerment', 'community_partnerships', 'zakat', 'sacrifices',
-            ],
-        ]);
+            ];
+        }
+
+        return view('pages.programs', compact('programs'));
     }
 
     public function campaigns(): View
     {
-        return view('pages.campaigns', [
-            'campaigns' => [
+        $campaigns = Campaign::published()->get();
+        if ($campaigns->isEmpty()) {
+            $campaigns = [
                 ['key' => 'water', 'goal' => '120,000', 'currency' => 'campaign.currency'],
                 ['key' => 'education', 'goal' => null, 'currency' => null],
-            ],
-        ]);
+            ];
+        }
+
+        return view('pages.campaigns', compact('campaigns'));
     }
 
     public function impact(): View
@@ -46,13 +56,67 @@ class PublicPageController extends Controller
 
     public function news(): View
     {
-        return view('pages.news', [
-            'stories' => [
-                ['key' => 'quran_honor', 'date' => '2025-04-29'],
-                ['key' => 'deir_balah', 'date' => '2025-04-29'],
-                ['key' => 'quran_camp', 'date' => '2025-04-29'],
-            ],
-        ]);
+        $stories = Story::published()->paginate(12);
+
+        return view('pages.news', compact('stories'));
+    }
+
+    public function newsShow(string $key): View
+    {
+        $story = Story::where('status', 'published')
+            ->where(function ($query) use ($key) {
+                $query->where('key', $key);
+                if (is_numeric($key)) {
+                    $query->orWhere('id', (int) $key);
+                }
+            })
+            ->firstOrFail();
+
+        $prevStory = Story::published()
+            ->where('id', '!=', $story->id)
+            ->where(function ($q) use ($story) {
+                if ($story->published_at) {
+                    $q->where('published_at', '<=', $story->published_at);
+                }
+            })
+            ->latest('published_at')
+            ->first();
+
+        $nextStory = Story::published()
+            ->where('id', '!=', $story->id)
+            ->where(function ($q) use ($story) {
+                if ($story->published_at) {
+                    $q->where('published_at', '>=', $story->published_at);
+                }
+            })
+            ->oldest('published_at')
+            ->first();
+
+        $relatedStories = Story::published()
+            ->where('id', '!=', $story->id)
+            ->take(3)
+            ->get();
+
+        return view('pages.news-show', compact('story', 'relatedStories', 'prevStory', 'nextStory'));
+    }
+
+    public function facilityShow(string $key): View
+    {
+        $facility = Facility::where('status', 'published')
+            ->where(function ($query) use ($key) {
+                $query->where('key', $key);
+                if (is_numeric($key)) {
+                    $query->orWhere('id', (int) $key);
+                }
+            })
+            ->firstOrFail();
+
+        $relatedFacilities = Facility::published()
+            ->where('id', '!=', $facility->id)
+            ->take(3)
+            ->get();
+
+        return view('pages.facility-show', compact('facility', 'relatedFacilities'));
     }
 
     public function sponsorship(): View
@@ -66,8 +130,15 @@ class PublicPageController extends Controller
 
     public function donate(): View
     {
+        $campaigns = Campaign::published()->get();
+        $programs = Program::published()->get();
+        $facilities = Facility::published()->get();
+
         return view('pages.donate', [
             'campaignKey' => 'water',
+            'campaigns' => $campaigns,
+            'programs' => $programs,
+            'facilities' => $facilities,
         ]);
     }
 

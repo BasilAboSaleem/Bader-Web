@@ -34,6 +34,7 @@
   <form
     action="{{ $isEdit ? route('dashboard.programs.update', $program) : route('dashboard.programs.store') }}"
     method="POST"
+    enctype="multipart/form-data"
     class="space-y-6"
   >
     @csrf
@@ -83,6 +84,79 @@
           @enderror
         </div>
 
+        {{-- Category AR --}}
+        <div>
+          <label for="category_ar" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">
+            {{ __('dashboard.field.category_ar') }} (إغاثي / تنموي / حماية)
+          </label>
+          <input
+            type="text"
+            id="category_ar"
+            name="category_ar"
+            value="{{ old('category_ar', $program->category_ar) }}"
+            placeholder="relief أو development أو protection"
+            class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+          >
+          @error('category_ar')
+            <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p>
+          @enderror
+        </div>
+
+        {{-- Category EN --}}
+        <div>
+          <label for="category_en" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">
+            {{ __('dashboard.field.category_en') }}
+          </label>
+          <input
+            type="text"
+            id="category_en"
+            name="category_en"
+            value="{{ old('category_en', $program->category_en) }}"
+            dir="ltr"
+            placeholder="Relief, Development, Protection..."
+            class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+          >
+          @error('category_en')
+            <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p>
+          @enderror
+        </div>
+
+        {{-- Badge AR --}}
+        <div>
+          <label for="badge_ar" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">
+            الشارة التمييزية (Badge AR)
+          </label>
+          <input
+            type="text"
+            id="badge_ar"
+            name="badge_ar"
+            value="{{ old('badge_ar', $program->badge_ar) }}"
+            placeholder="استجابة طارئة، أولوية عاجلة..."
+            class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+          >
+          @error('badge_ar')
+            <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p>
+          @enderror
+        </div>
+
+        {{-- Highlight AR --}}
+        <div>
+          <label for="highlight_ar" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">
+            النص البارز (Highlight AR)
+          </label>
+          <input
+            type="text"
+            id="highlight_ar"
+            name="highlight_ar"
+            value="{{ old('highlight_ar', $program->highlight_ar) }}"
+            placeholder="مياه نقية للأسر النازحة..."
+            class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+          >
+          @error('highlight_ar')
+            <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p>
+          @enderror
+        </div>
+
         {{-- Key --}}
         <div>
           <label for="key" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">
@@ -102,23 +176,24 @@
           @enderror
         </div>
 
-        {{-- Icon --}}
+        {{-- Image Upload --}}
         <div>
-          <label for="icon" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">
-            {{ __('dashboard.field.icon') }}
+          <label for="image_file" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">
+            {{ __('dashboard.field.image') }} (رفع صورة من الجهاز)
           </label>
-          <input
-            type="text"
-            id="icon"
-            name="icon"
-            value="{{ old('icon', $program->icon) }}"
-            dir="ltr"
-            placeholder="heart, home, education..."
-            class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-          >
-          @error('icon')
-            <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p>
-          @enderror
+          <div class="space-y-2">
+            @if ($program->image)
+              <div class="flex items-center gap-3 p-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
+                <img src="{{ asset($program->image) }}" alt="Preview" class="h-12 w-16 object-cover rounded-md border border-gray-300 dark:border-gray-600">
+                <span class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-xs">{{ $program->image }}</span>
+              </div>
+            @endif
+            <input type="file" id="image_file" name="image_file" accept="image/*"
+              class="w-full text-theme-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 dark:file:bg-brand-500/10 dark:file:text-brand-400 text-gray-500">
+            @error('image_file') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+            <input type="text" id="image" name="image" value="{{ old('image', $program->image) }}" dir="ltr" placeholder="أو رابط مسار الصورة..."
+              class="h-9 w-full rounded-lg border border-gray-200 bg-transparent px-3 text-xs text-gray-700 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/80">
+          </div>
         </div>
 
         {{-- Order --}}

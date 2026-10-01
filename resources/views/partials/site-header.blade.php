@@ -2,78 +2,136 @@
     use App\Support\PublicNavigation;
     $primary = PublicNavigation::primary();
     $secondary = PublicNavigation::secondary();
-    $dark = $dark ?? false;
+    $dark = $dark ?? true;
 @endphp
 
 <header
     data-site-header
-    @class([
-        'relative sticky top-0 z-50 border-b transition-colors duration-200',
-        'border-white/10 bg-bader-green-deep text-bader-on-dark' => $dark,
-        'border-bader-green/10 bg-bader-paper text-bader-ink' => ! $dark,
-    ])
+    class="sticky top-0 z-50 transition-all duration-300 bg-teal-950/90 backdrop-blur-md shadow-lg border-b border-teal-800 text-sand-50"
 >
-    <div class="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
-        <a href="{{ route('home') }}" class="flex min-w-0 items-center gap-2" aria-label="{{ __('brand.name') }}">
-            <img src="{{ asset(config('bader.assets.mark_star')) }}" alt="" width="40" height="40" class="h-10 w-10">
+    <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+        {{-- Brand Logo & Names --}}
+        <a href="{{ route('home') }}" class="flex min-w-0 items-center gap-3 group" aria-label="{{ __('brand.name') }}">
+            <span class="relative flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-gold-500/20 via-teal-900 to-teal-950 border border-gold-500/30 p-2 shadow-inner group-hover:border-gold-400 group-hover:scale-105 transition-all">
+                <img src="{{ asset(config('bader.assets.mark_star')) }}" alt="" class="h-full w-full object-contain">
+            </span>
             <span class="leading-tight">
-                <span @class(['block text-sm font-semibold', 'text-white' => $dark, 'text-bader-green' => ! $dark])>{{ __('brand.name') }}</span>
-                <span @class(['hidden text-[11px] sm:block', 'text-white/55' => $dark, 'text-bader-ink/55' => ! $dark])>{{ __('brand.name_en') }}</span>
+                <span class="block font-display text-base sm:text-lg font-bold tracking-tight text-white group-hover:text-gold-400 transition-colors">{{ __('brand.name') }}</span>
+                <span class="block text-[10px] sm:text-[11px] font-sans text-gold-400/90 tracking-wider">{{ __('brand.tagline') }}</span>
             </span>
         </a>
 
-        <nav class="ms-auto hidden items-center gap-5 text-sm font-semibold lg:flex" aria-label="{{ __('nav.home') }}">
+        {{-- Desktop Navigation Links --}}
+        <nav class="hidden items-center gap-1.5 lg:flex font-sans" aria-label="{{ __('nav.home') }}">
             @foreach ($primary as $item)
+                @php
+                    $isActive = request()->routeIs($item['route']);
+                @endphp
                 <a
                     href="{{ route($item['route']) }}"
-                    @class([
-                        'hover:text-bader-lime' => $dark,
-                        request()->routeIs($item['route']) ? ($dark ? 'text-bader-lime' : 'text-bader-green') : ($dark ? 'text-white/80' : 'text-bader-ink/80'),
-                    ])
+                    @if ($isActive) aria-current="page" @endif
+                    class="px-3.5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 {{ $isActive ? 'bg-gold-500 text-teal-950 shadow-md shadow-gold-500/20 font-bold' : 'text-sand-100 hover:text-white hover:bg-teal-900/60' }}"
                 >{{ __($item['key']) }}</a>
             @endforeach
 
-            <details class="relative">
-                <summary @class(['cursor-pointer list-none', 'text-white/80 hover:text-bader-lime' => $dark, 'text-bader-ink/80' => ! $dark])>{{ __('nav.more') }}</summary>
-                <div class="absolute end-0 top-full z-20 mt-2 w-48 rounded-xl border border-bader-green/10 bg-white py-2 text-bader-ink shadow-sm">
+            {{-- Secondary Pages Dropdown --}}
+            <details class="relative group/drop">
+                <summary class="cursor-pointer list-none flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold text-sand-100 hover:text-white hover:bg-teal-900/60 transition-colors">
+                    <span>{{ __('nav.more') }}</span>
+                    <svg class="h-4 w-4 text-gold-400 transition-transform group-open/drop:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </summary>
+                <div class="absolute end-0 top-full z-50 mt-2 w-52 rounded-2xl border border-teal-800 bg-teal-950 p-2 text-sand-100 shadow-2xl backdrop-blur-xl animate-rise">
                     @foreach ($secondary as $item)
-                        <a href="{{ route($item['route']) }}" class="block px-4 py-2 text-sm hover:bg-bader-paper">{{ __($item['key']) }}</a>
+                        @php
+                            $isSecActive = request()->routeIs($item['route']);
+                        @endphp
+                        <a
+                            href="{{ route($item['route']) }}"
+                            class="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-medium transition-colors {{ $isSecActive ? 'bg-teal-800/80 text-gold-400 font-bold' : 'hover:bg-teal-900/80 hover:text-white' }}"
+                        >
+                            <span class="h-1.5 w-1.5 rounded-full {{ $isSecActive ? 'bg-gold-400' : 'bg-teal-700' }}"></span>
+                            <span>{{ __($item['key']) }}</span>
+                        </a>
                     @endforeach
                 </div>
             </details>
         </nav>
 
-        <div class="ms-auto flex items-center gap-2 lg:ms-3">
-            <div class="hidden items-center text-xs font-semibold sm:flex">
-                <a href="{{ route('locale.switch', 'ar') }}" @class(['rounded-full px-2 py-1', app()->isLocale('ar') ? ($dark ? 'bg-bader-lime text-bader-green-deep' : 'bg-bader-green text-white') : ($dark ? 'text-white' : 'text-bader-green')])>{{ __('locale.ar') }}</a>
-                <a href="{{ route('locale.switch', 'en') }}" @class(['rounded-full px-2 py-1', app()->isLocale('en') ? ($dark ? 'bg-bader-lime text-bader-green-deep' : 'bg-bader-green text-white') : ($dark ? 'text-white' : 'text-bader-green')])>{{ __('locale.en') }}</a>
+        {{-- Desktop Action Items (Lang & Donate) --}}
+        <div class="hidden items-center gap-3 sm:flex">
+            {{-- Language Switcher Pills --}}
+            <div class="flex items-center rounded-xl bg-teal-900/80 border border-teal-800/80 p-1 text-xs font-semibold">
+                <a
+                    href="{{ route('locale.switch', 'ar') }}"
+                    class="rounded-lg px-2.5 py-1 transition-all {{ app()->isLocale('ar') ? 'bg-gold-500 text-teal-950 font-bold shadow-sm' : 'text-sand-200 hover:text-white' }}"
+                >{{ __('locale.ar') }}</a>
+                <a
+                    href="{{ route('locale.switch', 'en') }}"
+                    class="rounded-lg px-2.5 py-1 transition-all {{ app()->isLocale('en') ? 'bg-gold-500 text-teal-950 font-bold shadow-sm' : 'text-sand-200 hover:text-white' }}"
+                >{{ __('locale.en') }}</a>
             </div>
-            <x-bader.button :href="route('donate')" :variant="$dark ? 'lime' : 'primary'">{{ __('nav.donate') }}</x-bader.button>
+
+            {{-- Main Header CTA --}}
+            <a
+                href="{{ route('donate') }}"
+                class="btn-primary !px-5 !py-2.5 text-xs sm:text-sm font-bold shadow-lg shadow-gold-500/20 flex items-center gap-2"
+            >
+                <svg class="h-4 w-4 text-teal-950" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                <span>{{ __('nav.donate') }}</span>
+            </a>
         </div>
 
-        <details class="lg:hidden">
-            <summary @class([
-                'flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full border',
-                'border-white/25 text-white' => $dark,
-                'border-bader-green/20 text-bader-green' => ! $dark,
-            ])>
+        {{-- Mobile Hamburger Menu --}}
+        <details class="lg:hidden relative group/mobile">
+            <summary class="flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-xl border border-teal-700 bg-teal-900/60 text-sand-50 transition-colors hover:bg-teal-800">
                 <span class="sr-only">{{ __('nav.menu') }}</span>
-                <span aria-hidden="true">☰</span>
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
             </summary>
-            <div @class([
-                'absolute inset-x-0 top-full border-b px-4 py-4',
-                'border-white/10 bg-bader-green-deep' => $dark,
-                'border-bader-green/10 bg-bader-paper' => ! $dark,
-            ])>
-                <nav class="grid gap-2 text-sm font-semibold">
-                    @foreach (PublicNavigation::all() as $item)
-                        <a href="{{ route($item['route']) }}" class="py-2">{{ __($item['key']) }}</a>
-                    @endforeach
-                    <div class="flex gap-2 pt-2 sm:hidden">
-                        <a href="{{ route('locale.switch', 'ar') }}" class="rounded-full px-3 py-1 {{ app()->isLocale('ar') ? 'bg-bader-lime text-bader-green-deep' : 'border border-current' }}">{{ __('locale.ar') }}</a>
-                        <a href="{{ route('locale.switch', 'en') }}" class="rounded-full px-3 py-1 {{ app()->isLocale('en') ? 'bg-bader-lime text-bader-green-deep' : 'border border-current' }}">{{ __('locale.en') }}</a>
+            <div class="absolute inset-x-0 -start-4 end-0 top-full mt-3 w-screen max-w-sm rounded-2xl border border-teal-800 bg-teal-950/95 p-5 shadow-2xl backdrop-blur-xl animate-rise text-sand-50 z-50">
+                <div class="flex items-center justify-between pb-4 mb-4 border-b border-teal-800/80">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-gold-400">{{ __('brand.name') }}</span>
                     </div>
+                    <div class="flex items-center rounded-lg bg-teal-900 border border-teal-800 p-0.5 text-xs font-semibold">
+                        <a href="{{ route('locale.switch', 'ar') }}" class="rounded px-2.5 py-1 {{ app()->isLocale('ar') ? 'bg-gold-500 text-teal-950 font-bold' : 'text-sand-300' }}">عربي</a>
+                        <a href="{{ route('locale.switch', 'en') }}" class="rounded px-2.5 py-1 {{ app()->isLocale('en') ? 'bg-gold-500 text-teal-950 font-bold' : 'text-sand-300' }}">EN</a>
+                    </div>
+                </div>
+
+                <nav class="grid gap-1 text-sm font-semibold">
+                    @foreach (PublicNavigation::all() as $item)
+                        @php
+                            $isMobActive = request()->routeIs($item['route']);
+                        @endphp
+                        <a
+                            href="{{ route($item['route']) }}"
+                            class="flex items-center justify-between rounded-xl px-3.5 py-2.5 transition-colors {{ $isMobActive ? 'bg-gold-500 text-teal-950 font-bold' : 'text-sand-100 hover:bg-teal-900/60' }}"
+                        >
+                            <span>{{ __($item['key']) }}</span>
+                            @if ($isMobActive)
+                                <span class="h-2 w-2 rounded-full bg-teal-950"></span>
+                            @endif
+                        </a>
+                    @endforeach
                 </nav>
+
+                <div class="mt-5 pt-4 border-t border-teal-800/80">
+                    <a
+                        href="{{ route('donate') }}"
+                        class="btn-primary w-full text-center !py-3 text-sm font-bold shadow-lg shadow-gold-500/20 flex items-center justify-center gap-2"
+                    >
+                        <svg class="h-4 w-4 text-teal-950" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                        <span>{{ __('nav.donate') }}</span>
+                    </a>
+                </div>
             </div>
         </details>
     </div>

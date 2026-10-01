@@ -16,11 +16,22 @@ class Facility extends Model
         'name_en',
         'description_ar',
         'description_en',
+        'content_ar',
+        'content_en',
         'location_ar',
         'location_en',
         'image',
+        'gallery',
+        'video_url',
+        'established_year',
+        'capacity_ar',
+        'capacity_en',
         'order',
         'status',
+    ];
+
+    protected $casts = [
+        'gallery' => 'array',
     ];
 
     public function scopePublished(Builder $query): Builder
@@ -42,10 +53,24 @@ class Facility extends Model
         return ($loc === 'en' && ! empty($this->description_en)) ? $this->description_en : $this->description_ar;
     }
 
+    public function getContentAttribute(): ?string
+    {
+        $loc = app()->getLocale();
+
+        return ($loc === 'en' && ! empty($this->content_en)) ? $this->content_en : $this->content_ar;
+    }
+
     public function getLocationAttribute(): ?string
     {
         $loc = app()->getLocale();
 
         return ($loc === 'en' && ! empty($this->location_en)) ? $this->location_en : $this->location_ar;
+    }
+
+    public function getCapacityAttribute(): ?string
+    {
+        $loc = app()->getLocale();
+
+        return ($loc === 'en' && ! empty($this->capacity_en)) ? $this->capacity_en : $this->capacity_ar;
     }
 }

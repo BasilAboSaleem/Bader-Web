@@ -31,6 +31,7 @@
   <form
     action="{{ $isEdit ? route('dashboard.stories.update', $story) : route('dashboard.stories.store') }}"
     method="POST"
+    enctype="multipart/form-data"
     class="space-y-6"
   >
     @csrf
@@ -79,10 +80,20 @@
         </div>
 
         <div>
-          <label for="image" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">{{ __('dashboard.field.image_url') }}</label>
-          <input type="text" id="image" name="image" value="{{ old('image', $story->image) }}" dir="ltr" placeholder="https://..."
-            class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-          @error('image') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+          <label for="image_file" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">{{ __('dashboard.field.image') }} (رفع من الجهاز)</label>
+          <div class="space-y-2">
+            @if ($story->image)
+              <div class="flex items-center gap-3 p-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
+                <img src="{{ asset($story->image) }}" alt="Preview" class="h-12 w-16 object-cover rounded-md border border-gray-300 dark:border-gray-600">
+                <span class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-xs">{{ $story->image }}</span>
+              </div>
+            @endif
+            <input type="file" id="image_file" name="image_file" accept="image/*"
+              class="w-full text-theme-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 dark:file:bg-brand-500/10 dark:file:text-brand-400 text-gray-500">
+            @error('image_file') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+            <input type="text" id="image" name="image" value="{{ old('image', $story->image) }}" dir="ltr" placeholder="أو رابط مسار الصورة..."
+              class="h-9 w-full rounded-lg border border-gray-200 bg-transparent px-3 text-xs text-gray-700 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/80">
+          </div>
         </div>
 
       </div>
