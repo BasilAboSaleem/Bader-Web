@@ -22,6 +22,8 @@ class Region extends Model
         'image',
         'map_x',
         'map_y',
+        'map_area',
+        'impact_metrics',
         'order',
         'status',
     ];
@@ -34,8 +36,42 @@ class Region extends Model
         return [
             'map_x' => 'integer',
             'map_y' => 'integer',
+            'impact_metrics' => 'array',
             'order' => 'integer',
         ];
+    }
+
+    /**
+     * Impact figures in the current locale, falling back to Arabic labels.
+     *
+     * @return list<array{value: string, label: string, icon: string}>
+     */
+    public function localizedImpactMetrics(): array
+    {
+        $isEnglish = app()->getLocale() === 'en';
+
+        return collect($this->impact_metrics ?? [])
+            ->map(fn (array $metric): array => [
+                'value' => (string) ($metric['value'] ?? ''),
+                'label' => (string) (($isEnglish && ! empty($metric['label_en'])) ? $metric['label_en'] : ($metric['label_ar'] ?? '')),
+                'icon' => (string) ($metric['icon'] ?? 'sparkle'),
+            ])
+            ->filter(fn (array $metric): bool => $metric['value'] !== '' && $metric['label'] !== '')
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Published regions with the counts and totals the impact map needs.
+     */
+    public function scopeForImpactMap(Builder $query): Builder
+    {
+        $publishedCampaigns = fn (Builder $campaigns) => $campaigns->published();
+
+        return $query->published()
+            ->withCount(['campaigns' => $publishedCampaigns])
+            ->withSum(['campaigns as raised_total' => $publishedCampaigns], 'raised_amount')
+            ->with(['facilities' => fn ($facilities) => $facilities->published()]);
     }
 
     public function scopePublished(Builder $query): Builder

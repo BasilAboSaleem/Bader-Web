@@ -30,6 +30,7 @@ class SitemapController extends Controller
             ['route' => 'gift', 'priority' => '0.7', 'changefreq' => 'monthly'],
             ['route' => 'zakat', 'priority' => '0.7', 'changefreq' => 'monthly'],
             ['route' => 'impact', 'priority' => '0.8', 'changefreq' => 'weekly'],
+            ['route' => 'impact-map', 'priority' => '0.7', 'changefreq' => 'weekly'],
             ['route' => 'news', 'priority' => '0.7', 'changefreq' => 'daily'],
             ['route' => 'donate', 'priority' => '0.9', 'changefreq' => 'weekly'],
             ['route' => 'partners', 'priority' => '0.7', 'changefreq' => 'monthly'],

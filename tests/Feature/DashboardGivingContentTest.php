@@ -35,11 +35,13 @@ class DashboardGivingContentTest extends TestCase
             'key' => 'mawasi',
             'map_x' => 30,
             'map_y' => 75,
+            'map_area' => 'khan_younis',
             'status' => 'published',
         ])->assertRedirect(route('dashboard.regions.index'));
 
         $region = Region::sole();
         $this->assertSame(0, $region->order);
+        $this->assertSame('khan_younis', $region->map_area);
         $this->get(route('contact'))->assertSee('منطقة المواصي');
 
         $this->actingAs($admin)->put(route('dashboard.regions.update', $region), [
@@ -47,8 +49,50 @@ class DashboardGivingContentTest extends TestCase
             'key' => 'mawasi',
             'map_x' => 120,
             'map_y' => 75,
+            'map_area' => 'unknown_area',
             'status' => 'draft',
-        ])->assertSessionHasErrors('map_x');
+        ])->assertSessionHasErrors(['map_x', 'map_area']);
+
+        $this->actingAs($admin)->put(route('dashboard.regions.update', $region), [
+            'name_ar' => 'منطقة المواصي',
+            'key' => 'mawasi',
+            'map_x' => 30,
+            'map_y' => 75,
+            'status' => 'published',
+            'impact_metrics' => [
+                ['value' => ' 3,200 ', 'icon' => 'droplet', 'label_ar' => 'لتر مياه يوميا', 'label_en' => 'litres of water a day'],
+                ['value' => '', 'icon' => 'users', 'label_ar' => '', 'label_en' => ''],
+            ],
+        ])->assertRedirect(route('dashboard.regions.index'));
+        $this->assertSame(
+            [['value' => '3,200', 'icon' => 'droplet', 'label_ar' => 'لتر مياه يوميا', 'label_en' => 'litres of water a day']],
+            $region->fresh()->impact_metrics,
+        );
+        $this->actingAs($admin)->get(route('dashboard.regions.edit', $region))
+            ->assertOk()
+            ->assertSee('value="لتر مياه يوميا"', false);
+
+        $this->actingAs($admin)->put(route('dashboard.regions.update', $region), [
+            'name_ar' => 'منطقة المواصي',
+            'key' => 'mawasi',
+            'map_x' => 30,
+            'map_y' => 75,
+            'status' => 'published',
+            'impact_metrics' => [
+                ['value' => '', 'icon' => 'rocket', 'label_ar' => 'مستفيد'],
+            ],
+        ])->assertSessionHasErrors(['impact_metrics.0.value', 'impact_metrics.0.icon']);
+
+        $this->actingAs($admin)->put(route('dashboard.regions.update', $region), [
+            'name_ar' => 'منطقة المواصي',
+            'key' => 'mawasi',
+            'map_x' => 30,
+            'map_y' => 75,
+            'status' => 'published',
+            'impact_metrics' => [
+                ['value' => '3,200', 'icon' => 'droplet', 'label_ar' => '', 'label_en' => ''],
+            ],
+        ])->assertSessionHasErrors('impact_metrics.0.label_ar');
 
         $this->actingAs($admin)->delete(route('dashboard.regions.destroy', $region))
             ->assertRedirect(route('dashboard.regions.index'));

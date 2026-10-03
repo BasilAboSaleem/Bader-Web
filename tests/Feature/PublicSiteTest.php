@@ -45,6 +45,50 @@ class PublicSiteTest extends TestCase
             ->assertViewHas('heroCampaigns', fn ($campaigns): bool => ! $campaigns->contains($draftCampaign));
     }
 
+    public function test_home_map_shades_linked_governorates_with_region_totals(): void
+    {
+        $linkedRegion = Region::factory()->create(['key' => 'rafah-field', 'map_area' => 'rafah']);
+        $unlinkedRegion = Region::factory()->create(['key' => 'unlinked-field', 'map_area' => null]);
+        Campaign::factory()->create(['region_id' => $linkedRegion->id, 'raised_amount' => 2500]);
+        Campaign::factory()->draft()->create(['region_id' => $linkedRegion->id, 'raised_amount' => 9000]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('data-region-area data-region="rafah-field"', false)
+            ->assertDontSee('data-region-area data-region="unlinked-field"', false)
+            ->assertSee('data-region="unlinked-field"', false)
+            ->assertSee(__('home.map.raised_amount', ['amount' => "\u{2066}$2,500\u{2069}"]), false)
+            ->assertDontSee('$11,500', false);
+    }
+
+    public function test_impact_map_page_opens_on_the_shared_region_with_its_metrics(): void
+    {
+        $region = Region::factory()->create([
+            'key' => 'khan-field',
+            'name_ar' => 'منطقة خان يونس',
+            'map_area' => 'khan_younis',
+            'impact_metrics' => [
+                ['value' => '12,500', 'icon' => 'users', 'label_ar' => 'مستفيد', 'label_en' => 'beneficiaries'],
+            ],
+        ]);
+        $shareUrl = route('impact-map', ['region' => $region->key]);
+
+        $response = $this->get($shareUrl)
+            ->assertOk()
+            ->assertSee('<title>'.$region->name_ar.' — ', false)
+            ->assertSee('data-initial-region="khan-field"', false)
+            ->assertSee('12,500', false)
+            ->assertSee('مستفيد', false)
+            ->assertSee('data-share-url="'.e($shareUrl).'"', false)
+            ->assertSee('api.whatsapp.com/send?text='.urlencode(__('home.map.share_title', ['region' => $region->name_ar])."\n".$shareUrl), false);
+        $this->assertDoesNotMatchRegularExpression('/id="region-panel-khan-field"[^>]*\shidden[\s>]/', $response->getContent());
+        $this->assertMatchesRegularExpression('/id="region-panel-all"[^>]*\shidden[\s>]/', $response->getContent());
+
+        $this->get(route('impact-map', ['region' => 'missing-area']))
+            ->assertOk()
+            ->assertSee('data-initial-region="all"', false);
+    }
+
     public function test_home_renders_without_any_published_content(): void
     {
         $this->get(route('home'))

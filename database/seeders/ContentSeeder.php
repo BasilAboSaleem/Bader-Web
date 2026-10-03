@@ -36,11 +36,11 @@ class ContentSeeder extends Seeder
 
         // 2. Work regions inside the Gaza Strip (map_x / map_y are percentages on the region map)
         $regions = [
-            ['key' => 'north_gaza', 'name_ar' => 'شمال غزة', 'name_en' => 'North Gaza', 'description_ar' => 'استجابة إغاثية للأسر العائدة والنازحة في محافظة الشمال.', 'description_en' => 'Relief response for returning and displaced families in the northern governorate.', 'map_x' => 72, 'map_y' => 8, 'order' => 1],
-            ['key' => 'gaza_city', 'name_ar' => 'مدينة غزة', 'name_en' => 'Gaza City', 'description_ar' => 'مياه وغذاء وتعليم في أكبر تجمع سكاني في القطاع.', 'description_en' => 'Water, food and education in the strip\'s largest population centre.', 'map_x' => 62, 'map_y' => 24, 'order' => 2],
-            ['key' => 'middle_area', 'name_ar' => 'الوسطى ودير البلح', 'name_en' => 'Middle Area & Deir al-Balah', 'description_ar' => 'مقر العمليات الميدانية ومرافق بادر التشغيلية.', 'description_en' => 'Home of Bader\'s field operations and operating facilities.', 'map_x' => 50, 'map_y' => 48, 'order' => 3],
-            ['key' => 'khan_younis', 'name_ar' => 'خان يونس', 'name_en' => 'Khan Younis', 'description_ar' => 'إيواء ودعم صحي للأسر في مخيمات النزوح.', 'description_en' => 'Shelter and health support for families in displacement camps.', 'map_x' => 38, 'map_y' => 70, 'order' => 4],
-            ['key' => 'rafah', 'name_ar' => 'رفح', 'name_en' => 'Rafah', 'description_ar' => 'تدخلات طارئة وفق إمكانية الوصول الميداني.', 'description_en' => 'Emergency interventions as field access allows.', 'map_x' => 26, 'map_y' => 90, 'order' => 5],
+            ['key' => 'north_gaza', 'name_ar' => 'شمال غزة', 'name_en' => 'North Gaza', 'description_ar' => 'استجابة إغاثية للأسر العائدة والنازحة في محافظة الشمال.', 'description_en' => 'Relief response for returning and displaced families in the northern governorate.', 'map_x' => 82, 'map_y' => 16, 'map_area' => 'north_gaza', 'order' => 1],
+            ['key' => 'gaza_city', 'name_ar' => 'مدينة غزة', 'name_en' => 'Gaza City', 'description_ar' => 'مياه وغذاء وتعليم في أكبر تجمع سكاني في القطاع.', 'description_en' => 'Water, food and education in the strip\'s largest population centre.', 'map_x' => 64, 'map_y' => 30, 'map_area' => 'gaza_city', 'order' => 2],
+            ['key' => 'middle_area', 'name_ar' => 'الوسطى ودير البلح', 'name_en' => 'Middle Area & Deir al-Balah', 'description_ar' => 'مقر العمليات الميدانية ومرافق بادر التشغيلية.', 'description_en' => 'Home of Bader\'s field operations and operating facilities.', 'map_x' => 44, 'map_y' => 47, 'map_area' => 'middle_area', 'order' => 3],
+            ['key' => 'khan_younis', 'name_ar' => 'خان يونس', 'name_en' => 'Khan Younis', 'description_ar' => 'إيواء ودعم صحي للأسر في مخيمات النزوح.', 'description_en' => 'Shelter and health support for families in displacement camps.', 'map_x' => 30, 'map_y' => 68, 'map_area' => 'khan_younis', 'order' => 4],
+            ['key' => 'rafah', 'name_ar' => 'رفح', 'name_en' => 'Rafah', 'description_ar' => 'تدخلات طارئة وفق إمكانية الوصول الميداني.', 'description_en' => 'Emergency interventions as field access allows.', 'map_x' => 17, 'map_y' => 82, 'map_area' => 'rafah', 'order' => 5],
         ];
 
         foreach ($regions as $region) {

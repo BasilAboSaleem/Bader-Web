@@ -6,7 +6,7 @@
     $otherLocale = app()->isLocale('ar') ? 'en' : 'ar';
     $megaMenus = [
         'about' => ['label' => __('nav.about'), 'active' => request()->routeIs('about', 'impact', 'partners', 'volunteer', 'faq', 'contact')],
-        'regions' => ['label' => __('nav.regions'), 'active' => request()->routeIs('regions.*')],
+        'regions' => ['label' => __('nav.regions'), 'active' => request()->routeIs('regions.*', 'impact-map')],
         'programs' => ['label' => __('nav.programs'), 'active' => request()->routeIs('programs', 'programs.*')],
         'projects' => ['label' => __('nav.campaigns'), 'active' => request()->routeIs('campaigns', 'campaigns.*')],
         'sponsorship' => ['label' => __('nav.sponsorship'), 'active' => request()->routeIs('sponsorship', 'sponsorship.*')],
@@ -100,7 +100,7 @@
                                             <p class="kicker">{{ __('nav.regions') }}</p>
                                             <p class="mt-2 max-w-xl text-sm text-muted">{{ __('header.regions_intro') }}</p>
                                         </div>
-                                        <a href="{{ route('home') }}#regions-map" class="mega-more">{{ __('header.view_map') }} <x-bader.icon name="arrow" class="h-4 w-4" /></a>
+                                        <a href="{{ route('impact-map') }}" class="mega-more">{{ __('header.view_map') }} <x-bader.icon name="arrow" class="h-4 w-4" /></a>
                                     </div>
                                     <ul class="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
                                         @forelse ($menus['regions'] as $region)
@@ -249,6 +249,7 @@
             <details class="drawer-group" @if ($megaMenus['regions']['active']) open @endif>
                 <summary class="drawer-link">{{ __('nav.regions') }} <x-bader.icon name="chevron-down" class="h-4 w-4" /></summary>
                 <div class="drawer-sub">
+                    <a href="{{ route('impact-map') }}" class="font-bold">{{ __('header.view_map') }}</a>
                     @foreach ($menus['regions'] as $region)
                         <a href="{{ route('regions.show', $region->key) }}">{{ $region->name }}</a>
                     @endforeach

@@ -30,16 +30,11 @@ class HomeController extends Controller
             ->take(8)
             ->get();
 
-        $regions = Region::published()
-            ->withCount(['campaigns' => $publishedCampaigns])
-            ->with(['facilities' => fn ($facilities) => $facilities->published()])
-            ->get();
-
         return view('home', [
             'homeSections' => collect(SiteSettings::homeSections())->where('visible', true)->pluck('key')->all(),
             'heroCampaigns' => $heroCampaigns,
             'quickGiveOptions' => SiteSettings::quickGiveOptions(),
-            'regions' => $regions,
+            'regions' => Region::forImpactMap()->get(),
             'metrics' => ImpactMetric::approved()->orderBy('order')->take(4)->get(),
             'programs' => Program::published()->withCount(['campaigns' => $publishedCampaigns])->get(),
             'projects' => $projects,

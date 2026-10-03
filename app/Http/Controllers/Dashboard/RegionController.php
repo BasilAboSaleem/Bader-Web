@@ -27,6 +27,7 @@ class RegionController extends Controller
         return view('dashboard.regions.form', [
             'region' => new Region(['map_x' => 50, 'map_y' => 50, 'status' => 'published']),
             'isEdit' => false,
+            ...$this->metricOptions(),
         ]);
     }
 
@@ -43,7 +44,19 @@ class RegionController extends Controller
         return view('dashboard.regions.form', [
             'region' => $region,
             'isEdit' => true,
+            ...$this->metricOptions(),
         ]);
+    }
+
+    /**
+     * @return array{maxMetrics: int, metricIcons: list<string>}
+     */
+    private function metricOptions(): array
+    {
+        return [
+            'maxMetrics' => config('bader.region_metrics.max'),
+            'metricIcons' => config('bader.region_metrics.icons'),
+        ];
     }
 
     public function update(Request $request, Region $region): RedirectResponse
@@ -77,9 +90,27 @@ class RegionController extends Controller
             'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
             'map_x' => ['required', 'integer', 'between:0,100'],
             'map_y' => ['required', 'integer', 'between:0,100'],
+            'map_area' => ['nullable', Rule::in(array_keys(config('bader.map_areas')))],
+            'impact_metrics' => ['nullable', 'array', 'max:'.config('bader.region_metrics.max')],
+            'impact_metrics.*' => ['array'],
+            'impact_metrics.*.value' => ['nullable', 'string', 'max:20', 'required_with:impact_metrics.*.label_ar'],
+            'impact_metrics.*.icon' => ['nullable', Rule::in(config('bader.region_metrics.icons'))],
+            'impact_metrics.*.label_ar' => ['nullable', 'string', 'max:60', 'required_with:impact_metrics.*.value,impact_metrics.*.label_en'],
+            'impact_metrics.*.label_en' => ['nullable', 'string', 'max:60'],
             'order' => ['nullable', 'integer', 'min:0'],
             'status' => ['required', 'in:draft,published'],
         ]);
+
+        $validated['impact_metrics'] = collect($validated['impact_metrics'] ?? [])
+            ->filter(fn (array $metric): bool => filled($metric['label_ar'] ?? null))
+            ->map(fn (array $metric): array => [
+                'value' => trim($metric['value']),
+                'icon' => $metric['icon'] ?? 'users',
+                'label_ar' => trim($metric['label_ar']),
+                'label_en' => trim($metric['label_en'] ?? ''),
+            ])
+            ->values()
+            ->all() ?: null;
 
         if ($request->hasFile('image_file')) {
             $validated['image'] = 'storage/'.$request->file('image_file')->store('regions', 'public');

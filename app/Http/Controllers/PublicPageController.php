@@ -124,6 +124,17 @@ class PublicPageController extends Controller
         return view('pages.region-show', compact('region', 'campaigns', 'cases', 'otherRegions'));
     }
 
+    /**
+     * Full-size impact map; "?region=key" opens it on that region (used by the share links).
+     */
+    public function impactMap(Request $request): View
+    {
+        $regions = Region::forImpactMap()->get();
+        $selectedRegion = $regions->firstWhere('key', $request->query('region'));
+
+        return view('pages.impact-map', compact('regions', 'selectedRegion'));
+    }
+
     public function impact(): View
     {
         return $this->page('impact');

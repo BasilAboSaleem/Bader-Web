@@ -87,6 +87,17 @@
         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('dashboard.section.map_position_desc') }}</p>
       </div>
       <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+        <div class="md:col-span-2">
+          <label for="map_area" class="{{ $labelClass }}">{{ __('dashboard.field.map_area') }}</label>
+          <select id="map_area" name="map_area" class="{{ $inputClass }}">
+            <option value="">{{ __('dashboard.field.map_area_none') }}</option>
+            @foreach (array_keys(config('bader.map_areas')) as $mapArea)
+              <option value="{{ $mapArea }}" @selected(old('map_area', $region->map_area) === $mapArea)>{{ __('home.map.area.'.$mapArea) }}</option>
+            @endforeach
+          </select>
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('dashboard.field.map_area_hint') }}</p>
+          @error('map_area') <p class="mt-1 text-xs text-error-500">{{ $message }}</p> @enderror
+        </div>
         <div>
           <label for="map_x" class="{{ $labelClass }}">{{ __('dashboard.field.map_x') }}</label>
           <input type="number" id="map_x" name="map_x" value="{{ old('map_x', $region->map_x ?? 50) }}" min="0" max="100" required class="{{ $inputClass }}">
@@ -95,6 +106,46 @@
           <label for="map_y" class="{{ $labelClass }}">{{ __('dashboard.field.map_y') }}</label>
           <input type="number" id="map_y" name="map_y" value="{{ old('map_y', $region->map_y ?? 50) }}" min="0" max="100" required class="{{ $inputClass }}">
         </div>
+      </div>
+    </div>
+
+    {{-- Impact figures: existing ones plus empty rows to add more; a row with an empty Arabic label is removed --}}
+    <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
+      <div class="mb-5 border-b border-gray-100 pb-4 dark:border-gray-800">
+        <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('dashboard.section.region_metrics') }}</h2>
+        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('dashboard.section.region_metrics_desc', ['max' => $maxMetrics]) }}</p>
+      </div>
+      <div class="space-y-3">
+        @for ($row = 0; $row < min(count($region->impact_metrics ?? []) + 2, $maxMetrics); $row++)
+          @php
+            $metric = ($region->impact_metrics ?? [])[$row] ?? [];
+            $metricOld = fn (string $field): string => (string) old("impact_metrics.{$row}.{$field}", $metric[$field] ?? '');
+          @endphp
+          <div @class(['grid grid-cols-1 gap-3 rounded-xl border p-3 sm:grid-cols-[8rem_9rem_minmax(0,1fr)_minmax(0,1fr)]', 'border-gray-100 bg-gray-50/50 dark:border-gray-800 dark:bg-gray-900/40' => $metric !== [], 'border-dashed border-gray-300 dark:border-gray-700' => $metric === []])>
+            <div>
+              <label for="metric_{{ $row }}_value" class="{{ $labelClass }}">{{ __('dashboard.field.metric_value') }}</label>
+              <input type="text" id="metric_{{ $row }}_value" name="impact_metrics[{{ $row }}][value]" value="{{ $metricOld('value') }}" dir="ltr" placeholder="12,500" class="{{ $inputClass }}">
+              @error("impact_metrics.{$row}.value") <p class="mt-1 text-xs text-error-500">{{ $message }}</p> @enderror
+            </div>
+            <div>
+              <label for="metric_{{ $row }}_icon" class="{{ $labelClass }}">{{ __('dashboard.pages_card_icon') }}</label>
+              <select id="metric_{{ $row }}_icon" name="impact_metrics[{{ $row }}][icon]" class="{{ $inputClass }}">
+                @foreach ($metricIcons as $icon)
+                  <option value="{{ $icon }}" @selected(($metricOld('icon') ?: 'users') === $icon)>{{ __('dashboard.card_icon.'.$icon) }}</option>
+                @endforeach
+              </select>
+            </div>
+            <div>
+              <label for="metric_{{ $row }}_label_ar" class="{{ $labelClass }}">{{ __('dashboard.field.metric_label_ar') }}</label>
+              <input type="text" id="metric_{{ $row }}_label_ar" name="impact_metrics[{{ $row }}][label_ar]" value="{{ $metricOld('label_ar') }}" placeholder="{{ __('dashboard.field.metric_label_placeholder') }}" class="{{ $inputClass }}">
+              @error("impact_metrics.{$row}.label_ar") <p class="mt-1 text-xs text-error-500">{{ $message }}</p> @enderror
+            </div>
+            <div>
+              <label for="metric_{{ $row }}_label_en" class="{{ $labelClass }}">{{ __('dashboard.field.metric_label_en') }}</label>
+              <input type="text" id="metric_{{ $row }}_label_en" name="impact_metrics[{{ $row }}][label_en]" value="{{ $metricOld('label_en') }}" dir="ltr" class="{{ $inputClass }}">
+            </div>
+          </div>
+        @endfor
       </div>
     </div>
 

@@ -8,7 +8,7 @@
         :kicker="__('home.map.region_label')"
         :title="$region->name"
         :intro="$region->description"
-        :breadcrumbs="[['label' => __('nav.regions'), 'url' => route('home').'#regions-map']]"
+        :breadcrumbs="[['label' => __('nav.impact_map'), 'url' => route('impact-map')]]"
     >
         <dl class="mt-6 flex flex-wrap gap-3">
             <div class="rounded-2xl bg-white px-5 py-3 ring-1 ring-hairline">
@@ -19,7 +19,17 @@
                 <dt class="text-xs text-subtle">{{ __('home.map.facilities') }}</dt>
                 <dd class="text-2xl font-extrabold text-forest-700">{{ $region->facilities->count() }}</dd>
             </div>
+            @foreach ($region->localizedImpactMetrics() as $metric)
+                <div class="rounded-2xl bg-white px-5 py-3 ring-1 ring-hairline">
+                    <dt class="text-xs text-subtle">{{ $metric['label'] }}</dt>
+                    <dd class="text-2xl font-extrabold text-forest-700" dir="ltr">{{ $metric['value'] }}</dd>
+                </div>
+            @endforeach
         </dl>
+        <a href="{{ route('impact-map', ['region' => $region->key]) }}" class="btn-outline mt-5">
+            <x-bader.icon name="map-pin" class="h-4 w-4" />
+            {{ __('home.map.view_on_map') }}
+        </a>
     </x-bader.page-hero>
 
     <section class="band-base section-y">
