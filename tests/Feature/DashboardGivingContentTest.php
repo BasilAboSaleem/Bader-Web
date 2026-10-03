@@ -9,6 +9,7 @@ use App\Models\Setting;
 use App\Models\SponsorshipCase;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 
 class DashboardGivingContentTest extends TestCase
@@ -138,6 +139,28 @@ class DashboardGivingContentTest extends TestCase
 
         $this->actingAs($admin)->delete(route('dashboard.sponsorship-cases.destroy', $case));
         $this->assertModelMissing($case);
+    }
+
+    public function test_sponsorship_case_photo_rejected_by_the_server_limit_shows_an_arabic_message(): void
+    {
+        $admin = User::factory()->create();
+        $region = Region::factory()->create();
+        $oversizedPhoto = new UploadedFile(UploadedFile::fake()->image('orphan.jpg')->getRealPath(), 'orphan.jpg', 'image/jpeg', UPLOAD_ERR_INI_SIZE, true);
+
+        $this->actingAs($admin)->post(route('dashboard.sponsorship-cases.store'), [
+            'type' => 'orphan',
+            'code' => 'GZ-200',
+            'name_ar' => 'محمد',
+            'region_id' => $region->id,
+            'monthly_amount' => 50,
+            'duration_months' => 12,
+            'status' => SponsorshipCase::STATUS_AVAILABLE,
+            'photo_file' => $oversizedPhoto,
+        ])->assertSessionHasErrors(['photo_file' => __('validation.uploaded', ['attribute' => 'الصورة'])])
+            ->assertSessionDoesntHaveErrors(['type', 'code', 'name_ar', 'monthly_amount', 'duration_months']);
+
+        $this->assertStringStartsWith('تعذّر رفع الصورة', __('validation.uploaded', ['attribute' => 'الصورة']));
+        $this->assertSame(0, SponsorshipCase::where('code', 'GZ-200')->count());
     }
 
     public function test_campaign_form_saves_program_region_and_preset_amounts(): void

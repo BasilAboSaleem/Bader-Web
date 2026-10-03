@@ -594,7 +594,6 @@
     "dashboard.module.sponsorship_cases": "حالات الكفالة",
     "dashboard.module.sponsorship_cases_desc": "الأيتام والأرامل وطلبة العلم الذين ينتظرون كافلاً، وحالة كفالة كل منهم.",
     "dashboard.region_counts": ":campaigns مشروع · :facilities مرفق · :cases حالة",
-    "dashboard.sponsorship_privacy_notice": "حفاظاً على خصوصية المستفيدين: استخدم اسماً مختصراً أو الاسم الأول فقط، ولا تنشر صوراً إلا بموافقة ولي الأمر.",
     "dashboard.section.map_position": "الموقع على الخريطة",
     "dashboard.section.map_position_desc": "نسبة مئوية من عرض الخريطة وارتفاعها (0 إلى 100) لتحديد مكان الدبوس على خريطة غزة.",
     "dashboard.section_giving_title": "أدوات العطاء",

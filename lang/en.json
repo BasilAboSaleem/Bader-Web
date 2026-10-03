@@ -594,7 +594,6 @@
     "dashboard.module.sponsorship_cases": "Sponsorship cases",
     "dashboard.module.sponsorship_cases_desc": "Orphans, widows and students awaiting a sponsor, and the sponsorship status of each.",
     "dashboard.region_counts": ":campaigns projects · :facilities facilities · :cases cases",
-    "dashboard.sponsorship_privacy_notice": "To protect beneficiaries' privacy: use a short or first name only, and publish photos only with guardian consent.",
     "dashboard.section.map_position": "Map position",
     "dashboard.section.map_position_desc": "Percentage of the map width and height (0 to 100) that places the pin on the Gaza map.",
     "dashboard.section_giving_title": "Giving tools",

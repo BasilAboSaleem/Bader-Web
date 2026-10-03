@@ -7,6 +7,7 @@ import { initZakatCalculators } from './public/zakat';
 import { initGiftDesigners } from './public/gift';
 import { initRegionMaps } from './public/region-map';
 import { initLightboxes } from './public/lightbox';
+import { initImageUploads } from './dashboard/image-uploads';
 
 const isPublicSite = () => document.body?.classList.contains('bader-public');
 
@@ -32,6 +33,8 @@ const isPublicSite = () => document.body?.classList.contains('bader-public');
 document.documentElement.classList.add('js');
 
 const initializePublicEnhancements = () => {
+    if (!isPublicSite()) initImageUploads();
+
     initReveal();
     initCountUp();
     initScrollEffects();

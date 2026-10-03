@@ -35,10 +35,6 @@
     </div>
   @endif
 
-  <div class="rounded-xl border border-warning-500/20 bg-warning-50 p-4 text-theme-sm text-warning-700 dark:bg-warning-500/10 dark:text-warning-400">
-    {{ __('dashboard.sponsorship_privacy_notice') }}
-  </div>
-
   <form action="{{ $isEdit ? route('dashboard.sponsorship-cases.update', $case) : route('dashboard.sponsorship-cases.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
     @csrf
     @if ($isEdit) @method('PUT') @endif
