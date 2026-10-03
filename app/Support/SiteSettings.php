@@ -492,6 +492,55 @@ class SiteSettings
     }
 
     /**
+     * Whether the hero opens with the organisation's own slide before the featured projects.
+     */
+    public static function heroIntroEnabled(): bool
+    {
+        return Setting::get('hero_intro_enabled', '1') === '1';
+    }
+
+    /**
+     * Content of the organisation's hero slide in the given locale; empty fields fall back to the defaults.
+     *
+     * @return array{badge: string, title: string, text: string, primary_label: string, primary_url: string, secondary_label: string, secondary_url: string, image: string}
+     */
+    public static function heroIntro(?string $locale = null): array
+    {
+        $loc = $locale ?? app()->getLocale();
+        $text = function (string $field, string $translationKey) use ($loc): string {
+            $custom = trim((string) Setting::get("hero_intro_{$field}_{$loc}", ''));
+
+            return $custom !== '' ? $custom : __($translationKey, [], $loc);
+        };
+        $url = function (string $field, string $default): string {
+            $custom = trim((string) Setting::get("hero_intro_{$field}_url", ''));
+
+            return $custom === '' ? $default : (str_starts_with($custom, '/') ? url($custom) : $custom);
+        };
+
+        return [
+            'badge' => $text('badge', 'home.hero_kicker'),
+            'title' => $text('title', 'home.hero_title'),
+            'text' => $text('text', 'home.hero_text'),
+            'primary_label' => $text('primary_label', 'home.hero.donate'),
+            'primary_url' => $url('primary', route('donate')),
+            'secondary_label' => $text('secondary_label', 'home.hero.about'),
+            'secondary_url' => $url('secondary', route('about')),
+            'image' => self::heroIntroImage(),
+        ];
+    }
+
+    /**
+     * Image of the organisation's hero slide: an upload from Dashboard → Homepage, or the bundled photo.
+     */
+    public static function heroIntroImage(): string
+    {
+        $path = trim((string) Setting::get('hero_intro_image', ''));
+
+        return asset($path !== '' ? $path : 'images/programs/education.jpg');
+    }
+
+    /**
      * Homepage sections in display order with their visibility; sections added to the config later are
      * appended visible, and "quick_give" always stays first.
      *

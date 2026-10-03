@@ -1,32 +1,40 @@
 @props(['campaigns'])
 
 @use('App\Support\Money')
+@use('App\Support\SiteSettings')
 
 @php
+    $intro = SiteSettings::heroIntro();
+    $introSlide = [
+        'title' => $intro['title'],
+        'text' => $intro['text'],
+        'badge' => $intro['badge'],
+        'image' => $intro['image'],
+        'progress' => null,
+        'raised' => null,
+        'goal' => null,
+        'donateUrl' => $intro['primary_url'],
+        'donateLabel' => $intro['primary_label'],
+        'detailsUrl' => $intro['secondary_url'],
+        'detailsLabel' => $intro['secondary_label'],
+    ];
+
     $slides = $campaigns->map(fn ($campaign) => [
         'title' => $campaign->title,
         'text' => $campaign->description,
         'badge' => $campaign->program?->title ?? __('home.hero.urgent'),
-        'image' => $campaign->image ? asset($campaign->image) : asset('images/programs/water.jpg'),
+        'image' => $campaign->image ? asset($campaign->image) : SiteSettings::heroIntroImage(),
         'progress' => $campaign->isOngoing() ? null : $campaign->progress_percent,
         'raised' => Money::format($campaign->raised_amount),
         'goal' => Money::format($campaign->goal_amount),
         'donateUrl' => route('donate', ['target_type' => 'campaign', 'target_id' => $campaign->id]),
         'detailsUrl' => route('campaigns.show', $campaign->key),
+        'donateLabel' => __('home.hero.donate'),
+        'detailsLabel' => __('home.hero.details'),
     ])->values();
 
-    if ($slides->isEmpty()) {
-        $slides = collect([[
-            'title' => __('home.hero_title'),
-            'text' => __('home.hero_text'),
-            'badge' => __('home.hero_kicker'),
-            'image' => asset('images/programs/water.jpg'),
-            'progress' => null,
-            'raised' => null,
-            'goal' => null,
-            'donateUrl' => route('donate'),
-            'detailsUrl' => route('about'),
-        ]]);
+    if (SiteSettings::heroIntroEnabled() || $slides->isEmpty()) {
+        $slides->prepend($introSlide);
     }
 
     $particles = [[8, 0], [17, 3.2], [29, 6.1], [41, 1.4], [55, 4.6], [66, 2.3], [78, 7.2], [90, 5.1]];
@@ -37,7 +45,7 @@
     data-autoplay="7000"
     aria-roledescription="carousel"
     aria-label="{{ __('home.hero.label') }}">
-    <h1 class="sr-only">{{ __('brand.name') }} — {{ __('home.hero_title') }}</h1>
+    <h1 class="sr-only">{{ __('brand.name') }} — {{ $intro['title'] }}</h1>
 
     <div class="relative h-[calc(100svh-7.5rem)] min-h-[34rem] max-h-[54rem]">
         <div class="flex h-full transition-transform duration-[900ms] ease-bader motion-reduce:transition-none" data-slider-track>
@@ -81,10 +89,10 @@
                             <div class="mt-8 flex animate-fade-up flex-wrap gap-3 [animation-delay:650ms]" data-replay>
                                 <a href="{{ $slide['donateUrl'] }}" class="btn-primary min-h-12 px-7 text-base">
                                     <x-bader.icon name="heart" class="h-5 w-5" />
-                                    {{ __('home.hero.donate') }}
+                                    {{ $slide['donateLabel'] }}
                                 </a>
                                 <a href="{{ $slide['detailsUrl'] }}" class="btn-ghost min-h-12 px-6 text-base">
-                                    {{ __('home.hero.details') }}
+                                    {{ $slide['detailsLabel'] }}
                                     <x-bader.icon name="arrow" class="h-4 w-4" />
                                 </a>
                             </div>

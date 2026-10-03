@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Campaign;
 use App\Models\Faq;
 use App\Models\Setting;
 use App\Models\User;
@@ -312,6 +313,62 @@ class DashboardSiteContentTest extends TestCase
                 'cards' => ['about' => [['icon' => '"><script>', 'title_ar' => 'بطاقة']]],
             ])
             ->assertSessionHasErrors('cards.about.0.icon');
+    }
+
+    public function test_hero_opens_with_the_organisation_slide_before_featured_projects(): void
+    {
+        Storage::fake('public');
+        $campaign = Campaign::factory()->featured()->create();
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSeeInOrder([__('home.hero_title'), __('home.hero.about'), $campaign->title], false);
+
+        $this->actingAs(User::factory()->create())
+            ->put(route('dashboard.homepage.update'), [
+                'sections' => ['quick_give' => ['visible' => '1']],
+                'hero_intro_enabled' => '1',
+                'hero_intro_image_file' => UploadedFile::fake()->image('hero.jpg', 1920, 1080),
+            ])
+            ->assertRedirect(route('dashboard.homepage.edit'));
+
+        $this->get(route('home'))->assertSee(asset((string) Setting::get('hero_intro_image')), false);
+
+        $this->put(route('dashboard.homepage.update'), [
+            'sections' => ['quick_give' => ['visible' => '1']],
+            'hero_intro_enabled' => '0',
+        ]);
+
+        $this->get(route('home'))
+            ->assertSee($campaign->title, false)
+            ->assertDontSee(__('home.hero.about'), false);
+    }
+
+    public function test_organisation_slide_content_and_buttons_are_edited_from_the_homepage_page(): void
+    {
+        $admin = User::factory()->create();
+
+        $this->actingAs($admin)
+            ->put(route('dashboard.homepage.update'), [
+                'sections' => ['quick_give' => ['visible' => '1']],
+                'hero_intro_badge_ar' => 'شارة مخصصة',
+                'hero_intro_title_ar' => 'عنوان الشريحة الأولى',
+                'hero_intro_text_ar' => 'وصف مكتوب من لوحة التحكم',
+                'hero_intro_primary_label_ar' => 'ادعم الآن',
+                'hero_intro_secondary_label_ar' => 'شاهد مشاريعنا',
+                'hero_intro_primary_url' => '/zakat',
+                'hero_intro_secondary_url' => 'https://example.org/report',
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSeeInOrder(['شارة مخصصة', 'عنوان', 'الشريحة', 'الأولى', 'وصف مكتوب من لوحة التحكم', url('/zakat'), 'ادعم الآن', 'https://example.org/report', 'شاهد مشاريعنا'], false);
+
+        $this->put(route('dashboard.homepage.update'), [
+            'sections' => ['quick_give' => ['visible' => '1']],
+            'hero_intro_primary_url' => 'javascript:alert(1)',
+        ])->assertSessionHasErrors('hero_intro_primary_url');
     }
 
     public function test_homepage_sections_can_be_hidden_and_reordered(): void
