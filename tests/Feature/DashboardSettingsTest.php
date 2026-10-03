@@ -19,7 +19,7 @@ class DashboardSettingsTest extends TestCase
     public function test_guest_cannot_update_site_settings(): void
     {
         $this->put(route('dashboard.settings.update'), [
-            'contact_phone' => '+968 1234 5678',
+            'contact_phone' => '+970 59 123 4567',
         ])->assertRedirect(route('login'));
     }
 
@@ -57,14 +57,14 @@ class DashboardSettingsTest extends TestCase
         $response = $this->actingAs($user)
             ->put(route('dashboard.settings.update'), [
                 'founded_year' => '2021',
-                'hq_location_ar' => 'سلطنة عمان، مسقط - المقر الرئيسي المعتمد',
-                'hq_location_en' => 'Sultanate of Oman, Muscat - Main HQ',
+                'hq_location_ar' => 'فلسطين، قطاع غزة - المقر الرئيسي المعتمد',
+                'hq_location_en' => 'Gaza Strip, Palestine - Main HQ',
                 'field_location_ar' => 'فلسطين، قطاع غزة - المكتب الميداني',
                 'field_location_en' => 'Palestine, Gaza Strip - Field Office',
                 'contact_email' => 'contact@baderhumanitarian.com',
-                'contact_phone' => '+968 9988 7766',
-                'contact_address_ar' => 'مسقط، سلطنة عمان',
-                'contact_address_en' => 'Muscat, Sultanate of Oman',
+                'contact_phone' => '+970 59988 7766',
+                'contact_address_ar' => 'غزة، فلسطين',
+                'contact_address_en' => 'Gaza, Palestine',
                 'urgent_enabled' => '1',
                 'urgent_text_ar' => 'نداء إغاثة عاجل لشمال غزة',
                 'urgent_text_en' => 'Emergency Appeal for North Gaza',
@@ -80,7 +80,7 @@ class DashboardSettingsTest extends TestCase
         ]);
         $this->assertDatabaseHas('settings', [
             'key' => 'contact_phone',
-            'value' => '+968 9988 7766',
+            'value' => '+970 59988 7766',
         ]);
         $this->assertDatabaseHas('settings', [
             'key' => 'urgent_text_ar',
@@ -94,9 +94,9 @@ class DashboardSettingsTest extends TestCase
 
         $this->actingAs($user)
             ->put(route('dashboard.settings.update'), [
-                'hq_location_ar' => 'سلطنة عمان، مسقط - المقر الرئيسي الجديد',
+                'hq_location_ar' => 'فلسطين، قطاع غزة - المقر الرئيسي الجديد',
                 'field_location_ar' => 'فلسطين، قطاع غزة - المركز الميداني المعتمد',
-                'contact_phone' => '+968 9988 7766',
+                'contact_phone' => '+970 59988 7766',
                 'contact_email' => 'director@baderhumanitarian.com',
                 'urgent_enabled' => '1',
                 'urgent_text_ar' => 'نداء إغاثة عاجل وفوري لأهلنا في قطاع غزة',
@@ -108,13 +108,13 @@ class DashboardSettingsTest extends TestCase
             ->assertOk()
             ->assertSee('نداء إغاثة عاجل وفوري لأهلنا في قطاع غزة', false)
             ->assertSee('https://baderhumanitarian.com/donate', false)
-            ->assertSee('سلطنة عمان، مسقط - المقر الرئيسي الجديد', false)
+            ->assertSee('فلسطين، قطاع غزة - المقر الرئيسي الجديد', false)
             ->assertSee('فلسطين، قطاع غزة - المركز الميداني المعتمد', false);
 
         // 2. Check Contact page displays the updated phone and email
         $this->get(route('contact'))
             ->assertOk()
-            ->assertSee('+968 9988 7766', false)
+            ->assertSee('+970 59988 7766', false)
             ->assertSee('director@baderhumanitarian.com', false);
     }
 
@@ -129,6 +129,7 @@ class DashboardSettingsTest extends TestCase
             ->assertSee(__('page.partners.title'), false)
             ->assertSee(__('page.volunteer.title'), false)
             ->assertSee('name="inst_about_president_speech_text_ar"', false)
+            ->assertSee('name="cards[about][3][title_ar]"', false)
             ->assertSee('name="inst_contact_intro_ar"', false);
     }
 
@@ -139,12 +140,13 @@ class DashboardSettingsTest extends TestCase
         $response = $this->actingAs($user)
             ->put(route('dashboard.pages.update'), [
                 'inst_about_intro_ar' => 'مؤسسة بادر الإنسانية - مقدمة محدثة ومخصصة للتعريف بالمؤسسة.',
-                'inst_about_mission_title_ar' => 'رسالتنا الإنسانية المحدثة',
-                'inst_about_mission_text_ar' => 'نص الرسالة المحدث من لوحة التحكم.',
                 'inst_about_president_speech_text_ar' => 'كلمة رئيس المؤسسة المكتوبة من لوحة التحكم.',
                 'inst_about_vision_text_ar' => 'رؤية بادر المكتوبة من لوحة التحكم.',
-                'inst_partners_local_title_ar' => 'شراكات محلية محدثة',
                 'inst_contact_intro_ar' => 'مقدمة صفحة التواصل من لوحة التحكم.',
+                'cards' => [
+                    'about' => [['icon' => 'heart', 'title_ar' => 'رسالتنا الإنسانية المحدثة', 'text_ar' => 'نص الرسالة المحدث من لوحة التحكم.']],
+                    'partners' => [['icon' => 'globe', 'title_ar' => 'شراكات محلية محدثة']],
+                ],
             ]);
 
         $response->assertRedirect(route('dashboard.pages.edit'));
@@ -160,6 +162,27 @@ class DashboardSettingsTest extends TestCase
 
         $this->get(route('partners'))->assertOk()->assertSee('شراكات محلية محدثة', false);
         $this->get(route('contact'))->assertOk()->assertSee('مقدمة صفحة التواصل من لوحة التحكم.', false);
+    }
+
+    public function test_founding_year_from_settings_is_used_by_every_text_that_mentions_it(): void
+    {
+        $this->get(route('about'))
+            ->assertOk()
+            ->assertSee('>2023</dd>', false)
+            ->assertSee('تأسست عام 2023', false);
+
+        $this->actingAs(User::factory()->create())
+            ->put(route('dashboard.settings.update'), ['founded_year' => '2022']);
+
+        $this->get(route('about'))
+            ->assertSee('>2022</dd>', false)
+            ->assertSee('تأسست عام 2022', false)
+            ->assertDontSee(':founded_year', false);
+        $this->get(route('faq'))
+            ->assertSee('تأسست عام 2022', false)
+            ->assertDontSee(':founded_year', false);
+        $this->get(route('dashboard.pages.edit'))
+            ->assertSee('تأسست عام :founded_year', false);
     }
 
     public function test_about_page_hides_president_speech_and_vision_until_they_are_filled_in(): void

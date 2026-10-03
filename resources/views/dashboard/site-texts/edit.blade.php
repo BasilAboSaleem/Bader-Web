@@ -86,6 +86,30 @@
                 $default = $defaults[$locale][$key] ?? '';
                 $value = $oldTexts[$locale][$key] ?? ($overrides[$locale][$key] ?? $default);
               @endphp
+              @if (isset($pluralForms[$locale][$key]))
+                <fieldset>
+                  <legend class="mb-1 block text-theme-xs font-medium text-gray-500 dark:text-gray-400">{{ __('dashboard.site_texts_locale.'.$locale) }}</legend>
+                  <p class="mb-2 text-[11px] leading-5 text-gray-400">{{ __('dashboard.site_texts_plural_hint') }}</p>
+                  <div class="space-y-2">
+                    @foreach ($pluralForms[$locale][$key] as $formIndex => $form)
+                      @php
+                        preg_match('/^\{(\d+)\}$|^\[(\d+),\s*(\d+|\*)\]$/', $form['condition'], $condition);
+                        $conditionLabel = match (true) {
+                            isset($condition[1]) && $condition[1] !== '' => __('dashboard.site_texts_plural_exact', ['n' => $condition[1]]),
+                            isset($condition[3]) && $condition[3] === '*' => __('dashboard.site_texts_plural_from', ['from' => $condition[2]]),
+                            isset($condition[3]) => __('dashboard.site_texts_plural_range', ['from' => $condition[2], 'to' => $condition[3]]),
+                            default => __('dashboard.site_texts_plural_form', ['n' => $formIndex + 1]),
+                        };
+                      @endphp
+                      <label class="flex items-center gap-2">
+                        <span class="w-24 shrink-0 text-[11px] font-medium text-gray-500 dark:text-gray-400">{{ $conditionLabel }}</span>
+                        <input type="text" name="texts[{{ $locale }}][{{ $key }}][{{ $formIndex }}]" value="{{ $oldTexts[$locale][$key][$formIndex] ?? $form['value'] }}" placeholder="{{ $form['text'] }}" @if ($locale === 'en') dir="ltr" @endif class="{{ $fieldClass }}">
+                      </label>
+                    @endforeach
+                  </div>
+                </fieldset>
+                @continue
+              @endif
               <div>
                 <label class="mb-1 block text-theme-xs font-medium text-gray-500 dark:text-gray-400" for="text-{{ $locale }}-{{ $loop->parent->index }}">{{ __('dashboard.site_texts_locale.'.$locale) }}</label>
                 <textarea id="text-{{ $locale }}-{{ $loop->parent->index }}" name="texts[{{ $locale }}][{{ $key }}]" rows="{{ mb_strlen($default) > 90 ? 3 : 1 }}" placeholder="{{ $default }}" @if ($locale === 'en') dir="ltr" @endif class="{{ $fieldClass }}">{{ $value }}</textarea>

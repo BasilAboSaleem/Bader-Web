@@ -9,7 +9,7 @@
 
         <div class="container-bader py-16 text-center sm:py-24">
             <p class="animate-fade-up text-[7rem] font-extrabold leading-none text-forest-700/15 sm:text-[10rem]" dir="ltr" aria-hidden="true">404</p>
-            <img src="{{ asset(config('bader.assets.mark_star')) }}" alt="" class="mx-auto -mt-10 h-14 w-14 animate-float sm:-mt-14">
+            <img src="{{ \App\Support\SiteSettings::brandAsset('mark_star') }}" alt="" class="mx-auto -mt-10 h-14 w-14 animate-float sm:-mt-14">
             <h1 class="mt-6 animate-fade-up text-3xl font-extrabold text-ink-900 [animation-delay:80ms] sm:text-4xl">{{ __('errors.404.title') }}</h1>
             <p class="mx-auto mt-4 max-w-xl animate-fade-up leading-8 text-muted [animation-delay:140ms]">{{ __('errors.404.text') }}</p>
             <div class="mt-8 flex animate-fade-up flex-wrap justify-center gap-3 [animation-delay:200ms]">

@@ -11,7 +11,7 @@
             <span class="inline-flex items-center gap-1.5 rounded-full bg-red-500/20 border border-red-500/40 px-2.5 py-0.5 text-[11px] font-bold text-red-300 uppercase tracking-wider">
                 <span class="h-1.5 w-1.5 rounded-full bg-red-400 animate-ping"></span>
                 <span class="h-1.5 w-1.5 rounded-full bg-red-400 absolute"></span>
-                <span>{{ app()->isLocale('ar') ? 'نداء استجابة عاجل' : 'Urgent Appeal' }}</span>
+                <span>{{ __('header.urgent_label') }}</span>
             </span>
             @if (!empty($urgentUrl))
                 <a href="{{ $urgentUrl }}" class="inline-flex items-center gap-2 font-medium text-sand-100 hover:text-gold-400 transition-colors">

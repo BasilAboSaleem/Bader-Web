@@ -153,8 +153,8 @@ class ContentManagementTest extends TestCase
             'description_en' => 'Providing clean drinking water tanks',
             'goal_amount' => 50000,
             'raised_amount' => 12500,
-            'currency_ar' => 'ريال عماني',
-            'currency_en' => 'OMR',
+            'currency_ar' => 'دولار أمريكي',
+            'currency_en' => 'USD',
             'is_featured' => true,
             'status' => 'published',
         ]);
@@ -181,8 +181,8 @@ class ContentManagementTest extends TestCase
             'description_en' => 'Updated description',
             'goal_amount' => 60000,
             'raised_amount' => 30000,
-            'currency_ar' => 'ريال عماني',
-            'currency_en' => 'OMR',
+            'currency_ar' => 'دولار أمريكي',
+            'currency_en' => 'USD',
             'is_featured' => false,
             'status' => 'under_review',
         ]);

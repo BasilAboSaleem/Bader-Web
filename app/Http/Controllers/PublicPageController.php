@@ -21,11 +21,7 @@ class PublicPageController extends Controller
 {
     public function about(): View
     {
-        return $this->page('about', [
-            'about.mission',
-            'about.work',
-            'about.independence',
-        ]);
+        return $this->page('about');
     }
 
     public function programs(): View
@@ -130,11 +126,7 @@ class PublicPageController extends Controller
 
     public function impact(): View
     {
-        return $this->page('impact', [
-            'impact.verification',
-            'impact.operations',
-            'impact.reporting',
-        ]);
+        return $this->page('impact');
     }
 
     public function news(): View
@@ -223,8 +215,8 @@ class PublicPageController extends Controller
             $frequency = Donation::FREQUENCY_ONCE;
         }
 
-        $categories = config('bader.donation_categories');
-        $category = in_array($query('category'), $categories, true) ? $query('category') : 'general';
+        $categories = SiteSettings::donationCategories();
+        $category = array_key_exists($query('category'), $categories) ? $query('category') : 'general';
 
         $giftDesigns = SiteSettings::giftDesigns();
 
@@ -257,7 +249,7 @@ class PublicPageController extends Controller
         return view('pages.gift', [
             'target' => $target,
             'giftDesigns' => SiteSettings::giftDesigns(),
-            'categories' => config('bader.donation_categories'),
+            'categories' => SiteSettings::donationCategories(),
         ]);
     }
 
@@ -271,20 +263,12 @@ class PublicPageController extends Controller
 
     public function partners(): View
     {
-        return $this->page('partners', [
-            'partners.local',
-            'partners.international',
-            'partners.community',
-        ]);
+        return $this->page('partners');
     }
 
     public function volunteer(): View
     {
-        return $this->page('volunteer', [
-            'volunteer.field',
-            'volunteer.skills',
-            'volunteer.commitment',
-        ]);
+        return $this->page('volunteer');
     }
 
     public function faq(): View
@@ -299,12 +283,12 @@ class PublicPageController extends Controller
         return view('pages.contact');
     }
 
-    /**
-     * @param  list<string>  $sections
-     */
-    private function page(string $key, array $sections): View
+    private function page(string $key): View
     {
-        return view('pages.public', compact('key', 'sections'));
+        return view('pages.public', [
+            'key' => $key,
+            'cards' => SiteSettings::institutionalCards($key),
+        ]);
     }
 
     /**

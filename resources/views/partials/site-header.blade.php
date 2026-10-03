@@ -42,7 +42,7 @@
     <div class="container-bader flex h-[4.5rem] items-center gap-4">
         <a href="{{ route('home') }}" class="group flex shrink-0 items-center gap-3" aria-label="{{ __('brand.name') }}">
             <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-950 p-2 shadow-card-sm transition-transform duration-300 ease-bader group-hover:scale-105">
-                <img src="{{ asset(config('bader.assets.mark_star')) }}" alt="" width="28" height="28" class="h-full w-full object-contain">
+                <img src="{{ \App\Support\SiteSettings::brandAsset('mark_star') }}" alt="" width="28" height="28" class="h-full w-full object-contain">
             </span>
             <span class="leading-tight">
                 <span class="block text-lg font-extrabold text-ink-900">{{ __('brand.name') }}</span>

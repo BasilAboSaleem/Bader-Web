@@ -59,13 +59,29 @@ return [
     | "extras" are optional blocks that only appear once the team fills them in.
     */
     'institutional_pages' => [
-        'about' => ['sections' => ['mission', 'work', 'independence'], 'extras' => ['president_speech', 'vision']],
-        'impact' => ['sections' => ['verification', 'operations', 'reporting'], 'extras' => []],
-        'partners' => ['sections' => ['local', 'international', 'community'], 'extras' => []],
-        'volunteer' => ['sections' => ['field', 'skills', 'commitment'], 'extras' => []],
+        'about' => ['sections' => ['mission' => 'heart', 'work' => 'map-pin', 'independence' => 'shield'], 'extras' => ['president_speech', 'vision']],
+        'impact' => ['sections' => ['verification' => 'check', 'operations' => 'building', 'reporting' => 'eye'], 'extras' => []],
+        'partners' => ['sections' => ['local' => 'hand-heart', 'international' => 'globe', 'community' => 'users'], 'extras' => []],
+        'volunteer' => ['sections' => ['field' => 'map-pin', 'skills' => 'sparkle', 'commitment' => 'shield'], 'extras' => []],
         'contact' => ['sections' => [], 'extras' => []],
         'faq' => ['sections' => [], 'extras' => []],
     ],
+
+    /*
+    | Cards per institutional page: "sections" above are the defaults until the team saves its own cards.
+    */
+    'page_cards' => [
+        'max' => 9,
+        'icons' => ['heart', 'hand-heart', 'shield', 'check', 'eye', 'globe', 'users', 'map-pin', 'building', 'sparkle', 'droplet', 'sprout', 'gift', 'calendar', 'info'],
+    ],
+
+    /*
+    | Homepage sections below the hero, in their default order. "quick_give" always sits right under
+    | the hero (it overlaps it), so it can be hidden but not moved.
+    */
+    'home_sections' => ['quick_give', 'regions', 'programs', 'projects', 'gift', 'news', 'map', 'sponsorship', 'ways_to_give', 'trust'],
+
+    'max_donation_categories' => 12,
 
     /*
     | Social platforms shown in the footer once a URL is saved in Site Settings.
@@ -74,12 +90,12 @@ return [
 
     /*
     | Public translation strings editable from Dashboard → Site texts, grouped by key prefix.
-    | Plural strings (containing "|") are not editable.
+    | Count-dependent strings ("{1} …|[2,*] …") are edited one form at a time.
     */
     'editable_text_groups' => [
         'home' => ['home.'],
         'layout' => ['header.', 'nav.', 'footer.', 'brand.', 'cta.', 'common.'],
-        'projects' => ['program_page.', 'campaigns_page.', 'campaign_page.', 'region_page.', 'facility_page.', 'project.', 'news_page.', 'story_page.'],
+        'projects' => ['program_page.', 'campaigns_page.', 'campaign_page.', 'campaign.', 'region_page.', 'region.', 'facility_page.', 'project.', 'news_page.', 'story_page.'],
         'sponsorship' => ['sponsorship_page.', 'sponsorship.'],
         'giving' => ['donate_page.', 'donate_box.', 'donate_success.', 'gift_page.', 'donation.'],
         'zakat' => ['zakat_page.', 'zakat.'],

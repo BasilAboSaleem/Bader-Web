@@ -52,7 +52,7 @@
         <summary class="flex cursor-pointer list-none items-center justify-between gap-3 p-5 lg:px-6">
           <span>
             <span class="block text-base font-semibold text-gray-900 dark:text-white">{{ __('page.'.$page.'.title') }}</span>
-            <span class="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">{{ __('dashboard.pages_page_hint', ['sections' => count($definition['sections'])]) }}</span>
+            <span class="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">{{ __('dashboard.pages_page_hint', ['sections' => count($definition['cards'])]) }}</span>
           </span>
           <span class="flex items-center gap-3">
             <a href="{{ route($page) }}" target="_blank" class="text-theme-xs font-medium text-brand-500 hover:underline">{{ __('dashboard.pages_view') }}</a>
@@ -73,6 +73,7 @@
                 @error($name) <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
               </div>
             @endforeach
+            <p class="text-theme-xs text-gray-400 md:col-span-2">{{ __('dashboard.hint.founded_year_token') }}</p>
           </div>
 
           {{-- Optional blocks (president's speech, vision) --}}
@@ -95,27 +96,49 @@
             </div>
           @endforeach
 
-          {{-- Section cards --}}
-          @foreach ($definition['sections'] as $section)
-            <div class="rounded-xl border border-gray-100 bg-gray-50/50 p-4 dark:border-gray-800 dark:bg-gray-900/40">
-              <h3 class="mb-3 text-theme-sm font-semibold text-gray-800 dark:text-white/90">
-                {{ __('dashboard.pages_card', ['number' => $loop->iteration]) }}
-              </h3>
-              <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                @foreach (config('bader.locales') as $locale)
-                  @php $titleName = "inst_{$page}_{$section}_title_{$locale}"; $textName = "inst_{$page}_{$section}_text_{$locale}"; @endphp
-                  <div>
-                    <label for="{{ $titleName }}" class="{{ $labelClass }}">{{ __('dashboard.title_'.$locale) }}</label>
-                    <input type="text" id="{{ $titleName }}" name="{{ $titleName }}" value="{{ old($titleName, $definition['values'][$titleName]) }}" @if ($locale === 'en') dir="ltr" @endif class="h-10 {{ $fieldClass }}">
-                    @error($titleName) <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
-                    <label for="{{ $textName }}" class="{{ $labelClass }} mt-2.5">{{ __('dashboard.text_'.$locale) }}</label>
-                    <textarea id="{{ $textName }}" name="{{ $textName }}" rows="3" @if ($locale === 'en') dir="ltr" @endif class="{{ $fieldClass }}">{{ old($textName, $definition['values'][$textName]) }}</textarea>
-                    @error($textName) <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
-                  </div>
-                @endforeach
-              </div>
+          {{-- Cards: existing ones plus empty rows to add more; a card with an empty Arabic title is removed --}}
+          @if ($definition['has_cards'])
+            <div>
+              <h3 class="text-theme-sm font-semibold text-gray-800 dark:text-white/90">{{ __('dashboard.pages_cards_title') }}</h3>
+              <p class="mt-0.5 text-theme-xs text-gray-500 dark:text-gray-400">{{ __('dashboard.pages_cards_hint', ['max' => $maxCards]) }}</p>
             </div>
-          @endforeach
+            @for ($row = 0; $row < min(count($definition['cards']) + 2, $maxCards); $row++)
+              @php
+                $card = $definition['cards'][$row] ?? [];
+                $isNewCard = $card === [];
+                $cardField = fn (string $field): string => "cards[{$page}][{$row}][{$field}]";
+                $cardOld = fn (string $field): string => (string) old("cards.{$page}.{$row}.{$field}", $card[$field] ?? '');
+              @endphp
+              <div @class(['rounded-xl border p-4', 'border-gray-100 bg-gray-50/50 dark:border-gray-800 dark:bg-gray-900/40' => ! $isNewCard, 'border-dashed border-gray-300 dark:border-gray-700' => $isNewCard])>
+                <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+                  <h4 class="text-theme-sm font-semibold text-gray-800 dark:text-white/90">
+                    {{ $isNewCard ? __('dashboard.pages_card_new') : __('dashboard.pages_card', ['number' => $row + 1]) }}
+                  </h4>
+                  <label class="flex items-center gap-2 text-theme-xs text-gray-600 dark:text-gray-400">
+                    {{ __('dashboard.pages_card_icon') }}
+                    <select name="{{ $cardField('icon') }}" class="h-9 rounded-lg border border-gray-300 bg-white px-2 text-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                      @foreach ($cardIcons as $icon)
+                        <option value="{{ $icon }}" @selected(($cardOld('icon') ?: 'sparkle') === $icon)>{{ __('dashboard.card_icon.'.$icon) }}</option>
+                      @endforeach
+                    </select>
+                  </label>
+                </div>
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  @foreach (config('bader.locales') as $locale)
+                    @php $titleId = "card_{$page}_{$row}_title_{$locale}"; $textId = "card_{$page}_{$row}_text_{$locale}"; @endphp
+                    <div>
+                      <label for="{{ $titleId }}" class="{{ $labelClass }}">{{ __('dashboard.title_'.$locale) }}</label>
+                      <input type="text" id="{{ $titleId }}" name="{{ $cardField('title_'.$locale) }}" value="{{ $cardOld('title_'.$locale) }}" @if ($locale === 'en') dir="ltr" @endif class="h-10 {{ $fieldClass }}">
+                      @error("cards.{$page}.{$row}.title_{$locale}") <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+                      <label for="{{ $textId }}" class="{{ $labelClass }} mt-2.5">{{ __('dashboard.text_'.$locale) }}</label>
+                      <textarea id="{{ $textId }}" name="{{ $cardField('text_'.$locale) }}" rows="3" @if ($locale === 'en') dir="ltr" @endif class="{{ $fieldClass }}">{{ $cardOld('text_'.$locale) }}</textarea>
+                      @error("cards.{$page}.{$row}.text_{$locale}") <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+                    </div>
+                  @endforeach
+                </div>
+              </div>
+            @endfor
+          @endif
         </div>
       </details>
     @endforeach

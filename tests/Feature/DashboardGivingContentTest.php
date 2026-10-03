@@ -132,7 +132,7 @@ class DashboardGivingContentTest extends TestCase
         $admin = User::factory()->create();
 
         $this->actingAs($admin)->put(route('dashboard.settings.update'), [
-            'whatsapp_number' => '+968 9123 4567',
+            'whatsapp_number' => '+970 59 123 4567',
             'gold_price_per_gram' => '101.5',
             'quick_give' => [
                 ['label_ar' => 'سقيا ماء', 'label_en' => 'Water', 'category' => 'sadaqah', 'amount' => '20'],
@@ -146,7 +146,7 @@ class DashboardGivingContentTest extends TestCase
             json_decode(Setting::get('quick_give_options'), true),
         );
 
-        $this->get(route('contact'))->assertSee('https://wa.me/96891234567', false);
+        $this->get(route('contact'))->assertSee('https://wa.me/970591234567', false);
 
         $this->actingAs($admin)->put(route('dashboard.settings.update'), [
             'quick_give' => [['label_ar' => 'بدون مبلغ', 'category' => 'general', 'amount' => '']],

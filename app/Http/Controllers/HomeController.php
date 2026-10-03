@@ -36,6 +36,7 @@ class HomeController extends Controller
             ->get();
 
         return view('home', [
+            'homeSections' => collect(SiteSettings::homeSections())->where('visible', true)->pluck('key')->all(),
             'heroCampaigns' => $heroCampaigns,
             'quickGiveOptions' => SiteSettings::quickGiveOptions(),
             'regions' => $regions,

@@ -7,7 +7,7 @@
 <section class="relative isolate overflow-hidden border-b border-hairline bg-paper-2">
     <div class="pointer-events-none absolute -end-24 -top-24 -z-10 h-72 w-72 rounded-full bg-gold-300/40 blur-3xl" aria-hidden="true"></div>
     <div class="pointer-events-none absolute -bottom-28 -start-16 -z-10 h-64 w-64 rounded-full bg-forest-500/10 blur-3xl" aria-hidden="true"></div>
-    <img src="{{ asset(config('bader.assets.mark_star')) }}" alt="" class="pointer-events-none absolute -end-10 top-1/2 -z-10 hidden h-72 w-72 -translate-y-1/2 opacity-[0.05] md:block" aria-hidden="true">
+    <img src="{{ \App\Support\SiteSettings::brandAsset('mark_star') }}" alt="" class="pointer-events-none absolute -end-10 top-1/2 -z-10 hidden h-72 w-72 -translate-y-1/2 opacity-[0.05] md:block" aria-hidden="true">
 
     <div class="container-bader py-10 sm:py-14">
         <nav aria-label="{{ __('common.breadcrumb') }}" class="animate-fade-up">

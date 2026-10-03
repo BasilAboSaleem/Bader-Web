@@ -89,10 +89,10 @@
                         <div class="mt-6">
                             <p class="field-label">{{ __('donate_page.category') }}</p>
                             <div class="flex flex-wrap gap-2">
-                                @foreach ($categories as $donationCategory)
+                                @foreach ($categories as $donationCategory => $categoryLabel)
                                     <label class="cursor-pointer">
                                         <input type="radio" name="donation_category" value="{{ $donationCategory }}" class="peer sr-only" @checked($selectedCategory === $donationCategory)>
-                                        <span class="chip peer-checked:border-forest-700 peer-checked:bg-forest-700 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-forest-600">{{ __('donation.category.'.$donationCategory) }}</span>
+                                        <span class="chip peer-checked:border-forest-700 peer-checked:bg-forest-700 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-forest-600">{{ $categoryLabel }}</span>
                                     </label>
                                 @endforeach
                             </div>

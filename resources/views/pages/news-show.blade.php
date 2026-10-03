@@ -64,7 +64,7 @@
                 <div class="mt-10 flex flex-wrap items-center justify-between gap-4 border-y border-hairline py-5" data-reveal>
                     <div class="flex items-center gap-3">
                         <span class="flex h-11 w-11 items-center justify-center rounded-full bg-teal-950">
-                            <img src="{{ asset(config('bader.assets.mark_star')) }}" alt="" class="h-5 w-5">
+                            <img src="{{ \App\Support\SiteSettings::brandAsset('mark_star') }}" alt="" class="h-5 w-5">
                         </span>
                         <span>
                             <span class="block text-sm font-extrabold text-ink-900">{{ __('brand.name') }}</span>

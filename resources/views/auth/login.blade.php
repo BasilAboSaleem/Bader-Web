@@ -9,7 +9,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#465fff">
   <title>{{ __('auth.login_title') }}</title>
-  <link rel="icon" href="{{ asset(config('bader.assets.favicon')) }}" type="image/svg+xml">
+  <link rel="icon" href="{{ \App\Support\SiteSettings::brandAsset('favicon') }}">
   @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-white font-outfit dark:bg-gray-900">
@@ -207,7 +207,7 @@
     <div class="relative z-10 flex max-w-sm flex-col items-center text-center">
       <div class="mb-8 rounded-2xl bg-white/10 p-5 backdrop-blur-xs border border-white/10 shadow-theme-lg">
         <img
-          src="{{ asset(config('bader.assets.mark_star')) }}"
+          src="{{ \App\Support\SiteSettings::brandAsset('mark_star') }}"
           alt="{{ __('brand.name') }}"
           width="72"
           height="72"

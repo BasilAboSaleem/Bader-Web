@@ -39,6 +39,12 @@ class SiteSettingController extends Controller
             'socialLinks' => SiteSettings::socialLinks(),
             'giftDesigns' => array_values(SiteSettings::giftDesigns()),
             'maxGiftDesigns' => self::MAX_GIFT_DESIGNS,
+            'donationCategories' => SiteSettings::donationCategoryDefinitions(),
+            'maxDonationCategories' => config('bader.max_donation_categories'),
+            'brandMarkUrl' => SiteSettings::brandAsset('mark_star'),
+            'brandFaviconUrl' => SiteSettings::brandAsset('favicon'),
+            'hasCustomMark' => filled(Setting::get('brand_mark_star')),
+            'hasCustomFavicon' => filled(Setting::get('brand_favicon')),
         ]);
     }
 
@@ -47,7 +53,19 @@ class SiteSettingController extends Controller
      */
     public function update(Request $request): RedirectResponse
     {
+        $updatesCategories = $request->has('donation_categories');
+        $categoryKeys = $updatesCategories
+            ? collect($request->input('donation_categories'))->pluck('key')->filter()->push('general')->unique()->values()->all()
+            : array_keys(SiteSettings::donationCategories());
+
         $validated = $request->validate([
+            'brand_mark_star_file' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
+            'brand_favicon_file' => ['nullable', 'file', 'mimes:png,ico,webp', 'max:1024'],
+            'donation_categories' => ['nullable', 'array', 'max:'.config('bader.max_donation_categories')],
+            'donation_categories.*' => ['array'],
+            'donation_categories.*.key' => ['nullable', 'string', 'max:40', 'regex:/^[a-z0-9_]+$/', 'distinct', 'required_with:donation_categories.*.label_ar'],
+            'donation_categories.*.label_ar' => ['nullable', 'string', 'max:60', 'required_with:donation_categories.*.key'],
+            'donation_categories.*.label_en' => ['nullable', 'string', 'max:60'],
             'founded_year' => ['nullable', 'string', 'max:20'],
             'hq_location_ar' => ['nullable', 'string', 'max:255'],
             'hq_location_en' => ['nullable', 'string', 'max:255'],
@@ -66,7 +84,7 @@ class SiteSettingController extends Controller
             'quick_give' => ['nullable', 'array', 'max:4'],
             'quick_give.*.label_ar' => ['nullable', 'string', 'max:60', 'required_with:quick_give.*.amount'],
             'quick_give.*.label_en' => ['nullable', 'string', 'max:60'],
-            'quick_give.*.category' => ['nullable', Rule::in(config('bader.donation_categories'))],
+            'quick_give.*.category' => ['nullable', Rule::in($categoryKeys)],
             'quick_give.*.amount' => ['nullable', 'numeric', 'min:1', 'max:100000', 'required_with:quick_give.*.label_ar'],
             'social' => ['nullable', 'array'],
             'social.*' => ['nullable', 'url:http,https', 'max:500'],
@@ -145,6 +163,31 @@ class SiteSettingController extends Controller
             ->values();
 
         Setting::set('gift_designs', $giftDesigns->isEmpty() ? '' : $giftDesigns->toJson(JSON_UNESCAPED_UNICODE), 'giving');
+
+        if ($updatesCategories) {
+            $donationCategories = collect($validated['donation_categories'] ?? [])
+                ->filter(fn (array $category): bool => filled($category['key'] ?? null) && filled($category['label_ar'] ?? null))
+                ->map(fn (array $category): array => [
+                    'key' => $category['key'],
+                    'label_ar' => $category['label_ar'],
+                    'label_en' => $category['label_en'] ?? '',
+                ])
+                ->values();
+
+            if (! $donationCategories->contains('key', 'general')) {
+                $donationCategories->prepend(['key' => 'general', 'label_ar' => __('donation.category.general', [], 'ar'), 'label_en' => __('donation.category.general', [], 'en')]);
+            }
+
+            Setting::set('donation_categories', $donationCategories->toJson(JSON_UNESCAPED_UNICODE), 'giving');
+        }
+
+        foreach (['mark_star', 'favicon'] as $asset) {
+            if ($request->hasFile("brand_{$asset}_file")) {
+                Setting::set("brand_{$asset}", 'storage/'.$request->file("brand_{$asset}_file")->store('branding', 'public'), 'branding');
+            } elseif ($request->boolean("brand_{$asset}_reset")) {
+                Setting::set("brand_{$asset}", '', 'branding');
+            }
+        }
 
         return redirect()->route('dashboard.settings.edit')
             ->with('status', __('dashboard.settings_saved'));

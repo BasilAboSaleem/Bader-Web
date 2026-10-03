@@ -7,7 +7,7 @@
 @endphp
 
 <section class="band-anchor relative isolate overflow-hidden section-y" aria-labelledby="trust-pillars-title">
-    <img src="{{ asset(config('bader.assets.mark_star')) }}" alt="" class="pointer-events-none absolute -end-20 top-1/2 -z-10 h-96 w-96 -translate-y-1/2 opacity-[0.04]" aria-hidden="true">
+    <img src="{{ \App\Support\SiteSettings::brandAsset('mark_star') }}" alt="" class="pointer-events-none absolute -end-20 top-1/2 -z-10 h-96 w-96 -translate-y-1/2 opacity-[0.04]" aria-hidden="true">
     <div class="container-bader">
         <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:items-center">
             <div data-reveal>

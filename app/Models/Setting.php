@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class Setting extends Model
 {
@@ -15,15 +16,24 @@ class Setting extends Model
         'group',
     ];
 
+    private const CACHE_KEY = 'bader.settings';
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => Cache::store('array')->forget(self::CACHE_KEY));
+        static::deleted(fn () => Cache::store('array')->forget(self::CACHE_KEY));
+    }
+
     /**
-     * Retrieve a setting by its unique key.
+     * Retrieve a setting by its unique key. All settings are loaded once per request, since a single page
+     * reads dozens of them.
      */
     public static function get(string $key, mixed $default = null): mixed
     {
         try {
-            $setting = static::query()->where('key', $key)->first();
+            $settings = Cache::store('array')->rememberForever(self::CACHE_KEY, fn (): array => static::query()->pluck('value', 'key')->all());
 
-            return $setting !== null ? $setting->value : $default;
+            return array_key_exists($key, $settings) ? $settings[$key] : $default;
         } catch (\Throwable) {
             return $default;
         }

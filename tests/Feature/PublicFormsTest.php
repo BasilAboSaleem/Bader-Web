@@ -16,7 +16,7 @@ class PublicFormsTest extends TestCase
         $response = $this->post(route('contact.submit'), [
             'name' => 'محمد سعيد',
             'email' => 'mohammed@example.com',
-            'phone' => '+968 91234567',
+            'phone' => '+970 591234567',
             'subject' => 'استفسار عن مشاريع الإغاثة',
             'message' => 'نود الاستفسار عن كيفية توجيه المساعدات للمناطق الشمالية.',
         ]);
@@ -45,10 +45,10 @@ class PublicFormsTest extends TestCase
     public function test_user_can_submit_partnership_proposal(): void
     {
         $response = $this->post(route('partners.submit'), [
-            'name' => 'د. خالد العماني',
+            'name' => 'د. خالد الغزي',
             'organization' => 'مؤسسة الأمل الخيرية',
             'email' => 'contact@alamal-ngo.org',
-            'phone' => '+968 99887766',
+            'phone' => '+970 599887766',
             'partnership_type' => 'تمويل برامج المياه',
             'message' => 'نرغب في عقد اتفاقية تعاون لتشغيل محطة تحلية مياه في غزة.',
         ]);
@@ -56,7 +56,7 @@ class PublicFormsTest extends TestCase
         $response->assertSessionHas('success_message');
         $this->assertDatabaseHas('form_submissions', [
             'type' => 'partnership',
-            'name' => 'د. خالد العماني',
+            'name' => 'د. خالد الغزي',
             'organization' => 'مؤسسة الأمل الخيرية',
             'status' => 'unread',
         ]);
@@ -67,8 +67,8 @@ class PublicFormsTest extends TestCase
         $response = $this->post(route('volunteer.submit'), [
             'name' => 'سارة أحمد',
             'email' => 'sara@example.com',
-            'phone' => '+968 93332211',
-            'location' => 'مسقط',
+            'phone' => '+970 593332211',
+            'location' => 'غزة',
             'skills' => 'ترجمة وتصميم جرافيك',
             'availability' => 'عطلات نهاية الأسبوع',
             'message' => 'متحمسة للمساهمة في إعداد التقارير الإعلامية بالإنجليزية.',
@@ -78,7 +78,7 @@ class PublicFormsTest extends TestCase
         $this->assertDatabaseHas('form_submissions', [
             'type' => 'volunteer',
             'name' => 'سارة أحمد',
-            'location' => 'مسقط',
+            'location' => 'غزة',
             'status' => 'unread',
         ]);
     }
@@ -88,7 +88,7 @@ class PublicFormsTest extends TestCase
         $response = $this->post(route('sponsorship.submit'), [
             'name' => 'أحمد الهنائي',
             'email' => 'ahmed@example.com',
-            'phone' => '+968 95554433',
+            'phone' => '+970 595554433',
             'sponsorship_type' => 'orphan',
             'beneficiaries_count' => 2,
             'message' => 'أرغب في كفالة يتيمين شهرياً وتزويدي بتقارير دورية.',
@@ -136,9 +136,9 @@ class PublicFormsTest extends TestCase
         ]);
 
         $response = $this->post(route('donate.transfer.submit'), [
-            'donor_name' => 'فاعل خير مسقط',
+            'donor_name' => 'فاعل خير غزة',
             'donor_email' => 'donor@example.com',
-            'donor_phone' => '+968 98765432',
+            'donor_phone' => '+970 598765432',
             'campaign_id' => $campaign->id,
             'amount' => 250.00,
             'reference_number' => 'BM-99882211',
@@ -150,7 +150,7 @@ class PublicFormsTest extends TestCase
 
         // Check donation record created as pending
         $this->assertDatabaseHas('donations', [
-            'donor_name' => 'فاعل خير مسقط',
+            'donor_name' => 'فاعل خير غزة',
             'amount' => 250.00,
             'reference_number' => 'BM-99882211',
             'status' => 'pending',
@@ -159,7 +159,7 @@ class PublicFormsTest extends TestCase
         // Check inbox entry created
         $this->assertDatabaseHas('form_submissions', [
             'type' => 'donation_transfer',
-            'name' => 'فاعل خير مسقط',
+            'name' => 'فاعل خير غزة',
             'status' => 'unread',
         ]);
     }

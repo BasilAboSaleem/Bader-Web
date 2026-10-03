@@ -41,6 +41,22 @@ class SiteTextController extends Controller
             )), 0, self::SEARCH_LIMIT)
             : $this->keysForPrefixes($groups[$group]);
 
+        $pluralForms = [];
+
+        foreach ($keys as $key) {
+            foreach (config('bader.locales') as $locale) {
+                $default = (string) ($defaults[$locale][$key] ?? '');
+
+                if (str_contains($default, '|')) {
+                    $pluralForms[$locale][$key] = array_map(
+                        fn (array $defaultForm, ?array $currentForm): array => $defaultForm + ['value' => $currentForm['text'] ?? $defaultForm['text']],
+                        self::pluralForms($default),
+                        array_pad(self::pluralForms((string) ($overrides[$locale][$key] ?? $default)), count(self::pluralForms($default)), null),
+                    );
+                }
+            }
+        }
+
         return view('dashboard.site-texts.edit', [
             'groups' => array_keys($groups),
             'group' => $group,
@@ -48,6 +64,7 @@ class SiteTextController extends Controller
             'keys' => $keys,
             'defaults' => $defaults,
             'overrides' => $overrides,
+            'pluralForms' => $pluralForms,
             'customisedCount' => count($overrides['ar']) + count($overrides['en']),
         ]);
     }
@@ -74,8 +91,8 @@ class SiteTextController extends Controller
                     continue;
                 }
 
-                $value = trim((string) $value);
                 $default = (string) ($defaults[$locale][$key] ?? '');
+                $value = is_array($value) ? $this->joinPluralForms($default, $value) : trim((string) $value);
 
                 if ($value === '' || $value === $default) {
                     unset($overrides[$locale][$key]);
@@ -159,18 +176,47 @@ class SiteTextController extends Controller
     }
 
     /**
-     * Keys starting with one of the prefixes, excluding plural strings whose "|" segments must stay intact.
-     *
      * @param  list<string>  $prefixes
      * @return list<string>
      */
     private function keysForPrefixes(array $prefixes): array
     {
-        $defaults = $this->defaults()['ar'];
-
         return array_values(array_filter(
-            array_keys($defaults),
-            fn (string $key): bool => Str::startsWith($key, $prefixes) && ! str_contains((string) $defaults[$key], '|'),
+            array_keys($this->defaults()['ar']),
+            fn (string $key): bool => Str::startsWith($key, $prefixes),
+        ));
+    }
+
+    /**
+     * Split a count-dependent string ("{1} one item|[2,*] :count items") into its forms.
+     *
+     * @return list<array{condition: string, text: string}>
+     */
+    private static function pluralForms(string $text): array
+    {
+        return array_map(function (string $form): array {
+            preg_match('/^\s*(\{\d+\}|\[\d+,\s*(?:\d+|\*)\])?\s*(.*)$/su', $form, $matches);
+
+            return ['condition' => $matches[1] ?? '', 'text' => trim($matches[2] ?? $form)];
+        }, explode('|', $text));
+    }
+
+    /**
+     * Rebuild a count-dependent string from the submitted texts, keeping the default's conditions and
+     * falling back to the default wording for any form left empty.
+     *
+     * @param  array<int|string, mixed>  $texts
+     */
+    private function joinPluralForms(string $default, array $texts): string
+    {
+        return implode('|', array_map(
+            function (array $form, int $index) use ($texts): string {
+                $text = trim((string) ($texts[$index] ?? ''));
+
+                return trim($form['condition'].' '.($text !== '' ? $text : $form['text']));
+            },
+            self::pluralForms($default),
+            array_keys(self::pluralForms($default)),
         ));
     }
 
@@ -179,6 +225,16 @@ class SiteTextController extends Controller
      */
     private function missingPlaceholders(string $default, string $value): array
     {
+        if (str_contains($default, '|')) {
+            $valueForms = self::pluralForms($value);
+
+            return array_values(array_unique(array_merge([], ...array_map(
+                fn (array $form, int $index): array => $this->missingPlaceholders($form['text'], $valueForms[$index]['text'] ?? ''),
+                self::pluralForms($default),
+                array_keys(self::pluralForms($default)),
+            ))));
+        }
+
         preg_match_all('/:([A-Za-z_]+)/', $default, $matches);
 
         return array_values(array_filter(

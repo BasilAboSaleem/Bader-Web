@@ -54,7 +54,7 @@
                 @foreach ($fallbackPrograms as $programKey)
                     <article class="surface-card flex flex-col p-6" data-reveal>
                         <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-forest-600/10">
-                            <img src="{{ asset(config('bader.assets.mark_star')) }}" alt="" class="h-6 w-6 object-contain">
+                            <img src="{{ \App\Support\SiteSettings::brandAsset('mark_star') }}" alt="" class="h-6 w-6 object-contain">
                         </span>
                         <h2 class="mt-5 text-xl font-extrabold text-ink-900">{{ __('program.'.$programKey) }}</h2>
                         <p class="mt-3 text-sm leading-relaxed text-muted">{{ __('program.'.$programKey.'_text') }}</p>

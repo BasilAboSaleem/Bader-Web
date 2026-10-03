@@ -32,7 +32,7 @@ class DonationPaymentController extends Controller
         $validated = $request->validate([
             'target_type' => ['required', 'string', 'in:campaign,program,facility,sponsorship,general'],
             'target_id' => ['nullable', 'integer'],
-            'donation_category' => ['required', 'string', Rule::in(config('bader.donation_categories'))],
+            'donation_category' => ['required', 'string', Rule::in(array_keys(SiteSettings::donationCategories()))],
             'amount' => ['required', 'numeric', 'min:1', 'max:1000000'],
             'frequency' => ['nullable', Rule::in([Donation::FREQUENCY_ONCE, Donation::FREQUENCY_MONTHLY])],
             'currency' => ['nullable', 'string', 'in:USD'],

@@ -79,7 +79,7 @@
                         </label>
                         <label class="block">
                             <span class="field-label">{{ __('gift_page.recipient_contact') }}</span>
-                            <input type="text" name="gift_recipient_contact" maxlength="255" class="field-input" dir="ltr" placeholder="name@example.com / +968…">
+                            <input type="text" name="gift_recipient_contact" maxlength="255" class="field-input" dir="ltr" placeholder="name@example.com / +970…">
                         </label>
                         <label class="block sm:col-span-2">
                             <span class="field-label">{{ __('gift_page.sender_name') }}</span>
@@ -112,8 +112,8 @@
                         <label class="mt-5 block">
                             <span class="field-label">{{ __('donate_page.category') }}</span>
                             <select name="category" class="field-input">
-                                @foreach ($categories as $category)
-                                    <option value="{{ $category }}" @selected($category === 'sadaqah')>{{ __('donation.category.'.$category) }}</option>
+                                @foreach ($categories as $category => $categoryLabel)
+                                    <option value="{{ $category }}" @selected($category === 'sadaqah')>{{ $categoryLabel }}</option>
                                 @endforeach
                             </select>
                         </label>
@@ -126,7 +126,7 @@
                 <div class="gift-card gift-card-preview" data-gift-preview data-design="{{ $firstDesign['key'] }}"
                     style="--gift-from: {{ $firstDesign['from'] }}; --gift-to: {{ $firstDesign['to'] }}; --gift-accent: {{ $firstDesign['accent'] }}">
                     <div class="flex items-center justify-between">
-                        <img src="{{ asset(config('bader.assets.mark_star')) }}" alt="" class="h-9 w-9">
+                        <img src="{{ \App\Support\SiteSettings::brandAsset('mark_star') }}" alt="" class="h-9 w-9">
                         <span class="rounded-full bg-white/15 px-3 py-1 text-xs font-bold" data-gift-design-label>{{ $firstDesign['label_'.$locale] ?? $firstDesign['label_ar'] }}</span>
                     </div>
                     <p class="mt-8 text-sm opacity-80">{{ __('gift_page.preview_to') }}</p>

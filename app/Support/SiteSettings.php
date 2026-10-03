@@ -21,7 +21,7 @@ class SiteSettings
     {
         $year = Setting::get('founded_year');
 
-        return ! empty($year) ? (string) $year : '2024';
+        return ! empty($year) ? (string) $year : '2023';
     }
 
     /**
@@ -222,15 +222,30 @@ class SiteSettings
      */
     public static function pageIntro(string $page, ?string $locale = null): string
     {
+        return self::withFoundedYear(self::pageIntroTemplate($page, $locale));
+    }
+
+    /**
+     * Page intro as the team edits it, with ":founded_year" left in place.
+     */
+    public static function pageIntroTemplate(string $page, ?string $locale = null): string
+    {
         $loc = $locale ?? app()->getLocale();
-        $key = "inst_{$page}_intro_{$loc}";
-        $custom = Setting::get($key);
+        $custom = Setting::get("inst_{$page}_intro_{$loc}");
 
         if (! empty($custom)) {
             return $custom;
         }
 
         return __("page.{$page}.intro", [], $loc);
+    }
+
+    /**
+     * Replace ":founded_year" with the founding year from Site Settings, so texts follow it when it changes.
+     */
+    public static function withFoundedYear(string $text): string
+    {
+        return str_replace(':founded_year', self::foundedYear(), $text);
     }
 
     /**
@@ -340,6 +355,164 @@ class SiteSettings
                 'accent' => (string) ($design['accent'] ?? '#e1e56b'),
             ]])
             ->all();
+    }
+
+    /**
+     * Public URL of a brand asset ("mark_star" or "favicon"); uploads from Site Settings replace the bundled
+     * files, and the favicon falls back to an uploaded mark before the bundled icon.
+     */
+    public static function brandAsset(string $asset): string
+    {
+        $candidates = $asset === 'favicon' ? ['brand_favicon', 'brand_mark_star'] : ["brand_{$asset}"];
+
+        foreach ($candidates as $settingKey) {
+            $path = trim((string) Setting::get($settingKey, ''));
+
+            if ($path !== '') {
+                return asset($path);
+            }
+        }
+
+        return asset((string) config("bader.assets.{$asset}"));
+    }
+
+    /**
+     * Donation categories offered to donors, keyed by category key, labelled in the given locale.
+     * "general" is always present because it is the fallback category.
+     *
+     * @return array<string, string>
+     */
+    public static function donationCategories(?string $locale = null): array
+    {
+        $loc = $locale ?? app()->getLocale();
+
+        return collect(self::donationCategoryDefinitions())
+            ->mapWithKeys(fn (array $category): array => [
+                $category['key'] => ($loc === 'en' && $category['label_en'] !== '') ? $category['label_en'] : ($category['label_ar'] !== '' ? $category['label_ar'] : __('donation.category.'.$category['key'], [], $loc)),
+            ])
+            ->all();
+    }
+
+    /**
+     * Label for any category key, including categories removed after donations were made with them.
+     */
+    public static function donationCategoryLabel(?string $key, ?string $locale = null): string
+    {
+        $key = (string) $key;
+        $categories = self::donationCategories($locale);
+
+        if (isset($categories[$key])) {
+            return $categories[$key];
+        }
+
+        $translationKey = "donation.category.{$key}";
+        $translated = __($translationKey, [], $locale ?? app()->getLocale());
+
+        return $translated !== $translationKey ? $translated : $key;
+    }
+
+    /**
+     * Category definitions for the settings form, with both labels.
+     *
+     * @return list<array{key: string, label_ar: string, label_en: string}>
+     */
+    public static function donationCategoryDefinitions(): array
+    {
+        $stored = json_decode((string) Setting::get('donation_categories', ''), true);
+        $definitions = is_array($stored) && $stored !== []
+            ? collect($stored)
+                ->filter(fn ($category) => is_array($category) && filled($category['key'] ?? null))
+                ->map(fn (array $category): array => [
+                    'key' => (string) $category['key'],
+                    'label_ar' => (string) ($category['label_ar'] ?? ''),
+                    'label_en' => (string) ($category['label_en'] ?? ''),
+                ])
+            : collect(config('bader.donation_categories'))->map(fn (string $key): array => [
+                'key' => $key,
+                'label_ar' => __("donation.category.{$key}", [], 'ar'),
+                'label_en' => __("donation.category.{$key}", [], 'en'),
+            ]);
+
+        if (! $definitions->contains('key', 'general')) {
+            $definitions->prepend(['key' => 'general', 'label_ar' => __('donation.category.general', [], 'ar'), 'label_en' => __('donation.category.general', [], 'en')]);
+        }
+
+        return $definitions->values()->all();
+    }
+
+    /**
+     * Cards shown on an institutional page, in the given locale, falling back to Arabic per field.
+     *
+     * @return list<array{icon: string, title: string, text: string}>
+     */
+    public static function institutionalCards(string $page, ?string $locale = null): array
+    {
+        $loc = $locale ?? app()->getLocale();
+
+        return array_values(array_filter(array_map(fn (array $card): array => [
+            'icon' => $card['icon'],
+            'title' => $card["title_{$loc}"] !== '' ? $card["title_{$loc}"] : $card['title_ar'],
+            'text' => $card["text_{$loc}"] !== '' ? $card["text_{$loc}"] : $card['text_ar'],
+        ], self::institutionalCardDefinitions($page)), fn (array $card): bool => $card['title'] !== ''));
+    }
+
+    /**
+     * Cards of an institutional page with both languages, as saved from Dashboard → Pages, or the
+     * default cards (and any older per-card settings) until the team saves its own list.
+     *
+     * @return list<array{icon: string, title_ar: string, title_en: string, text_ar: string, text_en: string}>
+     */
+    public static function institutionalCardDefinitions(string $page): array
+    {
+        $stored = json_decode((string) Setting::get("inst_{$page}_cards", ''), true);
+
+        if (is_array($stored)) {
+            return array_values(array_map(fn (array $card): array => [
+                'icon' => in_array($card['icon'] ?? null, config('bader.page_cards.icons'), true) ? $card['icon'] : 'sparkle',
+                'title_ar' => (string) ($card['title_ar'] ?? ''),
+                'title_en' => (string) ($card['title_en'] ?? ''),
+                'text_ar' => (string) ($card['text_ar'] ?? ''),
+                'text_en' => (string) ($card['text_en'] ?? ''),
+            ], array_filter($stored, 'is_array')));
+        }
+
+        $cards = [];
+
+        foreach (config("bader.institutional_pages.{$page}.sections", []) as $section => $icon) {
+            $cards[] = [
+                'icon' => $icon,
+                'title_ar' => self::institutionalTitle($page, "{$page}.{$section}", 'ar'),
+                'title_en' => self::institutionalTitle($page, "{$page}.{$section}", 'en'),
+                'text_ar' => self::institutionalText($page, "{$page}.{$section}", 'ar'),
+                'text_en' => self::institutionalText($page, "{$page}.{$section}", 'en'),
+            ];
+        }
+
+        return $cards;
+    }
+
+    /**
+     * Homepage sections in display order with their visibility; sections added to the config later are
+     * appended visible, and "quick_give" always stays first.
+     *
+     * @return list<array{key: string, visible: bool}>
+     */
+    public static function homeSections(): array
+    {
+        $available = config('bader.home_sections');
+        $stored = json_decode((string) Setting::get('home_sections', ''), true);
+        $sections = collect(is_array($stored) ? $stored : [])
+            ->filter(fn ($section) => is_array($section) && in_array($section['key'] ?? null, $available, true))
+            ->unique('key')
+            ->map(fn (array $section): array => ['key' => $section['key'], 'visible' => (bool) ($section['visible'] ?? true)]);
+
+        foreach ($available as $key) {
+            if (! $sections->contains('key', $key)) {
+                $sections->push(['key' => $key, 'visible' => true]);
+            }
+        }
+
+        return $sections->sortBy(fn (array $section): int => $section['key'] === 'quick_give' ? 0 : 1)->values()->all();
     }
 
     /**

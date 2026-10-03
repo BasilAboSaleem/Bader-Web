@@ -37,7 +37,7 @@
         <div class="space-y-5">
             <a href="{{ route('home') }}" class="inline-flex items-center gap-3">
                 <span class="flex h-12 w-12 items-center justify-center rounded-2xl border border-gold-500/30 bg-teal-900 p-2.5">
-                    <img src="{{ asset(config('bader.assets.mark_star')) }}" alt="" width="28" height="28" class="h-full w-full object-contain">
+                    <img src="{{ \App\Support\SiteSettings::brandAsset('mark_star') }}" alt="" width="28" height="28" class="h-full w-full object-contain">
                 </span>
                 <span class="leading-tight">
                     <span class="block text-xl font-extrabold text-white">{{ __('brand.name') }}</span>

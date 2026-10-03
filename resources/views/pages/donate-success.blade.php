@@ -31,7 +31,7 @@
                 <div class="surface-card mt-10 overflow-hidden" data-receipt>
                     <div class="flex items-center justify-between gap-4 border-b border-hairline bg-paper-2 px-6 py-4">
                         <div class="flex items-center gap-3">
-                            <img src="{{ asset(config('bader.assets.mark_star')) }}" alt="" class="h-8 w-8">
+                            <img src="{{ \App\Support\SiteSettings::brandAsset('mark_star') }}" alt="" class="h-8 w-8">
                             <div>
                                 <p class="font-extrabold text-ink-900">{{ __('donate_success.receipt_title') }}</p>
                                 <p class="text-xs text-subtle">{{ __('brand.name') }}</p>
@@ -63,7 +63,7 @@
                         @if ($donation->donation_category)
                             <div class="flex justify-between gap-4 py-3">
                                 <dt class="text-subtle">{{ __('donate_page.category') }}</dt>
-                                <dd class="font-bold text-ink-900">{{ __('donation.category.'.$donation->donation_category) }}</dd>
+                                <dd class="font-bold text-ink-900">{{ \App\Support\SiteSettings::donationCategoryLabel($donation->donation_category) }}</dd>
                             </div>
                         @endif
                         <div class="flex justify-between gap-4 py-3">
@@ -84,7 +84,7 @@
                         <p class="mb-3 text-sm font-bold text-subtle">{{ __('donate_success.gift_card') }}</p>
                         <div class="gift-card gift-card-preview" style="--gift-from: {{ $giftCard['from'] ?? '#0a2e2f' }}; --gift-to: {{ $giftCard['to'] ?? '#1f6b38' }}; --gift-accent: {{ $giftCard['accent'] ?? '#e1e56b' }}">
                             <div class="flex items-center justify-between">
-                                <img src="{{ asset(config('bader.assets.mark_star')) }}" alt="" class="h-9 w-9">
+                                <img src="{{ \App\Support\SiteSettings::brandAsset('mark_star') }}" alt="" class="h-9 w-9">
                                 <span class="rounded-full bg-white/15 px-3 py-1 text-xs font-bold">{{ $giftCard['label_'.$locale] ?? $giftCard['label_ar'] }}</span>
                             </div>
                             <p class="mt-8 text-sm opacity-80">{{ __('gift_page.preview_to') }}</p>

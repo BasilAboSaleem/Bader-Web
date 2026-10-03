@@ -39,8 +39,8 @@ class DonationController extends Controller
     {
         return view('dashboard.donations.form', [
             'donation' => new Donation([
-                'currency_ar' => 'ريال عماني',
-                'currency_en' => 'OMR',
+                'currency_ar' => 'دولار أمريكي',
+                'currency_en' => 'USD',
                 'payment_method' => 'bank_transfer',
                 'status' => 'verified',
                 'transfer_date' => now()->toDateString(),

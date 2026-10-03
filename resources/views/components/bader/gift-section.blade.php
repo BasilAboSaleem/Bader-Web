@@ -40,7 +40,7 @@
                 <div class="gift-card absolute w-64 animate-float motion-reduce:animate-none sm:w-72 {{ $cardPlacements[$index] }}"
                     style="--gift-from: {{ $design['from'] }}; --gift-to: {{ $design['to'] }}; --gift-accent: {{ $design['accent'] }}">
                     <div class="flex items-center justify-between">
-                        <img src="{{ asset(config('bader.assets.mark_star')) }}" alt="" class="h-7 w-7 opacity-90">
+                        <img src="{{ \App\Support\SiteSettings::brandAsset('mark_star') }}" alt="" class="h-7 w-7 opacity-90">
                         <x-bader.icon name="gift" class="h-5 w-5 text-[var(--gift-accent)]" />
                     </div>
                     <p class="mt-6 text-xs font-bold opacity-80">{{ __('home.gift.card_label') }}</p>

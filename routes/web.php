@@ -5,6 +5,7 @@ use App\Http\Controllers\Dashboard\CampaignController;
 use App\Http\Controllers\Dashboard\DonationController;
 use App\Http\Controllers\Dashboard\FacilityController;
 use App\Http\Controllers\Dashboard\FaqController;
+use App\Http\Controllers\Dashboard\HomepageController;
 use App\Http\Controllers\Dashboard\ImpactMetricController;
 use App\Http\Controllers\Dashboard\InboxController;
 use App\Http\Controllers\Dashboard\InstitutionalPageController;
@@ -88,6 +89,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/dashboard/settings', [SiteSettingController::class, 'edit'])->name('dashboard.settings.edit');
     Route::put('/dashboard/settings', [SiteSettingController::class, 'update'])->name('dashboard.settings.update');
+    Route::get('/dashboard/homepage', [HomepageController::class, 'edit'])->name('dashboard.homepage.edit');
+    Route::put('/dashboard/homepage', [HomepageController::class, 'update'])->name('dashboard.homepage.update');
     Route::get('/dashboard/pages', [InstitutionalPageController::class, 'edit'])->name('dashboard.pages.edit');
     Route::put('/dashboard/pages', [InstitutionalPageController::class, 'update'])->name('dashboard.pages.update');
     Route::get('/dashboard/site-texts', [SiteTextController::class, 'edit'])->name('dashboard.site-texts.edit');

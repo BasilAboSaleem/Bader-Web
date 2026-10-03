@@ -55,6 +55,7 @@
           <label for="answer_en" class="{{ $labelClass }}">{{ __('dashboard.answer_en') }}</label>
           <textarea id="answer_en" name="answer_en" rows="6" dir="ltr" class="{{ $textareaClass }}">{{ old('answer_en', $faq->answer_en) }}</textarea>
         </div>
+        <p class="text-theme-xs text-gray-400 md:col-span-2">{{ __('dashboard.hint.founded_year_token') }}</p>
         <div>
           <label for="order" class="{{ $labelClass }}">{{ __('dashboard.field.order') }}</label>
           <input type="number" id="order" name="order" value="{{ old('order', $faq->order ?? 0) }}" min="0" class="{{ $inputClass }}">

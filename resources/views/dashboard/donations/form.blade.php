@@ -75,7 +75,7 @@
 
         <div>
           <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300">{{ __('dashboard.field.currency_ar') }}</label>
-          <input type="text" name="currency_ar" value="{{ old('currency_ar', $donation->currency_ar ?? 'ريال عماني') }}"
+          <input type="text" name="currency_ar" value="{{ old('currency_ar', $donation->currency_ar ?? 'دولار أمريكي') }}"
                  class="mt-1.5 block w-full rounded-lg border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-800 focus:border-brand-500 focus:outline-none dark:border-gray-800 dark:bg-gray-800 dark:text-gray-200">
         </div>
 

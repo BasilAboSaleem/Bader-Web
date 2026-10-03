@@ -7,20 +7,12 @@
 @section('meta_description', SiteSettings::pageIntro($key))
 
 @php
-    $sectionIcons = [
-        'about.mission' => 'heart',
-        'about.work' => 'map-pin',
-        'about.independence' => 'shield',
-        'impact.verification' => 'check',
-        'impact.operations' => 'building',
-        'impact.reporting' => 'eye',
-        'partners.local' => 'hand-heart',
-        'partners.international' => 'globe',
-        'partners.community' => 'users',
-        'volunteer.field' => 'map-pin',
-        'volunteer.skills' => 'sparkle',
-        'volunteer.commitment' => 'shield',
-    ];
+    $cardColumns = match (count($cards)) {
+        0, 1 => '',
+        2, 4 => 'md:grid-cols-2',
+        3 => 'md:grid-cols-3',
+        default => 'md:grid-cols-2 lg:grid-cols-3',
+    };
     $hasForm = in_array($key, ['partners', 'volunteer'], true);
     $presidentText = $key === 'about' ? SiteSettings::optionalInstitutional('about', 'president_speech', 'text') : null;
     $visionText = $key === 'about' ? SiteSettings::optionalInstitutional('about', 'vision', 'text') : null;
@@ -95,18 +87,22 @@
 
     <section class="{{ $key === 'impact' ? 'band-tint' : 'band-base' }} section-y">
         <div class="container-bader">
-            <div class="grid gap-5 md:grid-cols-3">
-                @foreach ($sections as $section)
-                    <article class="surface-card surface-card-hover relative p-7" data-reveal style="animation-delay: {{ $loop->index * 80 }}ms">
-                        <span class="absolute end-6 top-6 text-4xl font-extrabold text-paper-3" aria-hidden="true">{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
-                        <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-forest-600/10 text-forest-700">
-                            <x-bader.icon :name="$sectionIcons[$section] ?? 'sparkle'" class="h-6 w-6" />
-                        </span>
-                        <h2 class="mt-5 text-xl font-extrabold text-ink-900">{{ SiteSettings::institutionalTitle($key, $section) }}</h2>
-                        <p class="mt-3 text-sm leading-7 text-muted">{{ SiteSettings::institutionalText($key, $section) }}</p>
-                    </article>
-                @endforeach
-            </div>
+            @if ($cards !== [])
+                <div class="grid grid-cols-1 gap-5 {{ $cardColumns }}">
+                    @foreach ($cards as $card)
+                        <article class="surface-card surface-card-hover relative p-7" data-reveal style="animation-delay: {{ ($loop->index % 3) * 80 }}ms">
+                            <span class="absolute end-6 top-6 text-4xl font-extrabold text-paper-3" aria-hidden="true">{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                            <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-forest-600/10 text-forest-700">
+                                <x-bader.icon :name="$card['icon']" class="h-6 w-6" />
+                            </span>
+                            <h2 class="mt-5 text-xl font-extrabold text-ink-900">{{ $card['title'] }}</h2>
+                            @if ($card['text'] !== '')
+                                <p class="mt-3 whitespace-pre-line text-sm leading-7 text-muted">{{ $card['text'] }}</p>
+                            @endif
+                        </article>
+                    @endforeach
+                </div>
+            @endif
 
             @if ($presidentText || $visionText)
                 <div @class(['mt-10 grid grid-cols-1 gap-5', 'lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]' => $presidentText && $visionText])>

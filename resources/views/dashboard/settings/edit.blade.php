@@ -51,9 +51,44 @@
     </div>
   @endif
 
-  <form action="{{ route('dashboard.settings.update') }}" method="POST" class="space-y-6">
+  <form action="{{ route('dashboard.settings.update') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
     @csrf
     @method('PUT')
+    @php
+      $settingsInput = 'h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800';
+    @endphp
+
+    {{-- Branding --}}
+    <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
+      <div class="mb-5 border-b border-gray-100 pb-4 dark:border-gray-800">
+        <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('dashboard.section_branding_title') }}</h2>
+        <p class="mt-0.5 text-theme-xs text-gray-500 dark:text-gray-400">{{ __('dashboard.section_branding_desc') }}</p>
+      </div>
+      <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+        @foreach ([
+          'mark_star' => ['url' => $brandMarkUrl, 'custom' => $hasCustomMark, 'accept' => 'image/png,image/jpeg,image/webp'],
+          'favicon' => ['url' => $brandFaviconUrl, 'custom' => $hasCustomFavicon, 'accept' => 'image/png,image/x-icon,image/webp,.ico'],
+        ] as $asset => $brand)
+          <div class="flex items-start gap-4 rounded-xl border border-gray-100 p-4 dark:border-gray-800">
+            <span class="flex size-16 shrink-0 items-center justify-center rounded-xl bg-[#0a2e2f] p-2">
+              <img src="{{ $brand['url'] }}" alt="" class="max-h-full max-w-full object-contain">
+            </span>
+            <div class="min-w-0 flex-1">
+              <label for="brand_{{ $asset }}_file" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">{{ __('dashboard.field_brand_'.$asset) }}</label>
+              <input type="file" id="brand_{{ $asset }}_file" name="brand_{{ $asset }}_file" accept="{{ $brand['accept'] }}" class="block w-full text-theme-xs text-gray-600 file:me-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-2 file:text-theme-xs file:font-medium file:text-brand-600 dark:text-gray-400">
+              <p class="mt-1 text-theme-xs text-gray-400">{{ __('dashboard.hint.brand_'.$asset) }}</p>
+              @if ($brand['custom'])
+                <label class="mt-2 inline-flex items-center gap-2 text-theme-xs text-gray-600 dark:text-gray-400">
+                  <input type="checkbox" name="brand_{{ $asset }}_reset" value="1" class="size-4 rounded border-gray-300">
+                  {{ __('dashboard.field_brand_reset') }}
+                </label>
+              @endif
+              @error('brand_'.$asset.'_file') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+            </div>
+          </div>
+        @endforeach
+      </div>
+    </div>
 
     {{-- 1. General & Identity --}}
     <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
@@ -82,9 +117,10 @@
             id="founded_year"
             name="founded_year"
             value="{{ old('founded_year', $foundedYear) }}"
-            placeholder="2024"
+            placeholder="2023"
             class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
           >
+          <p class="mt-1 text-theme-xs text-gray-400">{{ __('dashboard.hint.founded_year') }}</p>
           @error('founded_year')
             <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p>
           @enderror
@@ -102,7 +138,7 @@
             id="hq_location_ar"
             name="hq_location_ar"
             value="{{ old('hq_location_ar', $hqLocationAr) }}"
-            placeholder="سلطنة عُمان، مسقط"
+            placeholder="فلسطين، قطاع غزة"
             class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
           >
           @error('hq_location_ar')
@@ -120,7 +156,7 @@
             id="hq_location_en"
             name="hq_location_en"
             value="{{ old('hq_location_en', $hqLocationEn) }}"
-            placeholder="Sultanate of Oman, Muscat"
+            placeholder="Gaza Strip, Palestine"
             dir="ltr"
             class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
           >
@@ -211,7 +247,7 @@
             id="contact_phone"
             name="contact_phone"
             value="{{ old('contact_phone', $contactPhone) }}"
-            placeholder="+968 0000 0000"
+            placeholder="+970 59 000 0000"
             dir="ltr"
             class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
           >
@@ -230,7 +266,7 @@
             id="contact_address_ar"
             name="contact_address_ar"
             value="{{ old('contact_address_ar', $contactAddressAr) }}"
-            placeholder="مسقط، سلطنة عُمان / غزة، فلسطين"
+            placeholder="غزة، فلسطين"
             class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
           >
           @error('contact_address_ar')
@@ -248,7 +284,7 @@
             id="contact_address_en"
             name="contact_address_en"
             value="{{ old('contact_address_en', $contactAddressEn) }}"
-            placeholder="Muscat, Oman / Gaza, Palestine"
+            placeholder="Gaza, Palestine"
             dir="ltr"
             class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
           >
@@ -355,9 +391,6 @@
     </div>
 
     {{-- 4. Giving tools --}}
-    @php
-      $settingsInput = 'h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800';
-    @endphp
     <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
       <div class="mb-5 border-b border-gray-100 pb-4 dark:border-gray-800">
         <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('dashboard.section_giving_title') }}</h2>
@@ -367,7 +400,7 @@
       <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
         <div>
           <label for="whatsapp_number" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">{{ __('dashboard.field_whatsapp') }}</label>
-          <input type="text" id="whatsapp_number" name="whatsapp_number" value="{{ old('whatsapp_number', $whatsappNumber) }}" placeholder="+968 9000 0000" dir="ltr" class="{{ $settingsInput }}">
+          <input type="text" id="whatsapp_number" name="whatsapp_number" value="{{ old('whatsapp_number', $whatsappNumber) }}" placeholder="+970 59 000 0000" dir="ltr" class="{{ $settingsInput }}">
           <p class="mt-1 text-theme-xs text-gray-400">{{ __('dashboard.hint.whatsapp') }}</p>
           @error('whatsapp_number') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
         </div>
@@ -380,6 +413,25 @@
       </div>
 
       <div class="mt-6">
+        <p class="mb-1 text-theme-sm font-semibold text-gray-800 dark:text-white/90">{{ __('dashboard.field_donation_categories') }}</p>
+        <p class="mb-3 text-theme-xs text-gray-400">{{ __('dashboard.hint.donation_categories') }}</p>
+        <div class="space-y-3">
+          @for ($row = 0; $row < min(count($donationCategories) + 2, $maxDonationCategories); $row++)
+            @php
+              $donationCategory = $donationCategories[$row] ?? [];
+              $isGeneralCategory = ($donationCategory['key'] ?? null) === 'general';
+            @endphp
+            <div class="grid grid-cols-1 gap-3 rounded-xl border border-gray-100 p-3 dark:border-gray-800 md:grid-cols-[11rem_1fr_1fr]">
+              <input type="text" name="donation_categories[{{ $row }}][key]" value="{{ old("donation_categories.$row.key", $donationCategory['key'] ?? '') }}" placeholder="{{ __('dashboard.field.key') }}" aria-label="{{ __('dashboard.field.key') }}" dir="ltr" @readonly($isGeneralCategory) class="{{ $settingsInput }} {{ $isGeneralCategory ? 'bg-gray-50 text-gray-500 dark:bg-white/[0.03]' : '' }}">
+              <input type="text" name="donation_categories[{{ $row }}][label_ar]" value="{{ old("donation_categories.$row.label_ar", $donationCategory['label_ar'] ?? '') }}" placeholder="{{ __('dashboard.field.label_ar') }}" aria-label="{{ __('dashboard.field.label_ar') }}" class="{{ $settingsInput }}">
+              <input type="text" name="donation_categories[{{ $row }}][label_en]" value="{{ old("donation_categories.$row.label_en", $donationCategory['label_en'] ?? '') }}" placeholder="{{ __('dashboard.field.label_en') }}" aria-label="{{ __('dashboard.field.label_en') }}" dir="ltr" class="{{ $settingsInput }}">
+            </div>
+          @endfor
+        </div>
+        @error('donation_categories*') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+      </div>
+
+      <div class="mt-6">
         <p class="mb-1 text-theme-sm font-semibold text-gray-800 dark:text-white/90">{{ __('dashboard.field_quick_give') }}</p>
         <p class="mb-3 text-theme-xs text-gray-400">{{ __('dashboard.hint.quick_give') }}</p>
         <div class="space-y-3">
@@ -389,8 +441,8 @@
               <input type="text" name="quick_give[{{ $row }}][label_ar]" value="{{ old("quick_give.$row.label_ar", $option['label_ar'] ?? '') }}" placeholder="{{ __('dashboard.field.label_ar') }}" aria-label="{{ __('dashboard.field.label_ar') }}" class="{{ $settingsInput }}">
               <input type="text" name="quick_give[{{ $row }}][label_en]" value="{{ old("quick_give.$row.label_en", $option['label_en'] ?? '') }}" placeholder="{{ __('dashboard.field.label_en') }}" aria-label="{{ __('dashboard.field.label_en') }}" dir="ltr" class="{{ $settingsInput }}">
               <select name="quick_give[{{ $row }}][category]" aria-label="{{ __('dashboard.field.category') }}" class="{{ $settingsInput }}">
-                @foreach (config('bader.donation_categories') as $category)
-                  <option value="{{ $category }}" @selected(old("quick_give.$row.category", $option['category'] ?? 'general') === $category)>{{ __('donation.category.'.$category) }}</option>
+                @foreach (\App\Support\SiteSettings::donationCategories() as $category => $categoryLabel)
+                  <option value="{{ $category }}" @selected(old("quick_give.$row.category", $option['category'] ?? 'general') === $category)>{{ $categoryLabel }}</option>
                 @endforeach
               </select>
               <input type="number" name="quick_give[{{ $row }}][amount]" value="{{ old("quick_give.$row.amount", isset($option['amount']) ? $option['amount'] + 0 : '') }}" min="1" step="1" placeholder="USD" aria-label="{{ __('dashboard.field.amount') }}" dir="ltr" class="{{ $settingsInput }}">

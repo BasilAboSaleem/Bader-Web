@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\SiteSettings;
 use Database\Factories\FaqFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -38,11 +39,11 @@ class Faq extends Model
 
     public function getQuestionAttribute(): string
     {
-        return (app()->getLocale() === 'en' && ! empty($this->question_en)) ? $this->question_en : $this->question_ar;
+        return SiteSettings::withFoundedYear((app()->getLocale() === 'en' && ! empty($this->question_en)) ? $this->question_en : $this->question_ar);
     }
 
     public function getAnswerAttribute(): string
     {
-        return (app()->getLocale() === 'en' && ! empty($this->answer_en)) ? $this->answer_en : $this->answer_ar;
+        return SiteSettings::withFoundedYear((app()->getLocale() === 'en' && ! empty($this->answer_en)) ? $this->answer_en : $this->answer_ar);
     }
 }
