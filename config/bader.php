@@ -14,8 +14,10 @@ return [
         'logo_dark' => 'brand/logo-dark1.jpg',
         'logo_dark_1080' => 'brand/logo-dark2-1080.jpg',
         'logo_dark_4500' => 'brand/logo-dark2-4500.jpg',
-        'mark_star' => 'brand/mark-star.svg',
-        'favicon' => 'brand/mark-star.svg',
+        'mark_star' => 'brand/bader-mark.webp',
+        'logo_full' => 'brand/bader-logo.webp',
+        'favicon' => 'brand/favicon.png',
+        'apple_touch_icon' => 'brand/apple-touch-icon.png',
     ],
 
     /*
@@ -79,7 +81,7 @@ return [
     | Homepage sections below the hero, in their default order. "quick_give" always sits right under
     | the hero (it overlaps it), so it can be hidden but not moved.
     */
-    'home_sections' => ['quick_give', 'regions', 'programs', 'projects', 'gift', 'news', 'map', 'sponsorship', 'ways_to_give', 'trust'],
+    'home_sections' => ['quick_give', 'regions', 'programs', 'projects', 'sponsorship', 'news', 'map', 'gift', 'ways_to_give', 'trust'],
 
     'max_donation_categories' => 12,
 

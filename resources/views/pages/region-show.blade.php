@@ -81,7 +81,7 @@
     @endif
 
     @if ($otherRegions->isNotEmpty())
-        <section class="band-tint py-10">
+        <section class="band-tint py-7">
             <div class="container-bader flex flex-wrap items-center gap-2">
                 <span class="me-2 text-sm font-bold text-subtle">{{ __('region_page.other_regions') }}</span>
                 @foreach ($otherRegions as $otherRegion)

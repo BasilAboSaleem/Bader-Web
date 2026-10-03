@@ -414,7 +414,7 @@
   }
 
   .bader-public .section-pad {
-    padding-block: 4rem;
+    padding-block: 2.8rem;
     padding-inline: 1rem;
   }
 
@@ -493,11 +493,11 @@
   }
 
   .bader-public .section-y {
-    padding-block: 4rem;
+    padding-block: 2.8rem;
   }
 
   @media (min-width: 1024px) {
-    .bader-public .section-y { padding-block: 5.5rem; }
+    .bader-public .section-y { padding-block: 3.85rem; }
   }
 
   .bader-public .band-base { background-color: var(--color-paper); }

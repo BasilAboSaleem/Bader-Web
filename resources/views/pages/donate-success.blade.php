@@ -11,7 +11,7 @@
 @endphp
 
 @section('content')
-    <section class="band-tint relative isolate overflow-hidden py-14 sm:py-20">
+    <section class="band-tint relative isolate overflow-hidden py-10 sm:py-14">
         <div class="pointer-events-none absolute -end-24 -top-24 -z-10 h-80 w-80 rounded-full bg-gold-300/40 blur-3xl print:hidden" aria-hidden="true"></div>
 
         <div class="container-bader max-w-3xl">

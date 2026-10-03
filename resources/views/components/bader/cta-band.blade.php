@@ -1,6 +1,6 @@
 @props(['title' => null, 'text' => null, 'band' => 'band-base'])
 
-<section class="{{ $band }} pb-16 pt-4 sm:pb-20">
+<section class="{{ $band }} pb-11 pt-3 sm:pb-14">
     <div class="container-bader">
         <div class="relative isolate overflow-hidden rounded-[2rem] bg-teal-950 px-6 py-10 text-white shadow-card-md sm:px-10 sm:py-12" data-reveal>
             <div class="pointer-events-none absolute -end-20 -top-24 -z-10 h-72 w-72 rounded-full bg-forest-600/40 blur-3xl" aria-hidden="true"></div>

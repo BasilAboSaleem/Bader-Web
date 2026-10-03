@@ -13,11 +13,10 @@ export const replayAnimations = (container) => {
     });
 };
 
-export const formatMoney = (value, locale = document.documentElement.lang || 'en') => {
-    const numberLocale = locale.startsWith('ar') ? 'ar-EG' : 'en-US';
-
-    return new Intl.NumberFormat(numberLocale, { maximumFractionDigits: 2 }).format(value);
-};
+/**
+ * Numbers always use Western (English) digits, in both the Arabic and English interfaces.
+ */
+export const formatMoney = (value) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value);
 
 export const buildUrl = (base, params) => {
     const url = new URL(base, window.location.origin);

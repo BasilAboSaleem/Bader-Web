@@ -36,9 +36,7 @@
     <div class="relative container-bader grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr] lg:gap-12">
         <div class="space-y-5">
             <a href="{{ route('home') }}" class="inline-flex items-center gap-3">
-                <span class="flex h-12 w-12 items-center justify-center rounded-2xl border border-gold-500/30 bg-teal-900 p-2.5">
-                    <img src="{{ \App\Support\SiteSettings::brandAsset('mark_star') }}" alt="" width="28" height="28" class="h-full w-full object-contain">
-                </span>
+                <img src="{{ \App\Support\SiteSettings::brandAsset('mark_star') }}" alt="" width="56" height="56" class="h-14 w-14 shrink-0 object-contain">
                 <span class="leading-tight">
                     <span class="block text-xl font-extrabold text-white">{{ __('brand.name') }}</span>
                     <span class="mt-1 block text-xs font-semibold text-gold-400">{{ __('brand.tagline') }}</span>

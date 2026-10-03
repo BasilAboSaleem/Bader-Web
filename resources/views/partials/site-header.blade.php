@@ -41,9 +41,7 @@
 <header data-site-header class="site-header sticky top-0 z-50">
     <div class="container-bader flex h-[4.5rem] items-center gap-4">
         <a href="{{ route('home') }}" class="group flex shrink-0 items-center gap-3" aria-label="{{ __('brand.name') }}">
-            <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-950 p-2 shadow-card-sm transition-transform duration-300 ease-bader group-hover:scale-105">
-                <img src="{{ \App\Support\SiteSettings::brandAsset('mark_star') }}" alt="" width="28" height="28" class="h-full w-full object-contain">
-            </span>
+            <img src="{{ \App\Support\SiteSettings::brandAsset('mark_star') }}" alt="" width="56" height="56" class="h-14 w-14 shrink-0 object-contain transition-transform duration-300 ease-bader group-hover:scale-105">
             <span class="leading-tight">
                 <span class="block text-lg font-extrabold text-ink-900">{{ __('brand.name') }}</span>
                 <span class="block text-[11px] font-semibold text-forest-700">{{ __('brand.name_en') }}</span>
