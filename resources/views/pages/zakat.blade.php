@@ -8,6 +8,12 @@
 @php
     $moneyFields = ['cash', 'savings', 'trade', 'debts'];
     $facts = ['rate', 'nisab', 'hawl', 'recipients'];
+    $factHighlights = [
+        'rate' => ['icon' => 'calculator', 'value' => __('zakat_page.fact_rate_short')],
+        'nisab' => ['icon' => 'sparkle', 'value' => __('zakat_page.nisab_grams', ['grams' => $nisabGrams])],
+        'hawl' => ['icon' => 'calendar', 'value' => __('zakat_page.fact_hawl_short')],
+        'recipients' => ['icon' => 'hand-heart', 'value' => __('zakat_page.fact_recipients_short')],
+    ];
 @endphp
 
 @section('content')
@@ -18,6 +24,26 @@
     />
 
     <section class="band-base section-y">
+        <div class="container-bader mb-6" data-reveal>
+            <div class="surface-card flex flex-col gap-4 p-4 sm:p-5 lg:flex-row lg:items-center">
+                <dl class="grid flex-1 grid-cols-2 gap-3 lg:grid-cols-4">
+                    @foreach ($factHighlights as $fact => $highlight)
+                        <div class="flex items-center gap-3 rounded-2xl bg-paper-2 px-3 py-2.5">
+                            <x-bader.icon :name="$highlight['icon']" class="h-5 w-5 shrink-0 text-forest-600" />
+                            <div class="min-w-0">
+                                <dt class="text-xs font-bold text-subtle">{{ __('zakat_page.fact_'.$fact.'_title') }}</dt>
+                                <dd class="text-sm font-extrabold text-ink-900">{{ $highlight['value'] }}</dd>
+                            </div>
+                        </div>
+                    @endforeach
+                </dl>
+                <a href="#zakat-basics" class="inline-flex shrink-0 items-center gap-1.5 self-start text-sm font-bold text-forest-700 hover:text-forest-800 lg:self-center">
+                    <x-bader.icon name="info" class="h-4 w-4" />
+                    {{ __('zakat_page.facts_more') }}
+                </a>
+            </div>
+        </div>
+
         <div class="container-bader grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_24rem]"
             data-zakat
             data-mode="both"
@@ -114,7 +140,7 @@
         </div>
     </section>
 
-    <section class="band-tint section-y">
+    <section id="zakat-basics" class="band-tint section-y scroll-mt-24">
         <div class="container-bader">
             <h2 class="section-title" data-reveal>{{ __('zakat_page.facts_title') }}</h2>
             <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
