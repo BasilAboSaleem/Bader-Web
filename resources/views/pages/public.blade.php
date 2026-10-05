@@ -40,10 +40,6 @@
                     <dt class="text-xs text-subtle">{{ __('about_page.hq') }}</dt>
                     <dd class="text-xl font-extrabold text-forest-700">{{ SiteSettings::hqLocation() }}</dd>
                 </div>
-                <div class="rounded-2xl bg-white px-5 py-3 ring-1 ring-hairline">
-                    <dt class="text-xs text-subtle">{{ __('about_page.field') }}</dt>
-                    <dd class="text-xl font-extrabold text-forest-700">{{ SiteSettings::fieldLocation() }}</dd>
-                </div>
             </dl>
         @elseif ($hasForm)
             <a href="#{{ $key }}-form" class="btn-brand mt-6 animate-fade-up [animation-delay:240ms]">

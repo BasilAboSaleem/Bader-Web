@@ -48,10 +48,6 @@
                     <x-bader.icon name="building" class="mt-0.5 h-4 w-4 text-gold-400" />
                     <span><span class="font-bold text-sand-50">{{ __('home.trust_hq_label') }}:</span> {{ SiteSettings::hqLocation() }}</span>
                 </li>
-                <li class="flex items-start gap-2.5">
-                    <x-bader.icon name="map-pin" class="mt-0.5 h-4 w-4 text-gold-400" />
-                    <span><span class="font-bold text-sand-50">{{ __('home.trust_field_label') }}:</span> {{ SiteSettings::fieldLocation() }}</span>
-                </li>
                 <li class="flex items-center gap-2.5">
                     <x-bader.icon name="mail" class="h-4 w-4 text-gold-400" />
                     <a href="mailto:{{ SiteSettings::contactEmail() }}" dir="ltr" class="transition-colors hover:text-gold-400">{{ SiteSettings::contactEmail() }}</a>
