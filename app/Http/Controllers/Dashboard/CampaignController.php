@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Campaign;
 use App\Models\Program;
 use App\Models\Region;
+use App\Support\MediaGalleryInput;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -105,6 +106,7 @@ class CampaignController extends Controller
             'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
             'order' => ['nullable', 'integer', 'min:0'],
             'status' => ['required', 'in:draft,under_review,published'],
+            ...MediaGalleryInput::rules(),
         ]);
 
         if ($request->hasFile('image_file')) {
@@ -125,8 +127,8 @@ class CampaignController extends Controller
         $validated['order'] ??= 0;
         $validated['is_featured'] = $request->boolean('is_featured');
         $validated['allows_monthly'] = $request->boolean('allows_monthly');
-        unset($validated['image_file']);
+        unset($validated['image_file'], $validated['gallery_files'], $validated['gallery_remove']);
 
-        return $validated;
+        return [...$validated, ...MediaGalleryInput::apply($request, $campaign?->galleryPhotos() ?? [], 'campaigns/gallery')];
     }
 }

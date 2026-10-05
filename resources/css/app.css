@@ -1229,6 +1229,33 @@
     transform: none;
   }
 
+  .bader-public .region-facility.is-completed {
+    background-color: var(--color-forest-600);
+    color: #fff;
+  }
+
+  .bader-public .region-facility.is-completed:hover,
+  .bader-public .region-facility.is-completed:focus-visible {
+    background-color: var(--color-gold-500);
+    color: var(--color-teal-950);
+  }
+
+  .bader-public .region-map-key {
+    display: inline-flex;
+    height: 1.25rem;
+    width: 1.25rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background-color: var(--color-teal-950);
+    color: var(--color-gold-400);
+  }
+
+  .bader-public .region-map-key.is-completed {
+    background-color: var(--color-forest-600);
+    color: #fff;
+  }
+
   .bader-public .region-tooltip {
     position: absolute;
     z-index: 10;
@@ -1538,6 +1565,57 @@
 
   .bader-public .lightbox-close:hover {
     background-color: var(--color-gold-500);
+  }
+
+  .bader-public .lightbox-nav {
+    position: absolute;
+    top: 50%;
+    z-index: 1;
+    display: flex;
+    height: 3rem;
+    width: 3rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background-color: rgb(255 255 255 / 0.92);
+    color: var(--color-ink-900);
+    box-shadow: var(--shadow-card-md);
+    transform: translateY(-50%);
+  }
+
+  .bader-public .lightbox-nav svg {
+    height: 1.5rem;
+    width: 1.5rem;
+  }
+
+  .bader-public .lightbox-nav:hover {
+    background-color: var(--color-gold-500);
+  }
+
+  .bader-public .lightbox-prev {
+    inset-inline-start: 0.75rem;
+  }
+
+  .bader-public .lightbox-next {
+    inset-inline-end: 0.75rem;
+  }
+
+  .bader-public .lightbox-counter {
+    position: absolute;
+    bottom: 0.75rem;
+    left: 50%;
+    border-radius: 9999px;
+    background-color: rgb(6 30 31 / 0.7);
+    padding: 0.25rem 0.875rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: #fff;
+    direction: ltr;
+    transform: translateX(-50%);
+  }
+
+  .bader-public :is(.lightbox-nav, .lightbox-counter)[hidden] {
+    display: none;
   }
 
   @media print {

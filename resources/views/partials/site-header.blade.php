@@ -8,7 +8,7 @@
         'about' => ['label' => __('nav.about'), 'active' => request()->routeIs('about', 'impact', 'partners', 'volunteer', 'faq', 'contact')],
         'regions' => ['label' => __('nav.regions'), 'active' => request()->routeIs('regions.*', 'impact-map')],
         'programs' => ['label' => __('nav.programs'), 'active' => request()->routeIs('programs', 'programs.*')],
-        'projects' => ['label' => __('nav.campaigns'), 'active' => request()->routeIs('campaigns', 'campaigns.*')],
+        'projects' => ['label' => __('nav.campaigns'), 'active' => request()->routeIs('campaigns', 'campaigns.*', 'completed-projects', 'completed-projects.*')],
         'sponsorship' => ['label' => __('nav.sponsorship'), 'active' => request()->routeIs('sponsorship', 'sponsorship.*')],
     ];
 @endphp
@@ -144,7 +144,10 @@
                                 @case('projects')
                                     <div class="flex items-end justify-between gap-4">
                                         <p class="kicker">{{ __('header.featured_projects') }}</p>
-                                        <a href="{{ route('campaigns') }}" class="mega-more">{{ __('header.all_projects') }} <x-bader.icon name="arrow" class="h-4 w-4" /></a>
+                                        <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+                                            <a href="{{ route('completed-projects') }}" class="mega-more">{{ __('nav.completed_projects') }} <x-bader.icon name="arrow" class="h-4 w-4" /></a>
+                                            <a href="{{ route('campaigns') }}" class="mega-more">{{ __('header.all_projects') }} <x-bader.icon name="arrow" class="h-4 w-4" /></a>
+                                        </div>
                                     </div>
                                     <ul class="mt-6 grid gap-4 md:grid-cols-3">
                                         @forelse ($menus['campaigns'] as $campaign)
@@ -265,6 +268,7 @@
             </details>
 
             <a href="{{ route('campaigns') }}" class="drawer-link">{{ __('nav.campaigns') }}</a>
+            <a href="{{ route('completed-projects') }}" class="drawer-link">{{ __('nav.completed_projects') }}</a>
             <a href="{{ route('sponsorship') }}" class="drawer-link">{{ __('nav.sponsorship') }}</a>
             <a href="{{ route('news') }}" class="drawer-link">{{ __('nav.news') }}</a>
             <a href="{{ route('gift') }}" class="drawer-link">{{ __('nav.gift') }}</a>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\Program;
+use App\Support\MediaGalleryInput;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -46,6 +47,7 @@ class ProgramController extends Controller
             'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
             'order' => ['nullable', 'integer'],
             'status' => ['required', 'in:draft,under_review,published'],
+            ...MediaGalleryInput::rules(),
         ]);
 
         if ($request->hasFile('image_file')) {
@@ -59,9 +61,9 @@ class ProgramController extends Controller
 
         $validated['is_flagship'] = $request->boolean('is_flagship');
 
-        unset($validated['image_file']);
+        unset($validated['image_file'], $validated['gallery_files'], $validated['gallery_remove']);
 
-        Program::create($validated);
+        Program::create([...$validated, ...MediaGalleryInput::apply($request, [], 'programs/gallery')]);
 
         return redirect()->route('dashboard.programs.index')
             ->with('status', __('dashboard.saved_successfully'));
@@ -95,6 +97,7 @@ class ProgramController extends Controller
             'image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
             'order' => ['nullable', 'integer'],
             'status' => ['required', 'in:draft,under_review,published'],
+            ...MediaGalleryInput::rules(),
         ]);
 
         if ($request->hasFile('image_file')) {
@@ -104,9 +107,9 @@ class ProgramController extends Controller
 
         $validated['is_flagship'] = $request->boolean('is_flagship');
 
-        unset($validated['image_file']);
+        unset($validated['image_file'], $validated['gallery_files'], $validated['gallery_remove']);
 
-        $program->update($validated);
+        $program->update([...$validated, ...MediaGalleryInput::apply($request, $program->galleryPhotos(), 'programs/gallery')]);
 
         return redirect()->route('dashboard.programs.index')
             ->with('status', __('dashboard.saved_successfully'));

@@ -55,6 +55,8 @@
                     </div>
                 @endif
 
+                <x-bader.media-gallery :model="$campaign" class="mt-10" />
+
                 <dl class="mt-10 grid gap-4 sm:grid-cols-3" data-reveal>
                     @if ($campaign->program)
                         <div class="rounded-2xl border border-hairline bg-white p-5">

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Campaign;
+use App\Models\CompletedProject;
 use App\Models\Donation;
 use App\Models\Facility;
 use App\Models\Faq;
@@ -49,13 +50,61 @@ class PublicPageController extends Controller
             ->with(['program', 'region'])
             ->get();
 
+        $completedProjects = $program->completedProjects()->published()->with('region')->take(6)->get();
+
+        $stories = $program->stories()->published()->take(6)->get();
+
         $otherPrograms = Program::published()
             ->whereKeyNot($program->getKey())
             ->withCount(['campaigns' => fn (Builder $campaigns) => $campaigns->published()])
             ->take(4)
             ->get();
 
-        return view('pages.program-show', compact('program', 'campaigns', 'otherPrograms'));
+        return view('pages.program-show', compact('program', 'campaigns', 'completedProjects', 'stories', 'otherPrograms'));
+    }
+
+    /**
+     * Projects already delivered (not fundraising), filterable by program and region.
+     */
+    public function completedProjects(Request $request): View
+    {
+        $programs = Program::published()->get();
+        $regions = Region::published()->get();
+
+        $selectedProgram = $programs->firstWhere('key', $request->query('program'));
+        $selectedRegion = $regions->firstWhere('key', $request->query('region'));
+
+        $filteredProjects = CompletedProject::published()
+            ->when($selectedProgram, fn (Builder $query) => $query->where('program_id', $selectedProgram->id))
+            ->when($selectedRegion, fn (Builder $query) => $query->where('region_id', $selectedRegion->id));
+
+        $totals = (clone $filteredProjects)->reorder()->toBase()
+            ->selectRaw('count(*) as projects_count, coalesce(sum(beneficiaries), 0) as beneficiaries_total')
+            ->first();
+
+        $completedProjects = $filteredProjects
+            ->with(['program', 'region'])
+            ->paginate(12)
+            ->withQueryString();
+
+        return view('pages.completed-projects', compact('completedProjects', 'programs', 'regions', 'selectedProgram', 'selectedRegion', 'totals'));
+    }
+
+    public function completedProjectShow(string $key): View
+    {
+        $completedProject = CompletedProject::published()
+            ->where('key', $key)
+            ->with(['program', 'region'])
+            ->firstOrFail();
+
+        $relatedProjects = CompletedProject::published()
+            ->whereKeyNot($completedProject->getKey())
+            ->when($completedProject->program_id, fn (Builder $query) => $query->orderByRaw('program_id = ? desc', [$completedProject->program_id]))
+            ->with(['program', 'region'])
+            ->take(3)
+            ->get();
+
+        return view('pages.completed-project-show', compact('completedProject', 'relatedProjects'));
     }
 
     public function campaigns(Request $request): View
@@ -112,6 +161,8 @@ class PublicPageController extends Controller
             ->with(['program', 'region'])
             ->get();
 
+        $completedProjects = $region->completedProjects()->published()->with(['program', 'region'])->get();
+
         $cases = $region->sponsorshipCases()
             ->available()
             ->longestWaiting()
@@ -121,7 +172,7 @@ class PublicPageController extends Controller
 
         $otherRegions = Region::published()->whereKeyNot($region->getKey())->get();
 
-        return view('pages.region-show', compact('region', 'campaigns', 'cases', 'otherRegions'));
+        return view('pages.region-show', compact('region', 'campaigns', 'completedProjects', 'cases', 'otherRegions'));
     }
 
     /**
@@ -150,6 +201,7 @@ class PublicPageController extends Controller
     public function newsShow(string $key): View
     {
         $story = Story::where('status', 'published')
+            ->with(['program' => fn ($program) => $program->where('status', 'published')])
             ->where(function ($query) use ($key) {
                 $query->where('key', $key);
                 if (is_numeric($key)) {
@@ -178,8 +230,11 @@ class PublicPageController extends Controller
             ->oldest('published_at')
             ->first();
 
-        $relatedStories = Story::published()
+        $relatedStories = Story::query()
+            ->where('status', 'published')
             ->where('id', '!=', $story->id)
+            ->when($story->program_id, fn (Builder $query) => $query->orderByRaw('program_id = ? desc', [$story->program_id]))
+            ->latest('published_at')
             ->take(3)
             ->get();
 

@@ -135,7 +135,7 @@ return [
     'editable_text_groups' => [
         'home' => ['home.'],
         'layout' => ['header.', 'nav.', 'footer.', 'brand.', 'cta.', 'common.'],
-        'projects' => ['program_page.', 'campaigns_page.', 'campaign_page.', 'campaign.', 'region_page.', 'region.', 'facility_page.', 'project.', 'news_page.', 'story_page.'],
+        'projects' => ['program_page.', 'campaigns_page.', 'campaign_page.', 'campaign.', 'region_page.', 'region.', 'facility_page.', 'completed_project_page.', 'project.', 'news_page.', 'story_page.', 'media.'],
         'sponsorship' => ['sponsorship_page.', 'sponsorship.'],
         'giving' => ['donate_page.', 'donate_box.', 'donate_success.', 'gift_page.', 'donation.'],
         'zakat' => ['zakat_page.', 'zakat.'],

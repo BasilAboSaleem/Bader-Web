@@ -71,7 +71,10 @@ class Region extends Model
         return $query->published()
             ->withCount(['campaigns' => $publishedCampaigns])
             ->withSum(['campaigns as raised_total' => $publishedCampaigns], 'raised_amount')
-            ->with(['facilities' => fn ($facilities) => $facilities->published()]);
+            ->with([
+                'facilities' => fn ($facilities) => $facilities->published(),
+                'completedProjects' => fn ($completedProjects) => $completedProjects->published(),
+            ]);
     }
 
     public function scopePublished(Builder $query): Builder
@@ -87,6 +90,11 @@ class Region extends Model
     public function facilities(): HasMany
     {
         return $this->hasMany(Facility::class);
+    }
+
+    public function completedProjects(): HasMany
+    {
+        return $this->hasMany(CompletedProject::class);
     }
 
     public function sponsorshipCases(): HasMany

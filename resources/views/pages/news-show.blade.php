@@ -17,6 +17,12 @@
         :breadcrumbs="[['label' => __('nav.news'), 'url' => route('news')]]"
     >
         <div class="mt-5 flex flex-wrap gap-2 text-xs font-bold">
+            @if ($story->program)
+                <a href="{{ route('programs.show', $story->program->key) }}" class="inline-flex items-center gap-1.5 rounded-full bg-forest-700 px-3 py-1.5 text-white hover:bg-forest-800">
+                    <x-bader.icon name="sprout" class="h-3.5 w-3.5" />
+                    {{ $story->program->title }}
+                </a>
+            @endif
             @if ($story->published_at)
                 <time datetime="{{ $story->published_at->toDateString() }}" class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-ink-800 ring-1 ring-hairline">
                     <x-bader.icon name="calendar" class="h-3.5 w-3.5" />
@@ -60,6 +66,8 @@
                         <p>{{ $paragraph }}</p>
                     @endforeach
                 </div>
+
+                <x-bader.media-gallery :model="$story" class="mt-10" />
 
                 <div class="mt-10 flex flex-wrap items-center justify-between gap-4 border-y border-hairline py-5" data-reveal>
                     <div class="flex items-center gap-3">

@@ -80,6 +80,18 @@
         </div>
 
         <div>
+          <label for="program_id" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">{{ __('dashboard.field.related_program') }}</label>
+          <select id="program_id" name="program_id"
+            class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+            <option value="">{{ __('dashboard.field.no_related_program') }}</option>
+            @foreach ($programs as $program)
+              <option value="{{ $program->id }}" @selected((string) old('program_id', $story->program_id) === (string) $program->id)>{{ $program->title_ar }}</option>
+            @endforeach
+          </select>
+          @error('program_id') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+        </div>
+
+        <div>
           <label for="image_file" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">{{ __('dashboard.field.image') }} (رفع من الجهاز)</label>
           <div class="space-y-2">
             @if ($story->image)
@@ -140,6 +152,8 @@
         </div>
       </div>
     </div>
+
+    <x-dashboard.media-fields :model="$story" />
 
     {{-- Publication --}}
     <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">

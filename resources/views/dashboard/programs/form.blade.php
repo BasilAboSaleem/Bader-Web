@@ -312,6 +312,8 @@
       </div>
     </div>
 
+    <x-dashboard.media-fields :model="$program" />
+
     {{-- Form Actions --}}
     <div class="flex items-center justify-end gap-3 pt-2">
       <a

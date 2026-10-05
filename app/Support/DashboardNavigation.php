@@ -26,6 +26,7 @@ class DashboardNavigation
         'projects' => [
             'programs' => 'dashboard.programs.index',
             'campaigns' => 'dashboard.campaigns.index',
+            'completed_projects' => 'dashboard.completed-projects.index',
             'facilities' => 'dashboard.facilities.index',
             'regions' => 'dashboard.regions.index',
             'sponsorship_cases' => 'dashboard.sponsorship-cases.index',

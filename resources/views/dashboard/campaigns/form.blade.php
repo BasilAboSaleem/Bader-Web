@@ -157,6 +157,8 @@
       </div>
     </div>
 
+    <x-dashboard.media-fields :model="$campaign" />
+
     {{-- Publication --}}
     <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
       <div class="mb-5 border-b border-gray-100 pb-4 dark:border-gray-800">

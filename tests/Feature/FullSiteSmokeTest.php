@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Campaign;
+use App\Models\CompletedProject;
 use App\Models\Donation;
 use App\Models\Facility;
 use App\Models\Faq;
@@ -31,6 +32,7 @@ class FullSiteSmokeTest extends TestCase
     /** Route parameter name => model whose first record is used to build the URL. */
     private const DASHBOARD_BINDINGS = [
         'campaign' => Campaign::class,
+        'completedProject' => CompletedProject::class,
         'donation' => Donation::class,
         'facility' => Facility::class,
         'faq' => Faq::class,
@@ -43,7 +45,7 @@ class FullSiteSmokeTest extends TestCase
         'story' => Story::class,
     ];
 
-    private const LEAKED_KEY_PATTERN = '/>\s*(home|nav|footer|header|page|common|cta|brand|donation|donate_page|donate_box|gift_page|zakat_page|sponsorship_page|sponsorship|faq_page|about_page|contact_page|program_page|campaign_page|campaigns_page|region_page|facility_page|story_page|news_page|form|form_page|errors|project|dashboard)\.[a-z0-9_.]+\s*</';
+    private const LEAKED_KEY_PATTERN = '/>\s*(home|nav|footer|header|page|common|cta|brand|donation|donate_page|donate_box|gift_page|zakat_page|sponsorship_page|sponsorship|faq_page|about_page|contact_page|program_page|campaign_page|campaigns_page|region_page|facility_page|completed_project_page|media|story_page|news_page|form|form_page|errors|project|dashboard)\.[a-z0-9_.]+\s*</';
 
     protected function setUp(): void
     {
@@ -54,6 +56,12 @@ class FullSiteSmokeTest extends TestCase
         $region = Region::query()->firstOrFail();
         SponsorshipCase::factory()->create(['region_id' => $region->id]);
         Facility::query()->update(['region_id' => $region->id]);
+        CompletedProject::factory()->create([
+            'region_id' => $region->id,
+            'program_id' => Program::query()->value('id'),
+            'gallery' => ['images/programs/water.jpg', 'images/programs/food.jpg'],
+            'videos' => ['https://youtu.be/dQw4w9WgXcQ'],
+        ]);
 
         Donation::create([
             'donor_name' => 'متبرع تجريبي',
@@ -95,6 +103,7 @@ class FullSiteSmokeTest extends TestCase
     {
         $parameters = [
             'campaigns.show' => ['key' => Campaign::published()->firstOrFail()->key],
+            'completed-projects.show' => ['key' => CompletedProject::published()->firstOrFail()->key],
             'programs.show' => ['key' => Program::published()->firstOrFail()->key],
             'regions.show' => ['key' => Region::published()->firstOrFail()->key],
             'facilities.show' => ['key' => Facility::published()->firstOrFail()->key],

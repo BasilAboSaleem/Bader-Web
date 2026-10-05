@@ -58,6 +58,25 @@
                         </div>
                     @endif
                 </div>
+
+                @if ($completedProjects->isNotEmpty())
+                    <div class="mt-12">
+                        <div class="flex flex-wrap items-end justify-between gap-4" data-reveal>
+                            <div>
+                                <p class="kicker">{{ __('completed_project_page.kicker') }}</p>
+                                <h2 class="section-title mt-2">{{ __('program_page.completed_title', ['program' => $program->title]) }}</h2>
+                            </div>
+                            <a href="{{ route('completed-projects', ['program' => $program->key]) }}" class="btn-outline">{{ __('completed_project_page.view_all') }}</a>
+                        </div>
+                        <div class="mt-6 grid gap-6 sm:grid-cols-2">
+                            @foreach ($completedProjects as $completedProject)
+                                <x-bader.completed-project-card :project="$completedProject" data-reveal />
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+                <x-bader.media-gallery :model="$program" class="mt-12" />
             </div>
 
             <aside class="lg:sticky lg:top-28" aria-label="{{ __('donate_box.kicker') }}">
@@ -71,8 +90,27 @@
         </div>
     </section>
 
-    @if ($otherPrograms->isNotEmpty())
+    @if ($stories->isNotEmpty())
         <section class="band-tint section-y">
+            <div class="container-bader">
+                <div class="flex flex-wrap items-end justify-between gap-4" data-reveal>
+                    <div>
+                        <p class="kicker">{{ __('program_page.news_kicker') }}</p>
+                        <h2 class="section-title mt-2">{{ __('program_page.news_title', ['program' => $program->title]) }}</h2>
+                    </div>
+                    <a href="{{ route('news') }}" class="btn-outline shrink-0">{{ __('news_page.all') }}</a>
+                </div>
+                <div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    @foreach ($stories as $story)
+                        <x-bader.story-card :story="$story" compact data-reveal style="animation-delay: {{ $loop->index * 80 }}ms" />
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
+    @if ($otherPrograms->isNotEmpty())
+        <section class="{{ $stories->isNotEmpty() ? 'band-base' : 'band-tint' }} section-y">
             <div class="container-bader">
                 <h2 class="section-title" data-reveal>{{ __('program_page.other_programs') }}</h2>
                 <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

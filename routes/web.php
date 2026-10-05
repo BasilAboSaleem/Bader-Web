@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Dashboard\CampaignController;
+use App\Http\Controllers\Dashboard\CompletedProjectController;
 use App\Http\Controllers\Dashboard\DonationController;
 use App\Http\Controllers\Dashboard\FacilityController;
 use App\Http\Controllers\Dashboard\FaqController;
@@ -40,6 +41,8 @@ Route::middleware('cache.public')->group(function () {
     Route::get('/programs/{key}', [PublicPageController::class, 'programShow'])->name('programs.show');
     Route::get('/campaigns', [PublicPageController::class, 'campaigns'])->name('campaigns');
     Route::get('/campaigns/{key}', [PublicPageController::class, 'campaignShow'])->name('campaigns.show');
+    Route::get('/completed-projects', [PublicPageController::class, 'completedProjects'])->name('completed-projects');
+    Route::get('/completed-projects/{key}', [PublicPageController::class, 'completedProjectShow'])->name('completed-projects.show');
     Route::get('/regions/{key}', [PublicPageController::class, 'regionShow'])->name('regions.show');
     Route::get('/impact-map', [PublicPageController::class, 'impactMap'])->name('impact-map');
     Route::get('/impact', [PublicPageController::class, 'impact'])->name('impact');
@@ -102,6 +105,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('dashboard/facilities', FacilityController::class)->names('dashboard.facilities')->except(['show']);
     Route::resource('dashboard/regions', RegionController::class)->names('dashboard.regions')->except(['show']);
     Route::resource('dashboard/campaigns', CampaignController::class)->names('dashboard.campaigns')->except(['show']);
+    Route::resource('dashboard/completed-projects', CompletedProjectController::class)
+        ->names('dashboard.completed-projects')
+        ->parameters(['completed-projects' => 'completedProject'])
+        ->except(['show']);
     Route::resource('dashboard/sponsorship-cases', SponsorshipCaseController::class)->names('dashboard.sponsorship-cases')->except(['show']);
     Route::resource('dashboard/stories', StoryController::class)->names('dashboard.stories')->except(['show']);
     Route::resource('dashboard/media', MediaAssetController::class)->names('dashboard.media')->except(['show']);

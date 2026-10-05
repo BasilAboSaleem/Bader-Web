@@ -2,16 +2,19 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasMediaGallery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Story extends Model
 {
-    use HasFactory;
+    use HasFactory, HasMediaGallery;
 
     protected $fillable = [
         'key',
+        'program_id',
         'title_ar',
         'title_en',
         'excerpt_ar',
@@ -34,6 +37,11 @@ class Story extends Model
     public function scopePublished(Builder $query): Builder
     {
         return $query->where('status', 'published')->orderByDesc('published_at');
+    }
+
+    public function program(): BelongsTo
+    {
+        return $this->belongsTo(Program::class);
     }
 
     public function getTitleAttribute(): string
