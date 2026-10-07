@@ -2,6 +2,7 @@
 
 namespace App\Models\Concerns;
 
+use App\Support\FacebookVideoLink;
 use App\Support\VideoEmbed;
 
 /**
@@ -31,11 +32,14 @@ trait HasMediaGallery
      */
     public function videoEmbeds(): array
     {
-        return VideoEmbed::fromList($this->videos);
+        return VideoEmbed::fromList(array_map(
+            fn (mixed $url): mixed => is_string($url) ? FacebookVideoLink::resolve($url) : $url,
+            $this->videos ?? [],
+        ));
     }
 
     public function hasMedia(): bool
     {
-        return $this->galleryPhotos() !== [] || $this->videoEmbeds() !== [];
+        return $this->galleryPhotos() !== [] || VideoEmbed::fromList($this->videos) !== [];
     }
 }

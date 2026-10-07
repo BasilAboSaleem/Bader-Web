@@ -75,7 +75,10 @@ final class MediaGalleryInput
             }
         }
 
-        $videos = self::videoLines($request->input('videos'));
+        $videos = array_values(array_unique(array_map(
+            FacebookVideoLink::resolve(...),
+            self::videoLines($request->input('videos')),
+        )));
 
         return [
             'gallery' => $gallery !== [] ? $gallery : null,
