@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Models\Campaign;
 use App\Models\Program;
-use App\Models\Region;
 use App\Support\MediaGalleryInput;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
@@ -18,7 +17,7 @@ class CampaignController extends Controller
 {
     public function index(): View
     {
-        $campaigns = Campaign::query()->with(['program', 'region'])->latest()->paginate(15);
+        $campaigns = Campaign::query()->with('program')->latest()->paginate(15);
 
         return view('dashboard.campaigns.index', compact('campaigns'));
     }
@@ -72,13 +71,12 @@ class CampaignController extends Controller
     }
 
     /**
-     * @return array{programs: Collection<int, Program>, regions: Collection<int, Region>}
+     * @return array{programs: Collection<int, Program>}
      */
     private function formOptions(): array
     {
         return [
             'programs' => Program::query()->orderBy('order')->get(['id', 'title_ar']),
-            'regions' => Region::query()->orderBy('order')->get(['id', 'name_ar']),
         ];
     }
 
@@ -92,7 +90,6 @@ class CampaignController extends Controller
             'title_en' => ['nullable', 'string', 'max:255'],
             'key' => ['nullable', 'string', 'max:100', 'alpha_dash', Rule::unique('campaigns', 'key')->ignore($campaign)],
             'program_id' => ['nullable', 'exists:programs,id'],
-            'region_id' => ['nullable', 'exists:regions,id'],
             'description_ar' => ['nullable', 'string'],
             'description_en' => ['nullable', 'string'],
             'content_ar' => ['nullable', 'string'],
@@ -123,6 +120,7 @@ class CampaignController extends Controller
                 explode(',', $validated['preset_amounts']),
             ))), 0, 6)
             : null;
+        $validated['region_id'] = null;
         $validated['raised_amount'] ??= 0;
         $validated['order'] ??= 0;
         $validated['is_featured'] = $request->boolean('is_featured');

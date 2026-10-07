@@ -62,19 +62,24 @@ class Region extends Model
     }
 
     /**
-     * Published regions with the counts and totals the impact map needs.
+     * Published regions with the projects and facilities the impact map needs.
      */
     public function scopeForImpactMap(Builder $query): Builder
     {
-        $publishedCampaigns = fn (Builder $campaigns) => $campaigns->published();
-
         return $query->published()
-            ->withCount(['campaigns' => $publishedCampaigns])
-            ->withSum(['campaigns as raised_total' => $publishedCampaigns], 'raised_amount')
+            ->withProjectsCount()
             ->with([
                 'facilities' => fn ($facilities) => $facilities->published(),
                 'completedProjects' => fn ($completedProjects) => $completedProjects->published(),
             ]);
+    }
+
+    /**
+     * Adds `projects_count`: the region's published projects.
+     */
+    public function scopeWithProjectsCount(Builder $query): Builder
+    {
+        return $query->withCount(['completedProjects as projects_count' => fn (Builder $projects) => $projects->where('status', 'published')]);
     }
 
     public function scopePublished(Builder $query): Builder

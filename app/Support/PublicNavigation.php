@@ -2,7 +2,7 @@
 
 namespace App\Support;
 
-use App\Models\Campaign;
+use App\Models\CompletedProject;
 use App\Models\Program;
 use App\Models\Region;
 use App\Models\SponsorshipCase;
@@ -12,14 +12,14 @@ use Illuminate\Support\Facades\Cache;
 
 final class PublicNavigation
 {
-    public const MENU_CACHE_KEY = 'public-navigation.menus';
+    public const MENU_CACHE_KEY = 'public-navigation.menus.v2';
 
     /**
      * Models whose changes must refresh the cached mega-menu data.
      *
      * @var list<class-string<Model>>
      */
-    public const MENU_SOURCES = [Campaign::class, Program::class, Region::class, SponsorshipCase::class];
+    public const MENU_SOURCES = [CompletedProject::class, Program::class, Region::class, SponsorshipCase::class];
 
     /**
      * @return list<array{route: string, key: string}>
@@ -30,6 +30,7 @@ final class PublicNavigation
             ['route' => 'home', 'key' => 'nav.home'],
             ['route' => 'about', 'key' => 'nav.about'],
             ['route' => 'programs', 'key' => 'nav.programs'],
+            ['route' => 'projects', 'key' => 'nav.projects'],
             ['route' => 'campaigns', 'key' => 'nav.campaigns'],
             ['route' => 'sponsorship', 'key' => 'nav.sponsorship'],
             ['route' => 'news', 'key' => 'nav.news'],
@@ -80,25 +81,21 @@ final class PublicNavigation
     /**
      * Database-driven content for the header mega menus.
      *
-     * @return array{regions: Collection<int, Region>, programs: Collection<int, Program>, campaigns: Collection<int, Campaign>, waitingCases: Collection<int, SponsorshipCase>}
+     * @return array{regions: Collection<int, Region>, programs: Collection<int, Program>, projects: Collection<int, CompletedProject>, waitingCases: Collection<int, SponsorshipCase>}
      */
     public static function menus(): array
     {
         $cached = Cache::remember(self::MENU_CACHE_KEY, now()->addHour(), fn (): array => [
-            'regions' => self::toCacheable(Region::published()
-                ->withCount(['campaigns' => fn ($campaigns) => $campaigns->published()])
-                ->get()),
-            'programs' => self::toCacheable(Program::published()
-                ->withCount(['campaigns' => fn ($campaigns) => $campaigns->published()])
-                ->get()),
-            'campaigns' => self::toCacheable(Campaign::published()->ordered()->with('region')->take(3)->get(), 'region'),
+            'regions' => self::toCacheable(Region::published()->withProjectsCount()->get()),
+            'programs' => self::toCacheable(Program::published()->withProjectsCount()->get()),
+            'projects' => self::toCacheable(CompletedProject::published()->with('region')->take(3)->get(), 'region'),
             'waitingCases' => self::toCacheable(SponsorshipCase::available()->longestWaiting()->with('region')->take(3)->get(), 'region'),
         ]);
 
         return [
             'regions' => self::fromCacheable(Region::class, $cached['regions']),
             'programs' => self::fromCacheable(Program::class, $cached['programs']),
-            'campaigns' => self::fromCacheable(Campaign::class, $cached['campaigns'], 'region', Region::class),
+            'projects' => self::fromCacheable(CompletedProject::class, $cached['projects'], 'region', Region::class),
             'waitingCases' => self::fromCacheable(SponsorshipCase::class, $cached['waitingCases'], 'region', Region::class),
         ];
     }

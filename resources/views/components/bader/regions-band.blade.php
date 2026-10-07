@@ -24,7 +24,7 @@
                             </span>
                             <span class="min-w-0">
                                 <span class="block font-extrabold leading-snug text-ink-900 group-hover:text-forest-700">{{ $region->name }}</span>
-                                <span class="block text-xs text-subtle">{{ trans_choice('region.projects_count', $region->campaigns_count, ['count' => $region->campaigns_count]) }}</span>
+                                <span class="block text-xs text-subtle">{{ trans_choice('region.projects_count', $region->projects_count, ['count' => $region->projects_count]) }}</span>
                             </span>
                         </a>
                     </li>

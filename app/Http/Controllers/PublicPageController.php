@@ -27,9 +27,7 @@ class PublicPageController extends Controller
 
     public function programs(): View
     {
-        $programs = Program::published()
-            ->withCount(['campaigns' => fn (Builder $campaigns) => $campaigns->published()])
-            ->get();
+        $programs = Program::published()->withProjectsCount()->get();
 
         $fallbackPrograms = $programs->isEmpty() ? [
             'water', 'food', 'shelter', 'winter', 'health', 'education',
@@ -47,16 +45,16 @@ class PublicPageController extends Controller
             ->published()
             ->ordered()
             ->withDonorsCount()
-            ->with(['program', 'region'])
+            ->with('program')
             ->get();
 
-        $completedProjects = $program->completedProjects()->published()->with('region')->take(6)->get();
+        $completedProjects = $program->completedProjects()->published()->with('region')->get();
 
         $stories = $program->stories()->published()->take(6)->get();
 
         $otherPrograms = Program::published()
             ->whereKeyNot($program->getKey())
-            ->withCount(['campaigns' => fn (Builder $campaigns) => $campaigns->published()])
+            ->withProjectsCount()
             ->take(4)
             ->get();
 
@@ -64,7 +62,7 @@ class PublicPageController extends Controller
     }
 
     /**
-     * Projects already delivered (not fundraising), filterable by program and region.
+     * All published projects, filterable by program and region.
      */
     public function completedProjects(Request $request): View
     {
@@ -110,21 +108,18 @@ class PublicPageController extends Controller
     public function campaigns(Request $request): View
     {
         $programs = Program::published()->get();
-        $regions = Region::published()->get();
 
         $selectedProgram = $programs->firstWhere('key', $request->query('program'));
-        $selectedRegion = $regions->firstWhere('key', $request->query('region'));
 
         $campaigns = Campaign::published()
             ->ordered()
             ->withDonorsCount()
-            ->with(['program', 'region'])
+            ->with('program')
             ->when($selectedProgram, fn (Builder $query) => $query->where('program_id', $selectedProgram->id))
-            ->when($selectedRegion, fn (Builder $query) => $query->where('region_id', $selectedRegion->id))
             ->paginate(12)
             ->withQueryString();
 
-        return view('pages.campaigns', compact('campaigns', 'programs', 'regions', 'selectedProgram', 'selectedRegion'));
+        return view('pages.campaigns', compact('campaigns', 'programs', 'selectedProgram'));
     }
 
     public function campaignShow(string $key): View
@@ -132,7 +127,7 @@ class PublicPageController extends Controller
         $campaign = Campaign::published()
             ->where('key', $key)
             ->withDonorsCount()
-            ->with(['program', 'region'])
+            ->with('program')
             ->firstOrFail();
 
         $relatedCampaigns = Campaign::published()
@@ -140,7 +135,7 @@ class PublicPageController extends Controller
             ->when($campaign->program_id, fn (Builder $query) => $query->orderByRaw('program_id = ? desc', [$campaign->program_id]))
             ->ordered()
             ->withDonorsCount()
-            ->with(['program', 'region'])
+            ->with('program')
             ->take(3)
             ->get();
 
@@ -154,13 +149,6 @@ class PublicPageController extends Controller
             ->with(['facilities' => fn ($facilities) => $facilities->published()])
             ->firstOrFail();
 
-        $campaigns = $region->campaigns()
-            ->published()
-            ->ordered()
-            ->withDonorsCount()
-            ->with(['program', 'region'])
-            ->get();
-
         $completedProjects = $region->completedProjects()->published()->with(['program', 'region'])->get();
 
         $cases = $region->sponsorshipCases()
@@ -172,7 +160,7 @@ class PublicPageController extends Controller
 
         $otherRegions = Region::published()->whereKeyNot($region->getKey())->get();
 
-        return view('pages.region-show', compact('region', 'campaigns', 'completedProjects', 'cases', 'otherRegions'));
+        return view('pages.region-show', compact('region', 'completedProjects', 'cases', 'otherRegions'));
     }
 
     /**

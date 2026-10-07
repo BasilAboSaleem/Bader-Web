@@ -1229,13 +1229,13 @@
     transform: none;
   }
 
-  .bader-public .region-facility.is-completed {
+  .bader-public .region-facility.is-project {
     background-color: var(--color-forest-600);
     color: #fff;
   }
 
-  .bader-public .region-facility.is-completed:hover,
-  .bader-public .region-facility.is-completed:focus-visible {
+  .bader-public .region-facility.is-project:hover,
+  .bader-public .region-facility.is-project:focus-visible {
     background-color: var(--color-gold-500);
     color: var(--color-teal-950);
   }
@@ -1251,7 +1251,7 @@
     color: var(--color-gold-400);
   }
 
-  .bader-public .region-map-key.is-completed {
+  .bader-public .region-map-key.is-project {
     background-color: var(--color-forest-600);
     color: #fff;
   }

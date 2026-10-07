@@ -7,7 +7,7 @@
                 <div class="max-w-2xl">
                     <p class="kicker">{{ __('home.campaigns_kicker') }}</p>
                     <h2 id="home-projects-title" class="section-title mt-3">{{ __('home.campaigns_heading') }}</h2>
-                    <p class="section-lead mt-3">{{ __('home.projects.text') }}</p>
+                    <p class="section-lead mt-3">{{ __('home.campaigns_text') }}</p>
                 </div>
                 <div class="flex shrink-0 items-center gap-2">
                     <button type="button" class="scroller-arrow" data-scroller-prev aria-label="{{ __('home.hero.previous') }}">
@@ -17,7 +17,7 @@
                         <x-bader.icon name="chevron-end" class="h-5 w-5" />
                     </button>
                     <a href="{{ route('campaigns') }}" class="btn-outline ms-2">
-                        {{ __('header.all_projects') }}
+                        {{ __('header.all_campaigns') }}
                         <x-bader.icon name="arrow" class="h-4 w-4" />
                     </a>
                 </div>

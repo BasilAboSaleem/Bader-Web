@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Campaign;
+use App\Models\CompletedProject;
 use App\Models\Facility;
 use App\Models\Program;
 use App\Models\Region;
@@ -37,22 +38,23 @@ class PublicProjectsPagesTest extends TestCase
         $this->get(route('campaigns.show', $campaign->key))->assertNotFound();
     }
 
-    public function test_projects_page_filters_by_program_and_region(): void
+    public function test_campaigns_page_filters_by_program_and_is_not_split_by_region(): void
     {
         $water = Program::factory()->create();
         $north = Region::factory()->create();
-        $matching = Campaign::factory()->create(['program_id' => $water->id, 'region_id' => $north->id]);
-        $otherProgram = Campaign::factory()->create(['region_id' => $north->id]);
-        $otherRegion = Campaign::factory()->create(['program_id' => $water->id]);
+        $legacyRegionCampaign = Campaign::factory()->create(['program_id' => $water->id, 'region_id' => $north->id]);
+        $waterCampaign = Campaign::factory()->create(['program_id' => $water->id]);
+        $otherProgram = Campaign::factory()->create();
 
         $this->get(route('campaigns', ['program' => $water->key, 'region' => $north->key]))
             ->assertOk()
-            ->assertSee($matching->title_ar)
-            ->assertViewHas('campaigns', fn ($campaigns): bool => $campaigns->pluck('id')->all() === [$matching->id]);
+            ->assertSee($waterCampaign->title_ar)
+            ->assertDontSee(__('campaigns_page.filter_region'))
+            ->assertViewHas('campaigns', fn ($campaigns): bool => $campaigns->pluck('id')->sort()->values()->all() === [$legacyRegionCampaign->id, $waterCampaign->id]);
 
         $this->get(route('campaigns', ['program' => 'unknown-program']))
             ->assertOk()
-            ->assertViewHas('campaigns', fn ($campaigns): bool => $campaigns->pluck('id')->sort()->values()->all() === [$matching->id, $otherProgram->id, $otherRegion->id]);
+            ->assertViewHas('campaigns', fn ($campaigns): bool => $campaigns->pluck('id')->sort()->values()->all() === [$legacyRegionCampaign->id, $waterCampaign->id, $otherProgram->id]);
     }
 
     public function test_campaign_page_shows_progress_and_the_campaign_amounts_in_both_languages(): void
@@ -83,17 +85,19 @@ class PublicProjectsPagesTest extends TestCase
             ->assertDontSee('donate_box.', false);
     }
 
-    public function test_region_page_shows_its_projects_and_waiting_cases(): void
+    public function test_region_page_shows_its_projects_and_waiting_cases_but_no_campaigns(): void
     {
         $region = Region::factory()->create();
-        $campaign = Campaign::factory()->create(['region_id' => $region->id]);
+        $project = CompletedProject::factory()->create(['region_id' => $region->id]);
+        $legacyRegionCampaign = Campaign::factory()->create(['region_id' => $region->id]);
         $case = SponsorshipCase::factory()->create(['region_id' => $region->id]);
         $sponsoredCase = SponsorshipCase::factory()->sponsored()->create(['region_id' => $region->id]);
 
         $this->get(route('regions.show', $region->key))
             ->assertOk()
             ->assertSee($region->name_ar)
-            ->assertSee($campaign->title_ar)
+            ->assertSee($project->title_ar)
+            ->assertDontSee($legacyRegionCampaign->title_ar)
             ->assertSee($case->name_ar)
             ->assertViewHas('cases', fn ($cases): bool => ! $cases->contains($sponsoredCase));
     }

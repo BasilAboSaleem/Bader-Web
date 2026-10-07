@@ -40,6 +40,14 @@ class Program extends Model
         return $query->where('status', 'published')->orderBy('order');
     }
 
+    /**
+     * Adds `projects_count`: the program's published projects.
+     */
+    public function scopeWithProjectsCount(Builder $query): Builder
+    {
+        return $query->withCount(['completedProjects as projects_count' => fn (Builder $projects) => $projects->where('status', 'published')]);
+    }
+
     public function campaigns(): HasMany
     {
         return $this->hasMany(Campaign::class);

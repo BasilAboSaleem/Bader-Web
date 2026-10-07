@@ -45,10 +45,10 @@
                         </div>
                     </div>
 
-                    @if ($campaigns->isNotEmpty())
+                    @if ($completedProjects->isNotEmpty())
                         <div class="mt-6 grid gap-6 sm:grid-cols-2">
-                            @foreach ($campaigns as $campaign)
-                                <x-bader.project-card :campaign="$campaign" />
+                            @foreach ($completedProjects as $completedProject)
+                                <x-bader.completed-project-card :project="$completedProject" data-reveal />
                             @endforeach
                         </div>
                     @else
@@ -59,18 +59,18 @@
                     @endif
                 </div>
 
-                @if ($completedProjects->isNotEmpty())
+                @if ($campaigns->isNotEmpty())
                     <div class="mt-12">
                         <div class="flex flex-wrap items-end justify-between gap-4" data-reveal>
                             <div>
-                                <p class="kicker">{{ __('completed_project_page.kicker') }}</p>
-                                <h2 class="section-title mt-2">{{ __('program_page.completed_title', ['program' => $program->title]) }}</h2>
+                                <p class="kicker">{{ __('program_page.campaigns_kicker') }}</p>
+                                <h2 class="section-title mt-2">{{ __('program_page.campaigns_title', ['program' => $program->title]) }}</h2>
                             </div>
-                            <a href="{{ route('completed-projects', ['program' => $program->key]) }}" class="btn-outline">{{ __('completed_project_page.view_all') }}</a>
+                            <a href="{{ route('campaigns', ['program' => $program->key]) }}" class="btn-outline">{{ __('header.all_campaigns') }}</a>
                         </div>
                         <div class="mt-6 grid gap-6 sm:grid-cols-2">
-                            @foreach ($completedProjects as $completedProject)
-                                <x-bader.completed-project-card :project="$completedProject" data-reveal />
+                            @foreach ($campaigns as $campaign)
+                                <x-bader.project-card :campaign="$campaign" />
                             @endforeach
                         </div>
                     </div>
@@ -120,7 +120,7 @@
                                 <x-bader.icon name="sprout" class="h-5 w-5" />
                             </span>
                             <h3 class="mt-4 font-extrabold text-ink-900 group-hover:text-forest-700">{{ $otherProgram->title }}</h3>
-                            <p class="mt-1 text-xs text-subtle">{{ trans_choice('region.projects_count', $otherProgram->campaigns_count, ['count' => $otherProgram->campaigns_count]) }}</p>
+                            <p class="mt-1 text-xs text-subtle">{{ trans_choice('region.projects_count', $otherProgram->projects_count, ['count' => $otherProgram->projects_count]) }}</p>
                         </a>
                     @endforeach
                 </div>

@@ -15,13 +15,9 @@
     <x-bader.page-hero
         :kicker="$completedProject->program?->title ?? __('completed_project_page.kicker')"
         :title="$completedProject->title"
-        :breadcrumbs="[['label' => __('completed_project_page.title'), 'url' => route('completed-projects')]]"
+        :breadcrumbs="[['label' => __('completed_project_page.title'), 'url' => route('projects')]]"
     >
         <div class="mt-5 flex flex-wrap gap-2 text-xs font-bold">
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-forest-700 px-3 py-1.5 text-white">
-                <x-bader.icon name="badge-check" class="h-3.5 w-3.5" />
-                {{ __('completed_project_page.badge') }}
-            </span>
             @if ($completedProject->region)
                 <a href="{{ route('regions.show', $completedProject->region->key) }}" class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-ink-800 ring-1 ring-hairline hover:text-forest-700">
                     <x-bader.icon name="map-pin" class="h-3.5 w-3.5" />
@@ -131,7 +127,7 @@
                         <x-bader.icon name="heart" class="h-4 w-4" />
                         {{ __('nav.donate') }}
                     </a>
-                    <a href="{{ route('campaigns') }}" class="btn-ghost mt-3 w-full">{{ __('header.all_projects') }}</a>
+                    <a href="{{ route('campaigns') }}" class="btn-ghost mt-3 w-full">{{ __('header.all_campaigns') }}</a>
                 </div>
             </aside>
         </div>
@@ -142,7 +138,7 @@
             <div class="container-bader">
                 <div class="flex items-end justify-between gap-4" data-reveal>
                     <h2 class="section-title">{{ __('completed_project_page.related') }}</h2>
-                    <a href="{{ route('completed-projects') }}" class="btn-outline shrink-0">{{ __('completed_project_page.view_all') }}</a>
+                    <a href="{{ route('projects') }}" class="btn-outline shrink-0">{{ __('completed_project_page.view_all') }}</a>
                 </div>
                 <div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     @foreach ($relatedProjects as $relatedProject)

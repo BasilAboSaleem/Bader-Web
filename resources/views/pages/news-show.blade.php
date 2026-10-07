@@ -126,7 +126,7 @@
                         <x-bader.icon name="heart" class="h-4 w-4" />
                         {{ __('nav.donate') }}
                     </a>
-                    <a href="{{ route('campaigns') }}" class="btn-ghost mt-3 w-full">{{ __('header.all_projects') }}</a>
+                    <a href="{{ route('campaigns') }}" class="btn-ghost mt-3 w-full">{{ __('header.all_campaigns') }}</a>
                 </div>
 
                 <div class="flex items-start gap-3 rounded-3xl border border-hairline bg-white p-5" data-reveal>

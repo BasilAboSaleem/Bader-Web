@@ -27,7 +27,7 @@ class SitemapController extends Controller
             ['route' => 'about', 'priority' => '0.9', 'changefreq' => 'monthly'],
             ['route' => 'programs', 'priority' => '0.8', 'changefreq' => 'weekly'],
             ['route' => 'campaigns', 'priority' => '0.9', 'changefreq' => 'daily'],
-            ['route' => 'completed-projects', 'priority' => '0.8', 'changefreq' => 'weekly'],
+            ['route' => 'projects', 'priority' => '0.9', 'changefreq' => 'weekly'],
             ['route' => 'sponsorship', 'priority' => '0.8', 'changefreq' => 'weekly'],
             ['route' => 'gift', 'priority' => '0.7', 'changefreq' => 'monthly'],
             ['route' => 'zakat', 'priority' => '0.7', 'changefreq' => 'monthly'],
@@ -44,7 +44,7 @@ class SitemapController extends Controller
         $detailPages = [
             ['route' => 'programs.show', 'models' => Program::published()->get(), 'priority' => '0.7', 'changefreq' => 'weekly'],
             ['route' => 'campaigns.show', 'models' => Campaign::published()->ordered()->get(), 'priority' => '0.8', 'changefreq' => 'daily'],
-            ['route' => 'completed-projects.show', 'models' => CompletedProject::published()->get(), 'priority' => '0.7', 'changefreq' => 'monthly'],
+            ['route' => 'projects.show', 'models' => CompletedProject::published()->get(), 'priority' => '0.7', 'changefreq' => 'monthly'],
             ['route' => 'regions.show', 'models' => Region::published()->get(), 'priority' => '0.6', 'changefreq' => 'weekly'],
             ['route' => 'facilities.show', 'models' => Facility::published()->get(), 'priority' => '0.6', 'changefreq' => 'monthly'],
             ['route' => 'news.show', 'models' => Story::published()->get(), 'priority' => '0.6', 'changefreq' => 'monthly'],

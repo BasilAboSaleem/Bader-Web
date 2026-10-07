@@ -15,7 +15,7 @@ class RegionController extends Controller
     public function index(): View
     {
         $regions = Region::query()
-            ->withCount(['campaigns', 'facilities', 'sponsorshipCases'])
+            ->withCount(['completedProjects', 'facilities', 'sponsorshipCases'])
             ->orderBy('order')
             ->paginate(15);
 

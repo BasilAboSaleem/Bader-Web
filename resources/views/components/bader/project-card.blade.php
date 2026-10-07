@@ -21,12 +21,6 @@
         @if ($campaign->program)
             <span class="absolute start-3 top-3 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-forest-800 shadow-card-xs">{{ $campaign->program->title }}</span>
         @endif
-        @if ($campaign->region)
-            <span class="absolute bottom-3 start-3 inline-flex items-center gap-1 text-xs font-semibold text-white">
-                <x-bader.icon name="map-pin" class="h-3.5 w-3.5" />
-                {{ $campaign->region->name }}
-            </span>
-        @endif
     </a>
 
     <div class="flex flex-1 flex-col p-5">

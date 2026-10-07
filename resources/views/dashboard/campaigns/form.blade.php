@@ -63,15 +63,6 @@
           </select>
         </div>
         <div>
-          <label for="region_id" class="{{ $labelClass }}">{{ __('dashboard.field.region') }}</label>
-          <select id="region_id" name="region_id" class="{{ $inputClass }}">
-            <option value="">—</option>
-            @foreach ($regions as $region)
-              <option value="{{ $region->id }}" @selected((string) old('region_id', $campaign->region_id) === (string) $region->id)>{{ $region->name_ar }}</option>
-            @endforeach
-          </select>
-        </div>
-        <div>
           <label for="key" class="{{ $labelClass }}">{{ __('dashboard.field.key') }}</label>
           <input type="text" id="key" name="key" value="{{ old('key', $campaign->key) }}" dir="ltr" placeholder="{{ __('dashboard.field.key_placeholder') }}" class="{{ $inputClass }}">
         </div>

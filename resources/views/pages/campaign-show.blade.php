@@ -17,12 +17,6 @@
         :breadcrumbs="$breadcrumbs"
     >
         <div class="mt-5 flex flex-wrap gap-2 text-xs font-bold">
-            @if ($campaign->region)
-                <a href="{{ route('regions.show', $campaign->region->key) }}" class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-ink-800 ring-1 ring-hairline hover:text-forest-700">
-                    <x-bader.icon name="map-pin" class="h-3.5 w-3.5" />
-                    {{ $campaign->region->name }}
-                </a>
-            @endif
             @if ($campaign->isOngoing())
                 <span class="inline-flex items-center gap-1.5 rounded-full bg-forest-700 px-3 py-1.5 text-white">
                     <x-bader.icon name="repeat" class="h-3.5 w-3.5" />
@@ -57,19 +51,13 @@
 
                 <x-bader.media-gallery :model="$campaign" class="mt-10" />
 
-                <dl class="mt-10 grid gap-4 sm:grid-cols-3" data-reveal>
+                <dl class="mt-10 grid gap-4 sm:grid-cols-2" data-reveal>
                     @if ($campaign->program)
                         <div class="rounded-2xl border border-hairline bg-white p-5">
                             <dt class="text-xs font-bold text-subtle">{{ __('campaign_page.program') }}</dt>
                             <dd class="mt-1 font-extrabold text-ink-900">
                                 <a href="{{ route('programs.show', $campaign->program->key) }}" class="hover:text-forest-700">{{ $campaign->program->title }}</a>
                             </dd>
-                        </div>
-                    @endif
-                    @if ($campaign->region)
-                        <div class="rounded-2xl border border-hairline bg-white p-5">
-                            <dt class="text-xs font-bold text-subtle">{{ __('campaign_page.region') }}</dt>
-                            <dd class="mt-1 font-extrabold text-ink-900">{{ $campaign->region->name }}</dd>
                         </div>
                     @endif
                     <div class="rounded-2xl border border-hairline bg-white p-5">
@@ -130,7 +118,7 @@
             <div class="container-bader">
                 <div class="flex items-end justify-between gap-4" data-reveal>
                     <h2 class="section-title">{{ __('campaign_page.related') }}</h2>
-                    <a href="{{ route('campaigns') }}" class="btn-outline">{{ __('header.all_projects') }}</a>
+                    <a href="{{ route('campaigns') }}" class="btn-outline">{{ __('header.all_campaigns') }}</a>
                 </div>
                 <div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     @foreach ($relatedCampaigns as $relatedCampaign)

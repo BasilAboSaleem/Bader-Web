@@ -22,7 +22,7 @@
                             <x-bader.icon name="heart" class="h-5 w-5" />
                             {{ __('nav.donate') }}
                         </a>
-                        <a href="{{ route('campaigns') }}" class="btn-ghost min-h-12 px-6">{{ __('header.all_projects') }}</a>
+                        <a href="{{ route('campaigns') }}" class="btn-ghost min-h-12 px-6">{{ __('header.all_campaigns') }}</a>
                     @else
                         {{ $slot }}
                     @endif

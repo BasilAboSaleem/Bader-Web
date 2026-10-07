@@ -41,7 +41,7 @@
               <td class="px-5 py-4 text-theme-sm font-medium text-gray-800 dark:text-white/90">{{ $region->name_ar }}</td>
               <td class="px-5 py-4 text-theme-sm text-gray-500 dark:text-gray-400" dir="ltr">{{ $region->name_en ?? '—' }}</td>
               <td class="px-5 py-4 text-theme-xs text-gray-500 dark:text-gray-400">
-                {{ __('dashboard.region_counts', ['campaigns' => $region->campaigns_count, 'facilities' => $region->facilities_count, 'cases' => $region->sponsorship_cases_count]) }}
+                {{ __('dashboard.region_counts', ['projects' => $region->completed_projects_count, 'facilities' => $region->facilities_count, 'cases' => $region->sponsorship_cases_count]) }}
               </td>
               <td class="px-5 py-4 text-theme-sm text-gray-500 dark:text-gray-400">{{ $region->order }}</td>
               <td class="px-5 py-4">

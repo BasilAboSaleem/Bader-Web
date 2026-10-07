@@ -15,18 +15,16 @@ class HomeController extends Controller
 {
     public function __invoke(): View
     {
-        $publishedCampaigns = fn ($campaigns) => $campaigns->published();
-
-        $heroCampaigns = Campaign::featured()->ordered()->with(['program', 'region'])->take(5)->get();
+        $heroCampaigns = Campaign::featured()->ordered()->with('program')->take(5)->get();
 
         if ($heroCampaigns->isEmpty()) {
-            $heroCampaigns = Campaign::published()->ordered()->with(['program', 'region'])->take(3)->get();
+            $heroCampaigns = Campaign::published()->ordered()->with('program')->take(3)->get();
         }
 
         $projects = Campaign::published()
             ->ordered()
             ->withDonorsCount()
-            ->with(['program', 'region'])
+            ->with('program')
             ->take(8)
             ->get();
 
@@ -36,7 +34,7 @@ class HomeController extends Controller
             'quickGiveOptions' => SiteSettings::quickGiveOptions(),
             'regions' => Region::forImpactMap()->get(),
             'metrics' => ImpactMetric::approved()->orderBy('order')->take(4)->get(),
-            'programs' => Program::published()->withCount(['campaigns' => $publishedCampaigns])->get(),
+            'programs' => Program::published()->withProjectsCount()->get(),
             'projects' => $projects,
             'stories' => Story::published()->take(4)->get(),
             'featuredCase' => SponsorshipCase::available()->longestWaiting()->with('region')->first(),

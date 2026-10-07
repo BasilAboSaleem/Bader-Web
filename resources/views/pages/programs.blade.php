@@ -27,7 +27,7 @@
                             @endif
                             <span class="absolute bottom-3 start-3 inline-flex items-center gap-1.5 text-xs font-bold text-white">
                                 <x-bader.icon name="grid" class="h-3.5 w-3.5" />
-                                {{ trans_choice('region.projects_count', $program->campaigns_count, ['count' => $program->campaigns_count]) }}
+                                {{ trans_choice('region.projects_count', $program->projects_count, ['count' => $program->projects_count]) }}
                             </span>
                         </div>
                         <div class="flex flex-1 flex-col p-6">
@@ -73,7 +73,7 @@
                     <x-bader.icon name="heart" class="h-4 w-4" />
                     {{ __('nav.donate') }}
                 </a>
-                <a href="{{ route('campaigns') }}" class="btn-ghost">{{ __('header.all_projects') }}</a>
+                <a href="{{ route('projects') }}" class="btn-ghost">{{ __('header.all_projects') }}</a>
             </div>
         </div>
     </section>

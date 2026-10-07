@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Campaign;
+use App\Models\CompletedProject;
 use App\Models\Region;
 use App\Models\SponsorshipCase;
 use App\Models\Story;
@@ -45,20 +46,22 @@ class PublicSiteTest extends TestCase
             ->assertViewHas('heroCampaigns', fn ($campaigns): bool => ! $campaigns->contains($draftCampaign));
     }
 
-    public function test_home_map_shades_linked_governorates_with_region_totals(): void
+    public function test_home_map_shades_linked_governorates_with_their_published_project_counts(): void
     {
         $linkedRegion = Region::factory()->create(['key' => 'rafah-field', 'map_area' => 'rafah']);
-        $unlinkedRegion = Region::factory()->create(['key' => 'unlinked-field', 'map_area' => null]);
+        Region::factory()->create(['key' => 'unlinked-field', 'map_area' => null]);
+        CompletedProject::factory()->count(2)->create(['region_id' => $linkedRegion->id]);
+        CompletedProject::factory()->draft()->create(['region_id' => $linkedRegion->id]);
         Campaign::factory()->create(['region_id' => $linkedRegion->id, 'raised_amount' => 2500]);
-        Campaign::factory()->draft()->create(['region_id' => $linkedRegion->id, 'raised_amount' => 9000]);
 
         $this->get(route('home'))
             ->assertOk()
             ->assertSee('data-region-area data-region="rafah-field"', false)
             ->assertDontSee('data-region-area data-region="unlinked-field"', false)
             ->assertSee('data-region="unlinked-field"', false)
-            ->assertSee(__('home.map.raised_amount', ['amount' => "\u{2066}$2,500\u{2069}"]), false)
-            ->assertDontSee('$11,500', false);
+            ->assertSee(trans_choice('region.projects_count', 2, ['count' => 2]))
+            ->assertDontSee(trans_choice('region.projects_count', 3, ['count' => 3]))
+            ->assertViewHas('regions', fn ($regions): bool => $regions->firstWhere('key', 'rafah-field')->projects_count === 2);
     }
 
     public function test_impact_map_page_opens_on_the_shared_region_with_its_metrics(): void

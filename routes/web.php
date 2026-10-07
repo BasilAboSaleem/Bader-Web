@@ -26,6 +26,7 @@ use App\Http\Controllers\PublicPageController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SponsorshipPageController;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // SEO: Sitemap & robots.txt (no caching — always fresh)
@@ -41,8 +42,8 @@ Route::middleware('cache.public')->group(function () {
     Route::get('/programs/{key}', [PublicPageController::class, 'programShow'])->name('programs.show');
     Route::get('/campaigns', [PublicPageController::class, 'campaigns'])->name('campaigns');
     Route::get('/campaigns/{key}', [PublicPageController::class, 'campaignShow'])->name('campaigns.show');
-    Route::get('/completed-projects', [PublicPageController::class, 'completedProjects'])->name('completed-projects');
-    Route::get('/completed-projects/{key}', [PublicPageController::class, 'completedProjectShow'])->name('completed-projects.show');
+    Route::get('/projects', [PublicPageController::class, 'completedProjects'])->name('projects');
+    Route::get('/projects/{key}', [PublicPageController::class, 'completedProjectShow'])->name('projects.show');
     Route::get('/regions/{key}', [PublicPageController::class, 'regionShow'])->name('regions.show');
     Route::get('/impact-map', [PublicPageController::class, 'impactMap'])->name('impact-map');
     Route::get('/impact', [PublicPageController::class, 'impact'])->name('impact');
@@ -58,6 +59,10 @@ Route::middleware('cache.public')->group(function () {
     Route::get('/faq', [PublicPageController::class, 'faq'])->name('faq');
     Route::get('/contact', [PublicPageController::class, 'contact'])->name('contact');
 });
+
+// Old completed-projects links (shared before projects were unified) keep working
+Route::get('/completed-projects', fn (Request $request) => redirect()->route('projects', $request->query(), 301));
+Route::permanentRedirect('/completed-projects/{key}', '/projects/{key}');
 
 // Public Form Submissions
 Route::middleware('throttle:10,1')->group(function () {

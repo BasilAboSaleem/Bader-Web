@@ -163,7 +163,7 @@ class DashboardGivingContentTest extends TestCase
         $this->assertSame(0, SponsorshipCase::where('code', 'GZ-200')->count());
     }
 
-    public function test_campaign_form_saves_program_region_and_preset_amounts(): void
+    public function test_campaign_form_saves_program_and_preset_amounts_without_linking_a_region(): void
     {
         $admin = User::factory()->create();
         $program = Program::factory()->create();
@@ -183,7 +183,7 @@ class DashboardGivingContentTest extends TestCase
 
         $campaign = Campaign::sole();
         $this->assertSame($program->id, $campaign->program_id);
-        $this->assertSame($region->id, $campaign->region_id);
+        $this->assertNull($campaign->region_id);
         $this->assertSame([15, 30.5, 60], $campaign->preset_amounts);
         $this->assertFalse($campaign->allows_monthly);
 

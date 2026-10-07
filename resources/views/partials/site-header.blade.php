@@ -8,7 +8,7 @@
         'about' => ['label' => __('nav.about'), 'active' => request()->routeIs('about', 'impact', 'partners', 'volunteer', 'faq', 'contact')],
         'regions' => ['label' => __('nav.regions'), 'active' => request()->routeIs('regions.*', 'impact-map')],
         'programs' => ['label' => __('nav.programs'), 'active' => request()->routeIs('programs', 'programs.*')],
-        'projects' => ['label' => __('nav.campaigns'), 'active' => request()->routeIs('campaigns', 'campaigns.*', 'completed-projects', 'completed-projects.*')],
+        'projects' => ['label' => __('nav.projects'), 'active' => request()->routeIs('campaigns', 'campaigns.*', 'projects', 'projects.*')],
         'sponsorship' => ['label' => __('nav.sponsorship'), 'active' => request()->routeIs('sponsorship', 'sponsorship.*')],
     ];
 @endphp
@@ -106,7 +106,7 @@
                                                 <a href="{{ route('regions.show', $region->key) }}" class="mega-tile">
                                                     <x-bader.icon name="map-pin" class="h-5 w-5 text-forest-700" />
                                                     <span class="mt-3 block font-bold text-ink-900">{{ $region->name }}</span>
-                                                    <span class="mt-1 block text-xs text-muted">{{ trans_choice('region.projects_count', $region->campaigns_count, ['count' => $region->campaigns_count]) }}</span>
+                                                    <span class="mt-1 block text-xs text-muted">{{ trans_choice('region.projects_count', $region->projects_count, ['count' => $region->projects_count]) }}</span>
                                                 </a>
                                             </li>
                                         @empty
@@ -133,7 +133,7 @@
                                                     </span>
                                                     <span class="min-w-0">
                                                         <span class="block truncate font-bold text-ink-900">{{ $program->title }}</span>
-                                                        <span class="block text-xs text-muted">{{ trans_choice('region.projects_count', $program->campaigns_count, ['count' => $program->campaigns_count]) }}</span>
+                                                        <span class="block text-xs text-muted">{{ trans_choice('region.projects_count', $program->projects_count, ['count' => $program->projects_count]) }}</span>
                                                     </span>
                                                 </a>
                                             </li>
@@ -145,22 +145,22 @@
                                     <div class="flex items-end justify-between gap-4">
                                         <p class="kicker">{{ __('header.featured_projects') }}</p>
                                         <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
-                                            <a href="{{ route('completed-projects') }}" class="mega-more">{{ __('nav.completed_projects') }} <x-bader.icon name="arrow" class="h-4 w-4" /></a>
-                                            <a href="{{ route('campaigns') }}" class="mega-more">{{ __('header.all_projects') }} <x-bader.icon name="arrow" class="h-4 w-4" /></a>
+                                            <a href="{{ route('projects') }}" class="mega-more">{{ __('header.all_projects') }} <x-bader.icon name="arrow" class="h-4 w-4" /></a>
+                                            <a href="{{ route('campaigns') }}" class="mega-more">{{ __('header.all_campaigns') }} <x-bader.icon name="arrow" class="h-4 w-4" /></a>
                                         </div>
                                     </div>
                                     <ul class="mt-6 grid gap-4 md:grid-cols-3">
-                                        @forelse ($menus['campaigns'] as $campaign)
+                                        @forelse ($menus['projects'] as $project)
                                             <li>
-                                                <a href="{{ route('campaigns.show', $campaign->key) }}" class="group block overflow-hidden rounded-2xl border border-hairline bg-white transition hover:shadow-card-md">
+                                                <a href="{{ route('projects.show', $project->key) }}" class="group block overflow-hidden rounded-2xl border border-hairline bg-white transition hover:shadow-card-md">
                                                     <span class="block aspect-[16/9] overflow-hidden bg-paper-2">
-                                                        <img src="{{ asset($campaign->image ?: 'images/programs/water.jpg') }}" alt="" class="h-full w-full object-cover transition duration-500 ease-bader group-hover:scale-105" loading="lazy">
+                                                        <img src="{{ asset($project->image ?: 'images/programs/water.jpg') }}" alt="" class="h-full w-full object-cover transition duration-500 ease-bader group-hover:scale-105" loading="lazy">
                                                     </span>
                                                     <span class="block p-4">
-                                                        @if ($campaign->region)
-                                                            <span class="flex items-center gap-1 text-xs font-semibold text-forest-700"><x-bader.icon name="map-pin" class="h-3.5 w-3.5" />{{ $campaign->region->name }}</span>
+                                                        @if ($project->region)
+                                                            <span class="flex items-center gap-1 text-xs font-semibold text-forest-700"><x-bader.icon name="map-pin" class="h-3.5 w-3.5" />{{ $project->region->name }}</span>
                                                         @endif
-                                                        <span class="mt-1 block font-bold text-ink-900">{{ $campaign->title }}</span>
+                                                        <span class="mt-1 block font-bold text-ink-900">{{ $project->title }}</span>
                                                     </span>
                                                 </a>
                                             </li>
@@ -267,8 +267,8 @@
                 </div>
             </details>
 
+            <a href="{{ route('projects') }}" class="drawer-link">{{ __('nav.projects') }}</a>
             <a href="{{ route('campaigns') }}" class="drawer-link">{{ __('nav.campaigns') }}</a>
-            <a href="{{ route('completed-projects') }}" class="drawer-link">{{ __('nav.completed_projects') }}</a>
             <a href="{{ route('sponsorship') }}" class="drawer-link">{{ __('nav.sponsorship') }}</a>
             <a href="{{ route('news') }}" class="drawer-link">{{ __('nav.news') }}</a>
             <a href="{{ route('gift') }}" class="drawer-link">{{ __('nav.gift') }}</a>

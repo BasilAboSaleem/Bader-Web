@@ -1,29 +1,22 @@
 @props(['regions', 'selected' => null, 'variant' => 'home'])
 
-@use('App\Support\Money')
-
 @php
     $isPage = $variant === 'page';
     $areas = config('bader.map_areas');
     [$viewWidth, $viewHeight] = config('bader.map_view_box');
     $regionsByArea = $regions->filter(fn ($region) => isset($areas[$region->map_area]))->keyBy('map_area');
-    $activityCount = fn ($region) => $region->campaigns_count + $region->completedProjects->count();
-    $maxActivity = max(1, (int) $regions->max($activityCount));
-    $totalProjects = $regions->sum('campaigns_count');
-    $totalCompleted = $regions->sum(fn ($region) => $region->completedProjects->count());
+    $maxActivity = max(1, (int) $regions->max('projects_count'));
+    $totalProjects = $regions->sum('projects_count');
     $totalFacilities = $regions->sum(fn ($region) => $region->facilities->count());
-    $totalRaised = Money::format($regions->sum('raised_total'));
     $selected = $regions->contains('key', $selected) ? $selected : 'all';
     $pinsPerRing = 8;
     $regionPoints = fn ($region) => [
-        ...$region->facilities->map(fn ($facility) => ['url' => route('facilities.show', $facility->key), 'name' => $facility->name, 'icon' => 'building', 'isCompleted' => false]),
-        ...$region->completedProjects->map(fn ($project) => ['url' => route('completed-projects.show', $project->key), 'name' => $project->title, 'icon' => 'badge-check', 'isCompleted' => true]),
+        ...$region->completedProjects->map(fn ($project) => ['url' => route('projects.show', $project->key), 'name' => $project->title, 'icon' => 'grid', 'isProject' => true]),
+        ...$region->facilities->map(fn ($facility) => ['url' => route('facilities.show', $facility->key), 'name' => $facility->name, 'icon' => 'building', 'isProject' => false]),
     ];
     $regionStats = fn ($region) => [
-        trans_choice('region.projects_count', $region->campaigns_count, ['count' => $region->campaigns_count]),
-        trans_choice('region.completed_count', $region->completedProjects->count(), ['count' => $region->completedProjects->count()]),
+        trans_choice('region.projects_count', $region->projects_count, ['count' => $region->projects_count]),
         trans_choice('region.facilities_count', $region->facilities->count(), ['count' => $region->facilities->count()]),
-        __('home.map.raised_amount', ['amount' => "\u{2066}".Money::format($region->raised_total ?? 0)."\u{2069}"]),
     ];
     $tooltipStats = fn ($region) => [
         ...array_map(fn (array $metric): string => "\u{2066}".$metric['value']."\u{2069} ".$metric['label'], array_slice($region->localizedImpactMetrics(), 0, 2)),
@@ -74,7 +67,7 @@
                                     <polygon
                                         @class(['region-area', 'is-linked' => $areaRegion, 'is-active' => $areaRegion?->key === $selected])
                                         points="{{ $definition['points'] }}"
-                                        style="--heat: {{ $areaRegion ? round(0.18 + 0.62 * $activityCount($areaRegion) / $maxActivity, 2) : 0 }}"
+                                        style="--heat: {{ $areaRegion ? round(0.18 + 0.62 * $areaRegion->projects_count / $maxActivity, 2) : 0 }}"
                                         @if ($areaRegion) data-region-area data-region="{{ $areaRegion->key }}" @endif />
                                 @endforeach
                             </svg>
@@ -91,7 +84,7 @@
                                         $pointY = max(3, min(97, $region->map_y + sin($angle) * 6.4 * $ringScale));
                                     @endphp
                                     <a href="{{ $point['url'] }}"
-                                        @class(['region-facility', 'is-completed' => $point['isCompleted']])
+                                        @class(['region-facility', 'is-project' => $point['isProject']])
                                         style="left: {{ round($pointX, 2) }}%; top: {{ round($pointY, 2) }}%"
                                         data-region-facility
                                         data-region="{{ $region->key }}"
@@ -136,10 +129,10 @@
                             <span>{{ __('home.map.legend_more') }}</span>
                         </div>
                     </div>
-                    @if ($totalCompleted > 0 || $totalFacilities > 0)
+                    @if ($totalProjects > 0 || $totalFacilities > 0)
                         <p class="mt-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-xs font-bold text-muted">
-                            @if ($totalCompleted > 0)
-                                <span class="inline-flex items-center gap-1.5"><span class="region-map-key is-completed"><x-bader.icon name="badge-check" class="h-3 w-3" /></span>{{ __('home.map.completed') }}</span>
+                            @if ($totalProjects > 0)
+                                <span class="inline-flex items-center gap-1.5"><span class="region-map-key is-project"><x-bader.icon name="grid" class="h-3 w-3" /></span>{{ __('home.map.projects') }}</span>
                             @endif
                             @if ($totalFacilities > 0)
                                 <span class="inline-flex items-center gap-1.5"><span class="region-map-key"><x-bader.icon name="building" class="h-3 w-3" /></span>{{ __('home.map.facilities') }}</span>
@@ -163,13 +156,11 @@
 
                     <div id="region-panel-all" class="surface-card p-6 sm:p-8" data-region-panel data-region="all" aria-live="polite" @if ($selected !== 'all') hidden @endif>
                         <h3 class="text-xl font-extrabold text-ink-900">{{ __('home.map.overview_title') }}</h3>
-                        <dl class="mt-5 grid grid-cols-2 gap-3 text-center sm:grid-cols-3">
+                        <dl class="mt-5 grid grid-cols-3 gap-3 text-center">
                             @foreach ([
                                 'regions' => $regions->count(),
                                 'projects' => $totalProjects,
-                                'completed' => $totalCompleted,
                                 'facilities' => $totalFacilities,
-                                'raised' => $totalRaised,
                             ] as $statKey => $statValue)
                                 <div class="rounded-2xl bg-paper-2 p-4">
                                     <dt class="text-xs text-subtle">{{ __('home.map.'.$statKey) }}</dt>
@@ -186,10 +177,7 @@
                                             {{ $region->name }}
                                         </span>
                                         <span class="text-end text-xs text-subtle">
-                                            {{ trans_choice('region.projects_count', $region->campaigns_count, ['count' => $region->campaigns_count]) }}
-                                            @if ($region->completedProjects->isNotEmpty())
-                                                · {{ trans_choice('region.completed_count', $region->completedProjects->count(), ['count' => $region->completedProjects->count()]) }}
-                                            @endif
+                                            {{ trans_choice('region.projects_count', $region->projects_count, ['count' => $region->projects_count]) }}
                                         </span>
                                     </button>
                                 </li>
@@ -230,6 +218,30 @@
                                     <span class="rounded-full bg-paper-2 px-3 py-1.5 text-ink-800">{{ $stat }}</span>
                                 @endforeach
                             </div>
+                            @if ($region->completedProjects->isNotEmpty())
+                                <div class="mt-5">
+                                    <p class="text-xs font-extrabold text-subtle">{{ __('home.map.projects_list') }}</p>
+                                    <ul class="mt-2 grid gap-2 sm:grid-cols-2">
+                                        @foreach ($region->completedProjects->take(6) as $completedProject)
+                                            <li>
+                                                <a href="{{ route('projects.show', $completedProject->key) }}" class="flex items-center gap-2 rounded-xl border border-hairline p-3 text-sm font-bold text-ink-800 transition hover:border-forest-600 hover:text-forest-700">
+                                                    <x-bader.icon name="grid" class="h-4 w-4 shrink-0 text-forest-600" />
+                                                    <span class="min-w-0 flex-1 truncate">{{ $completedProject->title }}</span>
+                                                    @if ($completedProject->completed_at)
+                                                        <span class="shrink-0 text-xs font-semibold text-subtle">{{ $completedProject->completed_at->format('Y') }}</span>
+                                                    @endif
+                                                </a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                    @if ($region->completedProjects->count() > 6)
+                                        <a href="{{ route('regions.show', $region->key) }}" class="mt-3 inline-flex items-center gap-1.5 text-sm font-extrabold text-forest-700 hover:underline">
+                                            {{ __('completed_project_page.view_all') }}
+                                            <x-bader.icon name="arrow" class="h-4 w-4" />
+                                        </a>
+                                    @endif
+                                </div>
+                            @endif
                             @if ($region->facilities->isNotEmpty())
                                 <ul class="mt-5 grid gap-2 sm:grid-cols-2">
                                     @foreach ($region->facilities as $facility)
@@ -241,30 +253,6 @@
                                         </li>
                                     @endforeach
                                 </ul>
-                            @endif
-                            @if ($region->completedProjects->isNotEmpty())
-                                <div class="mt-5">
-                                    <p class="text-xs font-extrabold text-subtle">{{ __('home.map.completed_list') }}</p>
-                                    <ul class="mt-2 grid gap-2 sm:grid-cols-2">
-                                        @foreach ($region->completedProjects->take(6) as $completedProject)
-                                            <li>
-                                                <a href="{{ route('completed-projects.show', $completedProject->key) }}" class="flex items-center gap-2 rounded-xl border border-hairline p-3 text-sm font-bold text-ink-800 transition hover:border-forest-600 hover:text-forest-700">
-                                                    <x-bader.icon name="badge-check" class="h-4 w-4 shrink-0 text-forest-600" />
-                                                    <span class="min-w-0 flex-1 truncate">{{ $completedProject->title }}</span>
-                                                    @if ($completedProject->completed_at)
-                                                        <span class="shrink-0 text-xs font-semibold text-subtle">{{ $completedProject->completed_at->format('Y') }}</span>
-                                                    @endif
-                                                </a>
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                    @if ($region->completedProjects->count() > 6)
-                                        <a href="{{ route('completed-projects', ['region' => $region->key]) }}" class="mt-3 inline-flex items-center gap-1.5 text-sm font-extrabold text-forest-700 hover:underline">
-                                            {{ __('completed_project_page.view_all') }}
-                                            <x-bader.icon name="arrow" class="h-4 w-4" />
-                                        </a>
-                                    @endif
-                                </div>
                             @endif
                             <div class="mt-6 flex flex-wrap gap-3">
                                 <a href="{{ route('regions.show', $region->key) }}" class="btn-brand">

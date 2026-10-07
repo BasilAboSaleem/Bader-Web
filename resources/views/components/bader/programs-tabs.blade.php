@@ -66,7 +66,7 @@
                                 @endif
                                 <p class="mt-5 inline-flex animate-fade-up items-center gap-2 text-sm font-bold text-subtle [animation-delay:260ms]" data-replay>
                                     <x-bader.icon name="grid" class="h-4 w-4" />
-                                    {{ trans_choice('region.projects_count', $program->campaigns_count, ['count' => $program->campaigns_count]) }}
+                                    {{ trans_choice('region.projects_count', $program->projects_count, ['count' => $program->projects_count]) }}
                                 </p>
                                 <div class="mt-7 flex animate-fade-up flex-wrap gap-3 [animation-delay:300ms]" data-replay>
                                     <a href="{{ route('donate', ['target_type' => 'program', 'target_id' => $program->id]) }}" class="btn-primary">

@@ -4,7 +4,7 @@
 @section('meta_description', __('completed_project_page.intro'))
 
 @php
-    $filterUrl = fn (array $overrides) => route('completed-projects', array_filter(array_merge([
+    $filterUrl = fn (array $overrides) => route('projects', array_filter(array_merge([
         'program' => $selectedProgram?->key,
         'region' => $selectedRegion?->key,
     ], $overrides)));
@@ -85,10 +85,10 @@
                 @endif
             @else
                 <div class="mt-8 rounded-3xl border border-dashed border-hairline-strong bg-white p-10 text-center">
-                    <x-bader.icon name="badge-check" class="mx-auto h-10 w-10 text-forest-600" />
+                    <x-bader.icon name="grid" class="mx-auto h-10 w-10 text-forest-600" />
                     <p class="mt-4 text-muted">{{ __('completed_project_page.empty') }}</p>
                     @if ($selectedProgram || $selectedRegion)
-                        <a href="{{ route('completed-projects') }}" class="btn-outline mt-6">{{ __('campaigns_page.clear_filters') }}</a>
+                        <a href="{{ route('projects') }}" class="btn-outline mt-6">{{ __('campaigns_page.clear_filters') }}</a>
                     @endif
                 </div>
             @endif
@@ -100,7 +100,7 @@
             <h2 class="section-title">{{ __('home.support_title') }}</h2>
             <p class="section-lead mt-3">{{ __('home.support_intro') }}</p>
             <div class="mt-7 flex flex-wrap justify-center gap-3">
-                <a href="{{ route('campaigns') }}" class="btn-primary">{{ __('header.all_projects') }}</a>
+                <a href="{{ route('campaigns') }}" class="btn-primary">{{ __('header.all_campaigns') }}</a>
                 <a href="{{ route('donate') }}" class="btn-brand">{{ __('nav.donate') }}</a>
             </div>
         </div>

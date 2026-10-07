@@ -13,10 +13,6 @@
         <dl class="mt-6 flex flex-wrap gap-3">
             <div class="rounded-2xl bg-white px-5 py-3 ring-1 ring-hairline">
                 <dt class="text-xs text-subtle">{{ __('home.map.projects') }}</dt>
-                <dd class="text-2xl font-extrabold text-forest-700">{{ $campaigns->count() }}</dd>
-            </div>
-            <div class="rounded-2xl bg-white px-5 py-3 ring-1 ring-hairline">
-                <dt class="text-xs text-subtle">{{ __('home.map.completed') }}</dt>
                 <dd class="text-2xl font-extrabold text-forest-700">{{ $completedProjects->count() }}</dd>
             </div>
             <div class="rounded-2xl bg-white px-5 py-3 ring-1 ring-hairline">
@@ -40,10 +36,10 @@
         <div class="container-bader">
             <h2 class="section-title" data-reveal>{{ __('region_page.projects_title', ['region' => $region->name]) }}</h2>
 
-            @if ($campaigns->isNotEmpty())
+            @if ($completedProjects->isNotEmpty())
                 <div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    @foreach ($campaigns as $campaign)
-                        <x-bader.project-card :campaign="$campaign" />
+                    @foreach ($completedProjects as $completedProject)
+                        <x-bader.completed-project-card :project="$completedProject" data-reveal style="animation-delay: {{ ($loop->index % 3) * 80 }}ms" />
                     @endforeach
                 </div>
             @else
@@ -55,27 +51,8 @@
         </div>
     </section>
 
-    @if ($completedProjects->isNotEmpty())
-        <section class="band-tint section-y">
-            <div class="container-bader">
-                <div class="flex flex-wrap items-end justify-between gap-4" data-reveal>
-                    <div>
-                        <p class="kicker">{{ __('completed_project_page.kicker') }}</p>
-                        <h2 class="section-title mt-2">{{ __('region_page.completed_title', ['region' => $region->name]) }}</h2>
-                    </div>
-                    <a href="{{ route('completed-projects', ['region' => $region->key]) }}" class="btn-outline">{{ __('completed_project_page.view_all') }}</a>
-                </div>
-                <div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    @foreach ($completedProjects as $completedProject)
-                        <x-bader.completed-project-card :project="$completedProject" data-reveal style="animation-delay: {{ $loop->index * 80 }}ms" />
-                    @endforeach
-                </div>
-            </div>
-        </section>
-    @endif
-
     @if ($region->facilities->isNotEmpty())
-        <section class="{{ $completedProjects->isNotEmpty() ? 'band-base' : 'band-tint' }} section-y">
+        <section class="band-tint section-y">
             <div class="container-bader">
                 <h2 class="section-title" data-reveal>{{ __('region_page.facilities_title') }}</h2>
                 <div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

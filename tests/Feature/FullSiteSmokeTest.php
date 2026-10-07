@@ -103,7 +103,7 @@ class FullSiteSmokeTest extends TestCase
     {
         $parameters = [
             'campaigns.show' => ['key' => Campaign::published()->firstOrFail()->key],
-            'completed-projects.show' => ['key' => CompletedProject::published()->firstOrFail()->key],
+            'projects.show' => ['key' => CompletedProject::published()->firstOrFail()->key],
             'programs.show' => ['key' => Program::published()->firstOrFail()->key],
             'regions.show' => ['key' => Region::published()->firstOrFail()->key],
             'facilities.show' => ['key' => Facility::published()->firstOrFail()->key],
