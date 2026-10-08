@@ -54,9 +54,8 @@ const initSlider = (root) => {
     root.querySelector('[data-slider-next]')?.addEventListener('click', () => go(activeIndex + 1));
     dots.forEach((dot, dotIndex) => dot.addEventListener('click', () => go(dotIndex)));
 
-    root.addEventListener('pointerenter', () => { isPaused = true; });
-    root.addEventListener('pointerleave', () => { isPaused = false; });
-    root.addEventListener('focusin', () => { isPaused = true; });
+    // Pause only while a keyboard user is inside; hovering or clicking the arrows must not stop the slides.
+    root.addEventListener('focusin', (event) => { isPaused = event.target.matches(':focus-visible'); });
     root.addEventListener('focusout', () => { isPaused = false; });
 
     root.addEventListener('keydown', (event) => {

@@ -42,13 +42,13 @@
 
 <section class="relative isolate overflow-hidden bg-teal-950 text-white"
     data-slider
-    data-autoplay="7000"
+    data-autoplay="4500"
     aria-roledescription="carousel"
     aria-label="{{ __('home.hero.label') }}">
     <h1 class="sr-only">{{ __('brand.name') }} — {{ $intro['title'] }}</h1>
 
     <div class="relative h-[calc(100svh-7.5rem)] min-h-[34rem] max-h-[54rem]">
-        <div class="flex h-full transition-transform duration-[900ms] ease-bader motion-reduce:transition-none" data-slider-track>
+        <div class="flex h-full transition-transform duration-[700ms] ease-bader motion-reduce:transition-none" data-slider-track>
             @foreach ($slides as $index => $slide)
                 <article class="relative h-full w-full shrink-0 overflow-hidden"
                     data-slider-slide
