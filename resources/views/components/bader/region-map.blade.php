@@ -139,11 +139,6 @@
                             @endif
                         </p>
                     @endif
-                    <p class="mt-2 text-center text-[0.65rem] text-subtle">
-                        {{ __('home.map.attribution') }}
-                        <a href="https://www.geoboundaries.org" target="_blank" rel="noopener" class="underline hover:text-forest-700">geoBoundaries</a>
-                        (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener" class="underline hover:text-forest-700">CC BY 4.0</a>)
-                    </p>
                 </div>
 
                 <div class="min-w-0">

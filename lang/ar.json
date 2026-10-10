@@ -713,7 +713,6 @@
     "home.map.share_title": "أثر بادر في :region",
     "home.map.copy_link": "نسخ الرابط",
     "home.map.share_whatsapp": "واتساب",
-    "home.map.attribution": "حدود المحافظات:",
     "region.facilities_count": "{0} لا توجد مرافق بعد|{1} مرفق واحد|{2} مرفقان|[3,10] :count مرافق|[11,*] :count مرفقاً",
     "sponsorship.waiting_since": "بانتظار كافل منذ :time",
     "sponsorship.sponsor_now": "اكفل الآن",

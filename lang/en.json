@@ -713,7 +713,6 @@
     "home.map.share_title": "Bader's impact in :region",
     "home.map.copy_link": "Copy link",
     "home.map.share_whatsapp": "WhatsApp",
-    "home.map.attribution": "Governorate boundaries:",
     "region.facilities_count": "{0} No facilities yet|{1} 1 facility|[2,*] :count facilities",
     "sponsorship.waiting_since": "Waiting for a sponsor for :time",
     "sponsorship.sponsor_now": "Sponsor now",
