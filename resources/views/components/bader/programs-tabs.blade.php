@@ -45,7 +45,7 @@
                         @unless ($loop->first) hidden @endunless>
                         <div class="grid lg:grid-cols-2">
                             <div class="relative min-h-64 overflow-hidden bg-paper-3 lg:min-h-[26rem]">
-                                <img src="{{ asset($programImage) }}" alt="" loading="lazy" class="absolute inset-0 h-full w-full animate-kenburns object-cover motion-reduce:animate-none" data-replay>
+                                <x-bader.responsive-image :src="$programImage" sizes="(min-width: 1024px) 50vw, 100vw" alt="" loading="lazy" class="absolute inset-0 h-full w-full animate-kenburns object-cover motion-reduce:animate-none" data-replay />
                                 @if ($program->badge)
                                     <span class="absolute start-4 top-4 rounded-full bg-gold-500 px-3 py-1 text-xs font-extrabold text-teal-950">{{ $program->badge }}</span>
                                 @endif

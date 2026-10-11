@@ -34,7 +34,7 @@
         <div class="container-bader grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
             <div class="min-w-0">
                 <div class="overflow-hidden rounded-3xl bg-paper-3 shadow-card-md" data-reveal>
-                    <img src="{{ $campaignImage }}" alt="{{ $campaign->title }}" class="aspect-[16/9] w-full object-cover">
+                    <x-bader.responsive-image :src="$campaignImage" sizes="(min-width: 1024px) 50rem, 100vw" :alt="$campaign->title" class="aspect-[16/9] w-full object-cover" />
                 </div>
 
                 @if ($campaign->description)

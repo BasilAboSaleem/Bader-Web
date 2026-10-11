@@ -55,7 +55,7 @@
                     aria-roledescription="slide"
                     aria-label="{{ __('home.hero.slide_of', ['current' => $index + 1, 'total' => $slides->count()]) }}"
                     @if ($index > 0) aria-hidden="true" inert @endif>
-                    <img src="{{ $slide['image'] }}" alt="" class="absolute inset-0 h-full w-full animate-kenburns object-cover motion-reduce:animate-none" data-replay @if ($index > 0) loading="lazy" @else fetchpriority="high" @endif>
+                    <x-bader.responsive-image :src="$slide['image']" :width="1920" alt="" class="absolute inset-0 h-full w-full animate-kenburns object-cover motion-reduce:animate-none" data-replay :loading="$index > 0 ? 'lazy' : null" :fetchpriority="$index === 0 ? 'high' : null" />
                     <div class="absolute inset-0 bg-gradient-to-t from-teal-950 via-teal-950/55 to-teal-950/20"></div>
                     <div class="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-teal-950/60 rtl:bg-gradient-to-r"></div>
 

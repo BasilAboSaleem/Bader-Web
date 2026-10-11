@@ -16,7 +16,7 @@
     <div class="flex items-start gap-4 p-5">
         <div class="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-paper-3">
             @if ($case->photo)
-                <img src="{{ asset($case->photo) }}" alt="" loading="lazy" class="h-full w-full object-cover">
+                <img src="{{ \App\Support\ResponsiveImage::url($case->photo, 480) }}" alt="" loading="lazy" decoding="async" class="h-full w-full object-cover">
             @else
                 <span class="flex h-full w-full items-center justify-center text-forest-600">
                     <x-bader.icon name="users" class="h-8 w-8" />

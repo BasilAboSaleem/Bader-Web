@@ -241,7 +241,7 @@
       @if ($facility->gallery && count($facility->gallery) > 0)
         <div class="mb-4 flex flex-wrap gap-2">
           @foreach ($facility->gallery as $photo)
-            <img src="{{ asset($photo) }}" alt="" class="h-16 w-20 object-cover rounded-lg border border-gray-200 dark:border-gray-700">
+            <img src="{{ \App\Support\ResponsiveImage::url($photo, 480) }}" alt="" class="h-16 w-20 object-cover rounded-lg border border-gray-200 dark:border-gray-700">
           @endforeach
         </div>
       @endif

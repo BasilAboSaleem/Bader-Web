@@ -20,7 +20,7 @@
                     @endphp
                     <article class="surface-card surface-card-hover group relative flex flex-col overflow-hidden" data-reveal style="animation-delay: {{ ($loop->index % 3) * 70 }}ms">
                         <div class="relative aspect-[16/10] overflow-hidden bg-paper-3">
-                            <img src="{{ asset($programImage) }}" alt="" loading="lazy" class="h-full w-full object-cover transition duration-700 ease-bader group-hover:scale-105">
+                            <x-bader.responsive-image :src="$programImage" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" alt="" loading="lazy" class="h-full w-full object-cover transition duration-700 ease-bader group-hover:scale-105" />
                             <span class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/40 to-transparent"></span>
                             @if ($program->badge)
                                 <span class="absolute start-3 top-3 rounded-full bg-gold-500 px-3 py-1 text-xs font-extrabold text-teal-950">{{ $program->badge }}</span>

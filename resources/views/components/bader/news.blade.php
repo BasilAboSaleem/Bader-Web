@@ -3,7 +3,7 @@
 @php
     $leadStory = $stories->first();
     $otherStories = $stories->slice(1, 3);
-    $storyImage = fn ($story) => $story->image ? asset($story->image) : asset('images/programs/education.jpg');
+    $storyImage = fn ($story) => $story->image ?: 'images/programs/education.jpg';
 @endphp
 
 <section class="band-tint section-y" aria-labelledby="home-news-title">
@@ -23,7 +23,7 @@
         @if ($leadStory)
             <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
                 <article class="group relative isolate flex min-h-[24rem] overflow-hidden rounded-3xl bg-teal-950 text-white shadow-card-md" data-reveal>
-                    <img src="{{ $storyImage($leadStory) }}" alt="" loading="lazy" class="absolute inset-0 -z-10 h-full w-full object-cover transition duration-700 ease-bader group-hover:scale-105">
+                    <x-bader.responsive-image :src="$storyImage($leadStory)" sizes="(min-width: 1024px) 58vw, 100vw" alt="" loading="lazy" class="absolute inset-0 -z-10 h-full w-full object-cover transition duration-700 ease-bader group-hover:scale-105" />
                     <div class="absolute inset-0 -z-10 bg-gradient-to-t from-teal-950 via-teal-950/50 to-transparent"></div>
                     <div class="mt-auto p-6 sm:p-8">
                         <div class="flex flex-wrap items-center gap-3 text-xs font-semibold text-white/80">
@@ -50,7 +50,7 @@
                     @foreach ($otherStories as $story)
                         <article class="surface-card surface-card-hover group relative flex gap-4 p-3" data-reveal style="animation-delay: {{ $loop->index * 80 }}ms">
                             <div class="h-24 w-28 shrink-0 overflow-hidden rounded-xl bg-paper-3 sm:w-32">
-                                <img src="{{ $storyImage($story) }}" alt="" loading="lazy" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
+                                <x-bader.responsive-image :src="$storyImage($story)" sizes="8rem" alt="" loading="lazy" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                             </div>
                             <div class="min-w-0 py-1">
                                 @if ($story->published_at)

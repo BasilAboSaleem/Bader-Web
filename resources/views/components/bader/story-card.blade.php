@@ -2,12 +2,12 @@
 
 @php
     $storyUrl = route('news.show', $story->key);
-    $storyImage = $story->image ? asset($story->image) : asset('images/programs/education.jpg');
+    $storyImage = $story->image ?: 'images/programs/education.jpg';
 @endphp
 
 <article {{ $attributes->class(['surface-card surface-card-hover group relative flex flex-col overflow-hidden']) }}>
     <div @class(['relative overflow-hidden bg-paper-3', 'aspect-[16/10]' => ! $compact, 'aspect-[16/9]' => $compact])>
-        <img src="{{ $storyImage }}" alt="" loading="lazy" class="h-full w-full object-cover transition duration-700 ease-bader group-hover:scale-105">
+        <x-bader.responsive-image :src="$storyImage" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" alt="" loading="lazy" class="h-full w-full object-cover transition duration-700 ease-bader group-hover:scale-105" />
         <div class="absolute inset-x-0 top-0 flex flex-wrap gap-2 p-3">
             @if ($story->category)
                 <span class="rounded-full bg-white/95 px-3 py-1 text-xs font-extrabold text-forest-700 shadow-card-xs">{{ $story->category }}</span>

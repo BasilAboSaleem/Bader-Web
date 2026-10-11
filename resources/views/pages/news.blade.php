@@ -26,7 +26,7 @@
                 @if ($leadStory)
                     <article class="surface-card surface-card-hover group relative grid grid-cols-1 overflow-hidden lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]" data-reveal>
                         <div class="relative aspect-[16/10] overflow-hidden bg-paper-3 lg:aspect-auto lg:min-h-[22rem]">
-                            <img src="{{ $leadStory->image ? asset($leadStory->image) : asset('images/programs/education.jpg') }}" alt="" class="absolute inset-0 h-full w-full object-cover transition duration-700 ease-bader group-hover:scale-105">
+                            <x-bader.responsive-image :src="$leadStory->image ?: 'images/programs/education.jpg'" sizes="(min-width: 1024px) 55vw, 100vw" alt="" class="absolute inset-0 h-full w-full object-cover transition duration-700 ease-bader group-hover:scale-105" />
                         </div>
                         <div class="flex flex-col justify-center p-6 sm:p-10">
                             <div class="flex flex-wrap items-center gap-2 text-xs font-bold">

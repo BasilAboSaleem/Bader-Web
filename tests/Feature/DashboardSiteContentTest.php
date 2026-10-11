@@ -6,6 +6,7 @@ use App\Models\Campaign;
 use App\Models\Faq;
 use App\Models\Setting;
 use App\Models\User;
+use App\Support\ResponsiveImage;
 use App\Support\SiteSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -332,7 +333,7 @@ class DashboardSiteContentTest extends TestCase
             ])
             ->assertRedirect(route('dashboard.homepage.edit'));
 
-        $this->get(route('home'))->assertSee(asset((string) Setting::get('hero_intro_image')), false);
+        $this->get(route('home'))->assertSee(ResponsiveImage::url((string) Setting::get('hero_intro_image'), 1920), false);
 
         $this->put(route('dashboard.homepage.update'), [
             'sections' => ['quick_give' => ['visible' => '1']],

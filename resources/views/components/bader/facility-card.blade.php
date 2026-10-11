@@ -6,7 +6,7 @@
 
 <article {{ $attributes->class(['surface-card surface-card-hover group relative flex flex-col overflow-hidden']) }}>
     <div class="relative aspect-[16/10] overflow-hidden bg-paper-3">
-        <img src="{{ $facilityImage }}" alt="" loading="lazy" class="h-full w-full object-cover transition duration-700 ease-bader group-hover:scale-105">
+        <x-bader.responsive-image :src="$facilityImage" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" alt="" loading="lazy" class="h-full w-full object-cover transition duration-700 ease-bader group-hover:scale-105" />
         <span class="absolute start-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1 text-xs font-extrabold text-forest-700 shadow-card-xs">
             <span class="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-forest-600"></span>
             {{ __('facility_page.active') }}

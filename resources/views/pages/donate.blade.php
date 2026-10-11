@@ -233,7 +233,7 @@
                 <aside class="space-y-4 lg:sticky lg:top-28" aria-label="{{ __('donate_page.summary') }}">
                     <div class="surface-card overflow-hidden">
                         <div class="relative h-32 overflow-hidden bg-paper-3">
-                            <img src="{{ $targetImage }}" alt="" class="h-full w-full object-cover">
+                            <img src="{{ \App\Support\ResponsiveImage::url($targetImage, 960) }}" alt="" decoding="async" class="h-full w-full object-cover">
                             <span class="absolute inset-0 bg-gradient-to-t from-teal-950/80 to-transparent"></span>
                             <p class="absolute bottom-3 start-4 end-4 font-extrabold text-white">{{ $target['title'] }}</p>
                         </div>

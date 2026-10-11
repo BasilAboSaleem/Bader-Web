@@ -110,7 +110,7 @@ class FullSiteSmokeTest extends TestCase
             'news.show' => ['key' => Story::published()->firstOrFail()->key],
             'sponsorship.show' => ['code' => SponsorshipCase::query()->firstOrFail()->code],
         ];
-        $skipped = ['locale.switch', 'donate.success', 'donate.cancel', 'sitemap', 'robots', 'login'];
+        $skipped = ['locale.switch', 'donate.success', 'donate.cancel', 'sitemap', 'robots', 'login', 'image-variant'];
 
         $routes = $this->getRoutes(fn (string $name): bool => ! str_starts_with($name, 'dashboard') && ! in_array($name, $skipped, true));
 

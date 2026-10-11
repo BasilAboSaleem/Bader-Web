@@ -21,17 +21,25 @@ use App\Http\Controllers\Dashboard\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DonationPaymentController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ImageVariantController;
 use App\Http\Controllers\PublicFormController;
 use App\Http\Controllers\PublicPageController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SponsorshipPageController;
 use App\Models\User;
+use App\Support\ResponsiveImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // SEO: Sitemap & robots.txt (no caching — always fresh)
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
+
+// Resized WebP photos, written to public/variants on first request and served statically afterwards
+Route::get('/variants/{width}/{path}', ImageVariantController::class)
+    ->whereIn('width', array_map('strval', ResponsiveImage::WIDTHS))
+    ->where('path', '.+\.webp')
+    ->name('image-variant');
 
 // Public pages with HTTP caching for guests
 Route::middleware('cache.public')->group(function () {

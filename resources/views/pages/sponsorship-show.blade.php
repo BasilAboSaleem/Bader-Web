@@ -18,7 +18,7 @@
                 <div class="surface-card flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:p-8" data-reveal>
                     <div class="h-36 w-36 shrink-0 overflow-hidden rounded-3xl bg-paper-3">
                         @if ($case->photo)
-                            <img src="{{ asset($case->photo) }}" alt="{{ $case->name }}" class="h-full w-full object-cover">
+                            <img src="{{ \App\Support\ResponsiveImage::url($case->photo, 480) }}" alt="{{ $case->name }}" decoding="async" class="h-full w-full object-cover">
                         @else
                             <span class="flex h-full w-full items-center justify-center text-forest-600">
                                 <x-bader.icon name="users" class="h-14 w-14" />

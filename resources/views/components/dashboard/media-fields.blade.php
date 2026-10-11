@@ -22,7 +22,7 @@
           @foreach ($photos as $photo)
             <li>
               <label class="group relative block cursor-pointer overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
-                <img src="{{ asset($photo) }}" alt="" loading="lazy" class="aspect-square w-full object-cover transition group-has-checked:opacity-40">
+                <img src="{{ \App\Support\ResponsiveImage::url($photo, 480) }}" alt="" loading="lazy" class="aspect-square w-full object-cover transition group-has-checked:opacity-40">
                 <span class="absolute inset-x-0 bottom-0 flex items-center gap-1.5 bg-gray-900/70 px-2 py-1 text-[11px] font-medium text-white group-has-checked:bg-error-600/90">
                   <input type="checkbox" name="gallery_remove[]" value="{{ $photo }}" @checked(in_array($photo, $removed, true)) class="size-3.5 accent-error-500">
                   {{ __('dashboard.media.remove_photo') }}

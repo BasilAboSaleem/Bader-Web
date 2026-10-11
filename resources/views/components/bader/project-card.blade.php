@@ -16,7 +16,7 @@
     data-amount="{{ $defaultAmount }}"
     data-frequency="once">
     <a href="{{ $detailsUrl }}" class="relative block aspect-[16/10] overflow-hidden bg-paper-3" tabindex="-1" aria-hidden="true">
-        <img src="{{ $image }}" alt="" loading="lazy" class="h-full w-full object-cover transition duration-700 ease-bader group-hover:scale-105">
+        <x-bader.responsive-image :src="$image" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" alt="" loading="lazy" class="h-full w-full object-cover transition duration-700 ease-bader group-hover:scale-105" />
         <span class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/45 to-transparent"></span>
         @if ($campaign->program)
             <span class="absolute start-3 top-3 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-forest-800 shadow-card-xs">{{ $campaign->program->title }}</span>

@@ -45,14 +45,14 @@
                     @foreach ($photos as $photo)
                         <li @if ($loop->index >= $visiblePhotos) hidden data-gallery-extra @endif>
                             <a
-                                href="{{ asset($photo) }}"
+                                href="{{ \App\Support\ResponsiveImage::url($photo, 1920) }}"
                                 data-lightbox="{{ $galleryGroup }}"
                                 data-close-label="{{ __('common.close') }}"
                                 data-prev-label="{{ __('media.previous_photo') }}"
                                 data-next-label="{{ __('media.next_photo') }}"
                                 class="group relative block aspect-[4/3] cursor-zoom-in overflow-hidden rounded-2xl bg-paper-3"
                             >
-                                <img src="{{ asset($photo) }}" alt="{{ __('media.photo_alt', ['title' => $mediaTitle, 'number' => $loop->iteration]) }}" loading="lazy" class="h-full w-full object-cover transition duration-700 ease-bader group-hover:scale-105">
+                                <x-bader.responsive-image :src="$photo" sizes="(min-width: 1024px) 18rem, (min-width: 640px) 33vw, 50vw" :alt="__('media.photo_alt', ['title' => $mediaTitle, 'number' => $loop->iteration])" loading="lazy" class="h-full w-full object-cover transition duration-700 ease-bader group-hover:scale-105" />
                             </a>
                         </li>
                     @endforeach

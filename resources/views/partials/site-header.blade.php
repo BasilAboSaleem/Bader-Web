@@ -126,7 +126,7 @@
                                                 <a href="{{ route('programs.show', $program->key) }}" class="mega-link !items-center">
                                                     <span class="h-11 w-11 shrink-0 overflow-hidden rounded-xl bg-paper-2">
                                                         @if ($program->image)
-                                                            <img src="{{ asset($program->image) }}" alt="" class="h-full w-full object-cover" loading="lazy">
+                                                            <img src="{{ \App\Support\ResponsiveImage::url($program->image, 480) }}" alt="" class="h-full w-full object-cover" loading="lazy" decoding="async">
                                                         @else
                                                             <span class="flex h-full w-full items-center justify-center text-forest-700"><x-bader.icon name="sprout" class="h-5 w-5" /></span>
                                                         @endif
@@ -154,7 +154,7 @@
                                             <li>
                                                 <a href="{{ route('projects.show', $project->key) }}" class="group block overflow-hidden rounded-2xl border border-hairline bg-white transition hover:shadow-card-md">
                                                     <span class="block aspect-[16/9] overflow-hidden bg-paper-2">
-                                                        <img src="{{ asset($project->image ?: 'images/programs/water.jpg') }}" alt="" class="h-full w-full object-cover transition duration-500 ease-bader group-hover:scale-105" loading="lazy">
+                                                        <img src="{{ \App\Support\ResponsiveImage::url($project->image ?: 'images/programs/water.jpg', 480) }}" alt="" class="h-full w-full object-cover transition duration-500 ease-bader group-hover:scale-105" loading="lazy" decoding="async">
                                                     </span>
                                                     <span class="block p-4">
                                                         @if ($project->region)

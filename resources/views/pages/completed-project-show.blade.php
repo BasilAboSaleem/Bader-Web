@@ -38,8 +38,8 @@
             <div class="min-w-0">
                 @if ($projectImage)
                     <figure class="overflow-hidden rounded-3xl bg-paper-3 shadow-card-md" data-reveal>
-                        <a href="{{ asset($projectImage) }}" data-lightbox data-close-label="{{ __('common.close') }}" class="group relative block cursor-zoom-in">
-                            <img src="{{ asset($projectImage) }}" alt="{{ $completedProject->title }}" class="aspect-[16/9] w-full object-cover transition duration-700 ease-bader group-hover:scale-[1.02]">
+                        <a href="{{ \App\Support\ResponsiveImage::url($projectImage, 1920) }}" data-lightbox data-close-label="{{ __('common.close') }}" class="group relative block cursor-zoom-in">
+                            <x-bader.responsive-image :src="$projectImage" sizes="(min-width: 1024px) 50rem, 100vw" :alt="$completedProject->title" class="aspect-[16/9] w-full object-cover transition duration-700 ease-bader group-hover:scale-[1.02]" />
                         </a>
                     </figure>
                 @endif
