@@ -11,13 +11,13 @@ use Illuminate\Support\Facades\File;
  */
 final class ResponsiveImage
 {
-    public const WIDTHS = [480, 960, 1920];
+    public const WIDTHS = [480, 960, 1280, 1920];
 
     public const DEFAULT_WIDTH = 960;
 
     private const DIRECTORY = 'variants';
 
-    private const QUALITY = 78;
+    private const QUALITY = 70;
 
     public static function url(?string $image, int $width = self::DEFAULT_WIDTH): string
     {

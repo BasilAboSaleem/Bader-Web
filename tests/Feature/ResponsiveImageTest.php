@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Story;
+use App\Support\ResponsiveImage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -18,7 +19,7 @@ class ResponsiveImageTest extends TestCase
     {
         File::deleteDirectory(public_path(self::SOURCE_DIRECTORY));
 
-        foreach ([480, 960, 1920] as $width) {
+        foreach (ResponsiveImage::WIDTHS as $width) {
             File::deleteDirectory(public_path('variants/'.$width.'/'.self::SOURCE_DIRECTORY));
         }
 
@@ -79,6 +80,7 @@ class ResponsiveImageTest extends TestCase
             ->assertOk()
             ->assertSee('src="'.asset('variants/960/storage/stories/rafah.jpg.webp').'"', false)
             ->assertSee(asset('variants/480/storage/stories/rafah.jpg.webp').' 480w', false)
+            ->assertSee(asset('variants/1280/storage/stories/rafah.jpg.webp').' 1280w', false)
             ->assertSee(asset('variants/1920/storage/stories/rafah.jpg.webp').' 1920w', false);
 
         $this->get(route('news.show', $externalStory->key))
