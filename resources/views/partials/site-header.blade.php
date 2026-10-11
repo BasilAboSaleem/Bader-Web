@@ -8,7 +8,8 @@
         'about' => ['label' => __('nav.about'), 'active' => request()->routeIs('about', 'impact', 'partners', 'volunteer', 'faq', 'contact')],
         'regions' => ['label' => __('nav.regions'), 'active' => request()->routeIs('regions.*', 'impact-map')],
         'programs' => ['label' => __('nav.programs'), 'active' => request()->routeIs('programs', 'programs.*')],
-        'projects' => ['label' => __('nav.projects'), 'active' => request()->routeIs('campaigns', 'campaigns.*', 'projects', 'projects.*')],
+        // Temporarily hidden; restore this entry and the drawer link below to bring the projects menu back.
+        // 'projects' => ['label' => __('nav.projects'), 'active' => request()->routeIs('campaigns', 'campaigns.*', 'projects', 'projects.*')],
         'sponsorship' => ['label' => __('nav.sponsorship'), 'active' => request()->routeIs('sponsorship', 'sponsorship.*')],
     ];
 @endphp
@@ -267,7 +268,8 @@
                 </div>
             </details>
 
-            <a href="{{ route('projects') }}" class="drawer-link">{{ __('nav.projects') }}</a>
+            {{-- Temporarily hidden with the projects mega menu above. --}}
+            {{-- <a href="{{ route('projects') }}" class="drawer-link">{{ __('nav.projects') }}</a> --}}
             <a href="{{ route('campaigns') }}" class="drawer-link">{{ __('nav.campaigns') }}</a>
             <a href="{{ route('sponsorship') }}" class="drawer-link">{{ __('nav.sponsorship') }}</a>
             <a href="{{ route('news') }}" class="drawer-link">{{ __('nav.news') }}</a>

@@ -181,23 +181,29 @@ class CompletedProjectsTest extends TestCase
             ->assertDontSee(route('projects.show', $draft->key), false);
     }
 
-    public function test_region_and_program_pages_list_their_completed_projects(): void
+    public function test_region_page_lists_its_projects_while_program_page_leaves_them_out(): void
     {
         $region = Region::factory()->create();
         $program = Program::factory()->create();
         $completedProject = CompletedProject::factory()->create(['region_id' => $region->id, 'program_id' => $program->id]);
         CompletedProject::factory()->create();
 
-        $listsOnlyTheirProject = fn ($projects): bool => $projects->pluck('id')->all() === [$completedProject->id];
-
         $this->get(route('regions.show', $region->key))
             ->assertOk()
             ->assertSee($completedProject->title_ar)
-            ->assertViewHas('completedProjects', $listsOnlyTheirProject);
+            ->assertViewHas('completedProjects', fn ($projects): bool => $projects->pluck('id')->all() === [$completedProject->id]);
 
         $this->get(route('programs.show', $program->key))
             ->assertOk()
-            ->assertSee($completedProject->title_ar)
-            ->assertViewHas('completedProjects', $listsOnlyTheirProject);
+            ->assertDontSee($completedProject->title_ar)
+            ->assertDontSee(route('projects.show', $completedProject->key), false);
+    }
+
+    public function test_main_navigation_hides_the_projects_menu_for_now(): void
+    {
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertDontSee('id="mega-projects"', false)
+            ->assertDontSee('class="drawer-link">'.__('nav.projects').'</a>', false);
     }
 }

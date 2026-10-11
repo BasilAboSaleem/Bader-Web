@@ -48,8 +48,6 @@ class PublicPageController extends Controller
             ->with('program')
             ->get();
 
-        $completedProjects = $program->completedProjects()->published()->with('region')->get();
-
         $stories = $program->stories()->published()->take(6)->get();
 
         $otherPrograms = Program::published()
@@ -58,7 +56,7 @@ class PublicPageController extends Controller
             ->take(4)
             ->get();
 
-        return view('pages.program-show', compact('program', 'campaigns', 'completedProjects', 'stories', 'otherPrograms'));
+        return view('pages.program-show', compact('program', 'campaigns', 'stories', 'otherPrograms'));
     }
 
     /**

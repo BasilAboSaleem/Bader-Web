@@ -37,28 +37,6 @@
                     @endif
                 </div>
 
-                <div class="mt-12">
-                    <div class="flex items-end justify-between gap-4" data-reveal>
-                        <div>
-                            <p class="kicker">{{ __('program_page.projects_kicker') }}</p>
-                            <h2 class="section-title mt-2">{{ __('program_page.projects_title', ['program' => $program->title]) }}</h2>
-                        </div>
-                    </div>
-
-                    @if ($completedProjects->isNotEmpty())
-                        <div class="mt-6 grid gap-6 sm:grid-cols-2">
-                            @foreach ($completedProjects as $completedProject)
-                                <x-bader.completed-project-card :project="$completedProject" data-reveal />
-                            @endforeach
-                        </div>
-                    @else
-                        <div class="mt-6 rounded-3xl border border-dashed border-hairline-strong bg-white p-8 text-center">
-                            <p class="text-muted">{{ __('program_page.no_projects') }}</p>
-                            <a href="{{ route('donate', ['target_type' => 'program', 'target_id' => $program->id]) }}" class="btn-brand mt-5">{{ __('program_page.support_program') }}</a>
-                        </div>
-                    @endif
-                </div>
-
                 @if ($campaigns->isNotEmpty())
                     <div class="mt-12">
                         <div class="flex flex-wrap items-end justify-between gap-4" data-reveal>
