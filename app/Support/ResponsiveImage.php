@@ -7,8 +7,8 @@ use Illuminate\Support\Facades\File;
 
 /**
  * Resized AVIF and WebP copies of local photos, generated on first request into public/variants
- * so the web server serves them directly afterwards. AVIF is about half the size of WebP;
- * WebP stays as the fallback for browsers without AVIF support.
+ * so the web server serves them directly afterwards. AVIF is about 30% smaller than WebP
+ * at the same sharpness; WebP stays as the fallback for browsers without AVIF support.
  */
 final class ResponsiveImage
 {
@@ -16,14 +16,14 @@ final class ResponsiveImage
 
     public const DEFAULT_WIDTH = 960;
 
-    public const LIGHTBOX_WIDTH = 1280;
+    public const LIGHTBOX_WIDTH = 1920;
 
     /**
      * Encoder quality per output format (0-100).
      *
      * @var array<string, int>
      */
-    public const FORMATS = ['avif' => 35, 'webp' => 60];
+    public const FORMATS = ['avif' => 50, 'webp' => 75];
 
     private const DIRECTORY = 'variants';
 
