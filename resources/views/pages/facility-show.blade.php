@@ -54,7 +54,7 @@
             <div class="min-w-0">
                 <figure class="overflow-hidden rounded-3xl bg-paper-3 shadow-card-md" data-reveal>
                     @if ($facility->image)
-                        <a href="{{ \App\Support\ResponsiveImage::url($facilityImage, 1920) }}" data-lightbox data-close-label="{{ __('common.close') }}" class="group relative block cursor-zoom-in">
+                        <a href="{{ \App\Support\ResponsiveImage::url($facilityImage, \App\Support\ResponsiveImage::LIGHTBOX_WIDTH) }}" data-lightbox data-close-label="{{ __('common.close') }}" class="group relative block cursor-zoom-in">
                             <x-bader.responsive-image :src="$facilityImage" sizes="(min-width: 1024px) 50rem, 100vw" :alt="$facility->name" class="aspect-[16/9] w-full object-cover transition duration-700 ease-bader group-hover:scale-[1.02]" />
                             <span class="absolute bottom-3 end-3 inline-flex items-center gap-1.5 rounded-full bg-black/55 px-3 py-1.5 text-xs font-bold text-white backdrop-blur">
                                 <x-bader.icon name="eye" class="h-3.5 w-3.5" />
@@ -119,7 +119,7 @@
                         </div>
                         <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
                             @foreach ($gallery as $photo)
-                                <a href="{{ \App\Support\ResponsiveImage::url($photo, 1920) }}" data-lightbox data-close-label="{{ __('common.close') }}" class="group relative block aspect-[4/3] cursor-zoom-in overflow-hidden rounded-2xl bg-paper-3">
+                                <a href="{{ \App\Support\ResponsiveImage::url($photo, \App\Support\ResponsiveImage::LIGHTBOX_WIDTH) }}" data-lightbox data-close-label="{{ __('common.close') }}" class="group relative block aspect-[4/3] cursor-zoom-in overflow-hidden rounded-2xl bg-paper-3">
                                     <x-bader.responsive-image :src="$photo" sizes="(min-width: 1024px) 18rem, (min-width: 640px) 33vw, 50vw" :alt="__('facility_page.photo_alt', ['name' => $facility->name, 'number' => $loop->iteration])" loading="lazy" class="h-full w-full object-cover transition duration-500 group-hover:scale-110" />
                                     <span class="absolute inset-0 flex items-center justify-center bg-teal-950/0 text-white opacity-0 transition group-hover:bg-teal-950/30 group-hover:opacity-100">
                                         <x-bader.icon name="eye" class="h-7 w-7" />

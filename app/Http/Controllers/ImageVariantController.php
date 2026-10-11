@@ -10,12 +10,13 @@ class ImageVariantController extends Controller
 {
     public function __invoke(int $width, string $path): BinaryFileResponse
     {
-        $file = ResponsiveImage::generate($width, Str::beforeLast($path, '.webp'));
+        $format = Str::afterLast($path, '.');
+        $file = ResponsiveImage::generate($width, Str::beforeLast($path, '.'), $format);
 
         abort_if($file === null, 404);
 
         return response()->file($file, [
-            'Content-Type' => 'image/webp',
+            'Content-Type' => 'image/'.$format,
             'Cache-Control' => 'public, max-age=31536000, immutable',
         ]);
     }

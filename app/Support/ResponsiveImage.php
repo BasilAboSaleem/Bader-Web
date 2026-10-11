@@ -6,8 +6,9 @@ use GdImage;
 use Illuminate\Support\Facades\File;
 
 /**
- * Resized WebP copies of local photos, generated on first request into public/variants
- * so the web server serves them directly afterwards.
+ * Resized AVIF and WebP copies of local photos, generated on first request into public/variants
+ * so the web server serves them directly afterwards. AVIF is about half the size of WebP;
+ * WebP stays as the fallback for browsers without AVIF support.
  */
 final class ResponsiveImage
 {
@@ -15,11 +16,20 @@ final class ResponsiveImage
 
     public const DEFAULT_WIDTH = 960;
 
+    public const LIGHTBOX_WIDTH = 1280;
+
+    /**
+     * Encoder quality per output format (0-100).
+     *
+     * @var array<string, int>
+     */
+    public const FORMATS = ['avif' => 35, 'webp' => 60];
+
     private const DIRECTORY = 'variants';
 
-    private const QUALITY = 70;
+    private const AVIF_SPEED = 6;
 
-    public static function url(?string $image, int $width = self::DEFAULT_WIDTH): string
+    public static function url(?string $image, int $width = self::DEFAULT_WIDTH, string $format = 'webp'): string
     {
         $path = self::localPath($image);
 
@@ -27,17 +37,17 @@ final class ResponsiveImage
             return self::original($image);
         }
 
-        return asset(self::DIRECTORY.'/'.$width.'/'.$path.'.webp');
+        return asset(self::DIRECTORY.'/'.$width.'/'.$path.'.'.$format);
     }
 
-    public static function srcset(?string $image): ?string
+    public static function srcset(?string $image, string $format = 'webp'): ?string
     {
         if (self::localPath($image) === null) {
             return null;
         }
 
         return implode(', ', array_map(
-            fn (int $width): string => self::url($image, $width).' '.$width.'w',
+            fn (int $width): string => self::url($image, $width, $format).' '.$width.'w',
             self::WIDTHS,
         ));
     }
@@ -69,12 +79,17 @@ final class ResponsiveImage
         return $path;
     }
 
-    /**
-     * Create the variant file and return its absolute path, or null for unknown widths and missing or unreadable sources.
-     */
-    public static function generate(int $width, string $path): ?string
+    public static function variantPath(int $width, string $path, string $format): string
     {
-        if (! in_array($width, self::WIDTHS, true) || self::localPath($path) !== $path) {
+        return public_path(self::DIRECTORY.'/'.$width.'/'.$path.'.'.$format);
+    }
+
+    /**
+     * Create the variant file and return its absolute path, or null for unknown widths or formats and missing or unreadable sources.
+     */
+    public static function generate(int $width, string $path, string $format = 'webp'): ?string
+    {
+        if (! in_array($width, self::WIDTHS, true) || ! isset(self::FORMATS[$format]) || self::localPath($path) !== $path) {
             return null;
         }
 
@@ -104,12 +119,16 @@ final class ResponsiveImage
         imagealphablending($image, false);
         imagesavealpha($image, true);
 
-        $target = public_path(self::DIRECTORY.'/'.$width.'/'.$path.'.webp');
+        $target = self::variantPath($width, $path, $format);
         $temporary = $target.'.'.bin2hex(random_bytes(4)).'.tmp';
 
         File::ensureDirectoryExists(dirname($target));
 
-        if (! imagewebp($image, $temporary, self::QUALITY)) {
+        $encoded = $format === 'avif'
+            ? imageavif($image, $temporary, self::FORMATS['avif'], self::AVIF_SPEED)
+            : imagewebp($image, $temporary, self::FORMATS['webp']);
+
+        if (! $encoded) {
             File::delete($temporary);
 
             return null;

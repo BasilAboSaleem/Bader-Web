@@ -4,4 +4,11 @@
     $srcset = \App\Support\ResponsiveImage::srcset($src);
 @endphp
 
-<img src="{{ \App\Support\ResponsiveImage::url($src, $width) }}" @if ($srcset) srcset="{{ $srcset }}" sizes="{{ $sizes }}" @endif decoding="async" {{ $attributes }}>
+@if ($srcset)
+    <picture class="contents">
+        <source type="image/avif" srcset="{{ \App\Support\ResponsiveImage::srcset($src, 'avif') }}" sizes="{{ $sizes }}">
+        <img src="{{ \App\Support\ResponsiveImage::url($src, $width) }}" srcset="{{ $srcset }}" sizes="{{ $sizes }}" decoding="async" {{ $attributes }}>
+    </picture>
+@else
+    <img src="{{ \App\Support\ResponsiveImage::url($src, $width) }}" decoding="async" {{ $attributes }}>
+@endif

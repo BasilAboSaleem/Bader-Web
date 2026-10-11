@@ -39,6 +39,18 @@ class ResponsiveImageTest extends TestCase
         $this->assertSame([480, 240], array_slice(getimagesize($variant), 0, 2));
     }
 
+    public function test_first_request_saves_a_resized_avif_copy(): void
+    {
+        $this->createPhoto('wide.jpg', 2000, 1000);
+
+        $this->get('/variants/960/'.self::SOURCE_DIRECTORY.'/wide.jpg.avif')
+            ->assertOk()
+            ->assertHeader('Content-Type', 'image/avif');
+
+        $variant = imagecreatefromavif(public_path('variants/960/'.self::SOURCE_DIRECTORY.'/wide.jpg.avif'));
+        $this->assertSame([960, 480], [imagesx($variant), imagesy($variant)]);
+    }
+
     public function test_small_photos_are_not_enlarged(): void
     {
         $this->createPhoto('small.png', 300, 200);
@@ -55,6 +67,7 @@ class ResponsiveImageTest extends TestCase
     {
         return [
             'width outside the list' => ['/variants/500/'.self::SOURCE_DIRECTORY.'/wide.jpg.webp'],
+            'format outside the list' => ['/variants/480/'.self::SOURCE_DIRECTORY.'/wide.jpg.png'],
             'missing photo' => ['/variants/480/'.self::SOURCE_DIRECTORY.'/missing.jpg.webp'],
             'folder outside storage and images' => ['/variants/480/build/wide.jpg.webp'],
             'parent directory traversal' => ['/variants/480/images/%2e%2e/'.self::SOURCE_DIRECTORY.'/wide.jpg.webp'],
@@ -78,6 +91,8 @@ class ResponsiveImageTest extends TestCase
 
         $this->get(route('news.show', $localStory->key))
             ->assertOk()
+            ->assertSee('<source type="image/avif" srcset="'.asset('variants/480/storage/stories/rafah.jpg.avif').' 480w', false)
+            ->assertSee(asset('variants/1920/storage/stories/rafah.jpg.avif').' 1920w', false)
             ->assertSee('src="'.asset('variants/960/storage/stories/rafah.jpg.webp').'"', false)
             ->assertSee(asset('variants/480/storage/stories/rafah.jpg.webp').' 480w', false)
             ->assertSee(asset('variants/1280/storage/stories/rafah.jpg.webp').' 1280w', false)

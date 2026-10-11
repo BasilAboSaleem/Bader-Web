@@ -45,7 +45,7 @@
                     @foreach ($photos as $photo)
                         <li @if ($loop->index >= $visiblePhotos) hidden data-gallery-extra @endif>
                             <a
-                                href="{{ \App\Support\ResponsiveImage::url($photo, 1920) }}"
+                                href="{{ \App\Support\ResponsiveImage::url($photo, \App\Support\ResponsiveImage::LIGHTBOX_WIDTH) }}"
                                 data-lightbox="{{ $galleryGroup }}"
                                 data-close-label="{{ __('common.close') }}"
                                 data-prev-label="{{ __('media.previous_photo') }}"

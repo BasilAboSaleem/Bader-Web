@@ -38,7 +38,7 @@ Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
 // Resized WebP photos, written to public/variants on first request and served statically afterwards
 Route::get('/variants/{width}/{path}', ImageVariantController::class)
     ->whereIn('width', array_map('strval', ResponsiveImage::WIDTHS))
-    ->where('path', '.+\.webp')
+    ->where('path', '.+\.('.implode('|', array_keys(ResponsiveImage::FORMATS)).')')
     ->name('image-variant');
 
 // Public pages with HTTP caching for guests
