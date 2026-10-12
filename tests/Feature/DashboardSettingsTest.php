@@ -168,8 +168,8 @@ class DashboardSettingsTest extends TestCase
     {
         $this->get(route('about'))
             ->assertOk()
-            ->assertSee('>2023</dd>', false)
-            ->assertSee('تأسست عام 2023', false);
+            ->assertSee('>2018</dd>', false)
+            ->assertSee('تأسست عام 2018', false);
 
         $this->actingAs(User::factory()->create())
             ->put(route('dashboard.settings.update'), ['founded_year' => '2022']);

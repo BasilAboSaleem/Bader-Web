@@ -21,7 +21,7 @@ class SiteSettings
     {
         $year = Setting::get('founded_year');
 
-        return ! empty($year) ? (string) $year : '2023';
+        return ! empty($year) ? (string) $year : '2018';
     }
 
     /**
