@@ -3,11 +3,9 @@
 namespace Tests\Feature;
 
 use App\Models\Campaign;
-use App\Models\CompletedProject;
 use App\Models\Facility;
 use App\Models\Program;
 use App\Models\Region;
-use App\Models\SponsorshipCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -85,21 +83,12 @@ class PublicProjectsPagesTest extends TestCase
             ->assertDontSee('donate_box.', false);
     }
 
-    public function test_region_page_shows_its_projects_and_waiting_cases_but_no_campaigns(): void
+    public function test_region_pages_are_closed_and_open_the_home_map_on_that_region(): void
     {
-        $region = Region::factory()->create();
-        $project = CompletedProject::factory()->create(['region_id' => $region->id]);
-        $legacyRegionCampaign = Campaign::factory()->create(['region_id' => $region->id]);
-        $case = SponsorshipCase::factory()->create(['region_id' => $region->id]);
-        $sponsoredCase = SponsorshipCase::factory()->sponsored()->create(['region_id' => $region->id]);
+        Region::factory()->create(['key' => 'khan-field']);
 
-        $this->get(route('regions.show', $region->key))
-            ->assertOk()
-            ->assertSee($region->name_ar)
-            ->assertSee($project->title_ar)
-            ->assertDontSee($legacyRegionCampaign->title_ar)
-            ->assertSee($case->name_ar)
-            ->assertViewHas('cases', fn ($cases): bool => ! $cases->contains($sponsoredCase));
+        $this->get('/regions/khan-field')
+            ->assertRedirect(route('home', ['region' => 'khan-field']).'#regions-map');
     }
 
     public function test_facility_page_offers_a_facility_donation_and_links_back_to_its_region(): void
@@ -129,7 +118,7 @@ class PublicProjectsPagesTest extends TestCase
         $this->get(route('facilities.show', $draftFacility->key))->assertNotFound();
     }
 
-    public function test_sitemap_lists_program_project_and_region_detail_pages(): void
+    public function test_sitemap_lists_program_and_campaign_pages_but_not_the_closed_region_pages(): void
     {
         $program = Program::factory()->create();
         $campaign = Campaign::factory()->create();
@@ -140,7 +129,7 @@ class PublicProjectsPagesTest extends TestCase
             ->assertOk()
             ->assertSee(route('programs.show', $program->key), false)
             ->assertSee(route('campaigns.show', $campaign->key), false)
-            ->assertSee(route('regions.show', $region->key), false)
+            ->assertDontSee(route('regions.show', $region->key), false)
             ->assertDontSee(route('campaigns.show', $draft->key), false);
     }
 }

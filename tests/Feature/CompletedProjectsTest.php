@@ -164,7 +164,7 @@ class CompletedProjectsTest extends TestCase
         $this->get(route('projects.show', $completedProject->key))->assertNotFound();
     }
 
-    public function test_impact_map_pins_and_counts_published_projects_per_region(): void
+    public function test_impact_map_names_published_projects_per_region_without_linking_to_them(): void
     {
         $region = Region::factory()->create();
         $published = CompletedProject::factory()->count(2)->create(['region_id' => $region->id]);
@@ -173,25 +173,21 @@ class CompletedProjectsTest extends TestCase
         $response = $this->get(route('impact-map'))->assertOk();
 
         foreach ($published as $completedProject) {
-            $response->assertSee('href="'.route('projects.show', $completedProject->key).'"', false);
+            $response
+                ->assertSee(e($completedProject->title_ar), false)
+                ->assertDontSee(route('projects.show', $completedProject->key), false);
         }
         $response
             ->assertSee('region-facility is-project', false)
             ->assertSee(trans_choice('region.projects_count', 2, ['count' => 2]))
-            ->assertDontSee(route('projects.show', $draft->key), false);
+            ->assertDontSee(e($draft->title_ar), false)
+            ->assertDontSee(route('regions.show', $region->key), false);
     }
 
-    public function test_region_page_lists_its_projects_while_program_page_leaves_them_out(): void
+    public function test_program_page_leaves_out_its_projects(): void
     {
-        $region = Region::factory()->create();
         $program = Program::factory()->create();
-        $completedProject = CompletedProject::factory()->create(['region_id' => $region->id, 'program_id' => $program->id]);
-        CompletedProject::factory()->create();
-
-        $this->get(route('regions.show', $region->key))
-            ->assertOk()
-            ->assertSee($completedProject->title_ar)
-            ->assertViewHas('completedProjects', fn ($projects): bool => $projects->pluck('id')->all() === [$completedProject->id]);
+        $completedProject = CompletedProject::factory()->create(['program_id' => $program->id]);
 
         $this->get(route('programs.show', $program->key))
             ->assertOk()

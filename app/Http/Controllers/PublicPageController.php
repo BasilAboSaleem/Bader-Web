@@ -14,6 +14,7 @@ use App\Models\Story;
 use App\Services\StripePaymentService;
 use App\Support\SiteSettings;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -159,6 +160,15 @@ class PublicPageController extends Controller
         $otherRegions = Region::published()->whereKeyNot($region->getKey())->get();
 
         return view('pages.region-show', compact('region', 'completedProjects', 'cases', 'otherRegions'));
+    }
+
+    /**
+     * Region pages are temporarily closed; their links open the home map on that region instead.
+     * Point the "regions.show" route back at regionShow() to reopen them.
+     */
+    public function regionOnHomeMap(string $key): RedirectResponse
+    {
+        return redirect()->to(route('home', ['region' => $key]).'#regions-map');
     }
 
     /**

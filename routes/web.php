@@ -52,7 +52,7 @@ Route::middleware('cache.public')->group(function () {
     Route::get('/campaigns/{key}', [PublicPageController::class, 'campaignShow'])->name('campaigns.show');
     Route::get('/projects', [PublicPageController::class, 'completedProjects'])->name('projects');
     Route::get('/projects/{key}', [PublicPageController::class, 'completedProjectShow'])->name('projects.show');
-    Route::get('/regions/{key}', [PublicPageController::class, 'regionShow'])->name('regions.show');
+    Route::get('/regions/{key}', [PublicPageController::class, 'regionOnHomeMap'])->name('regions.show');
     Route::get('/impact-map', [PublicPageController::class, 'impactMap'])->name('impact-map');
     Route::get('/impact', [PublicPageController::class, 'impact'])->name('impact');
     Route::get('/news', [PublicPageController::class, 'news'])->name('news');

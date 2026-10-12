@@ -45,7 +45,8 @@ class SitemapController extends Controller
             ['route' => 'programs.show', 'models' => Program::published()->get(), 'priority' => '0.7', 'changefreq' => 'weekly'],
             ['route' => 'campaigns.show', 'models' => Campaign::published()->ordered()->get(), 'priority' => '0.8', 'changefreq' => 'daily'],
             ['route' => 'projects.show', 'models' => CompletedProject::published()->get(), 'priority' => '0.7', 'changefreq' => 'monthly'],
-            ['route' => 'regions.show', 'models' => Region::published()->get(), 'priority' => '0.6', 'changefreq' => 'weekly'],
+            // Region pages are temporarily closed (they redirect to the home map); restore this entry when they reopen.
+            // ['route' => 'regions.show', 'models' => Region::published()->get(), 'priority' => '0.6', 'changefreq' => 'weekly'],
             ['route' => 'facilities.show', 'models' => Facility::published()->get(), 'priority' => '0.6', 'changefreq' => 'monthly'],
             ['route' => 'news.show', 'models' => Story::published()->get(), 'priority' => '0.6', 'changefreq' => 'monthly'],
         ];
