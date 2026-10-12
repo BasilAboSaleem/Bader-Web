@@ -9,11 +9,12 @@ use App\Models\Region;
 use App\Models\SponsorshipCase;
 use App\Models\Story;
 use App\Support\SiteSettings;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class HomeController extends Controller
 {
-    public function __invoke(): View
+    public function __invoke(Request $request): View
     {
         $heroCampaigns = Campaign::featured()->ordered()->with('program')->take(5)->get();
 
@@ -33,6 +34,7 @@ class HomeController extends Controller
             'heroCampaigns' => $heroCampaigns,
             'quickGiveOptions' => SiteSettings::quickGiveOptions(),
             'regions' => Region::forImpactMap()->get(),
+            'selectedRegion' => $request->string('region')->toString() ?: null,
             'metrics' => ImpactMetric::approved()->orderBy('order')->take(4)->get(),
             'programs' => Program::published()->withProjectsCount()->get(),
             'projects' => $projects,

@@ -104,7 +104,7 @@
                                     <ul class="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
                                         @forelse ($menus['regions'] as $region)
                                             <li>
-                                                <a href="{{ route('regions.show', $region->key) }}" class="mega-tile">
+                                                <a href="{{ route('home', ['region' => $region->key]) }}#regions-map" class="mega-tile">
                                                     <x-bader.icon name="map-pin" class="h-5 w-5 text-forest-700" />
                                                     <span class="mt-3 block font-bold text-ink-900">{{ $region->name }}</span>
                                                     <span class="mt-1 block text-xs text-muted">{{ trans_choice('region.projects_count', $region->projects_count, ['count' => $region->projects_count]) }}</span>
@@ -253,7 +253,7 @@
                 <div class="drawer-sub">
                     <a href="{{ route('impact-map') }}" class="font-bold">{{ __('header.view_map') }}</a>
                     @foreach ($menus['regions'] as $region)
-                        <a href="{{ route('regions.show', $region->key) }}">{{ $region->name }}</a>
+                        <a href="{{ route('home', ['region' => $region->key]) }}#regions-map">{{ $region->name }}</a>
                     @endforeach
                 </div>
             </details>

@@ -92,6 +92,27 @@ class PublicSiteTest extends TestCase
             ->assertSee('data-initial-region="all"', false);
     }
 
+    public function test_navigation_regions_open_the_home_map_on_the_chosen_region(): void
+    {
+        $region = Region::factory()->create(['key' => 'khan-field', 'map_area' => 'khan_younis']);
+        $mapLink = route('home', ['region' => $region->key]).'#regions-map';
+
+        $response = $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('href="'.e($mapLink).'" class="mega-tile"', false)
+            ->assertDontSee('href="'.route('regions.show', $region->key).'" class="mega-tile"', false);
+        $this->assertSame(2, substr_count($response->getContent(), 'href="'.e($mapLink).'"'));
+
+        $response = $this->get(route('home', ['region' => $region->key]))
+            ->assertOk()
+            ->assertSee('data-initial-region="khan-field"', false);
+        $this->assertDoesNotMatchRegularExpression('/id="region-panel-khan-field"[^>]*\shidden[\s>]/', $response->getContent());
+
+        $this->get(route('home', ['region' => 'missing-area']))
+            ->assertOk()
+            ->assertSee('data-initial-region="all"', false);
+    }
+
     public function test_home_renders_without_any_published_content(): void
     {
         $this->get(route('home'))

@@ -27,7 +27,7 @@
                 <x-bader.news :stories="$stories" />
                 @break
             @case('map')
-                <x-bader.region-map :regions="$regions" />
+                <x-bader.region-map :regions="$regions" :selected="$selectedRegion" />
                 @break
             @case('sponsorship')
                 <x-bader.sponsorship-cta :case="$featuredCase" :from="$sponsorshipFrom" />
