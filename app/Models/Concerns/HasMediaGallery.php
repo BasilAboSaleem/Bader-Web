@@ -28,14 +28,19 @@ trait HasMediaGallery
     }
 
     /**
-     * @return list<array{provider: string, url: string, embed_url: string, is_vertical: bool}>
+     * @return list<array{provider: string, url: string, embed_url: string, is_vertical: bool, is_embeddable: bool}>
      */
     public function videoEmbeds(): array
     {
-        return VideoEmbed::fromList(array_map(
+        $embeds = VideoEmbed::fromList(array_map(
             fn (mixed $url): mixed => is_string($url) ? FacebookVideoLink::resolve($url) : $url,
             $this->videos ?? [],
         ));
+
+        return array_map(
+            fn (array $embed): array => [...$embed, 'is_embeddable' => FacebookVideoLink::isEmbeddable($embed['url'])],
+            $embeds,
+        );
     }
 
     public function hasMedia(): bool

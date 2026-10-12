@@ -1161,6 +1161,8 @@
     "media.videos": "مقاطع الفيديو",
     "media.photo_alt": ":title — صورة :number",
     "media.video_title": ":title — فيديو :number",
+    "media.facebook_only": "فيسبوك يتيح مشاهدة هذا الفيديو على صفحته فقط.",
+    "media.watch_on_facebook": "شاهد الفيديو على فيسبوك",
     "media.show_all_photos": "عرض كل الصور (:count)",
     "media.previous_photo": "الصورة السابقة",
     "media.next_photo": "الصورة التالية",

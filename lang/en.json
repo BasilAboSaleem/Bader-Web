@@ -1161,6 +1161,8 @@
     "media.videos": "Videos",
     "media.photo_alt": ":title — photo :number",
     "media.video_title": ":title — video :number",
+    "media.facebook_only": "Facebook only allows this video to be watched on its own page.",
+    "media.watch_on_facebook": "Watch the video on Facebook",
     "media.show_all_photos": "Show all photos (:count)",
     "media.previous_photo": "Previous photo",
     "media.next_photo": "Next photo",

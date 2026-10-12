@@ -4,17 +4,67 @@ namespace App\Support;
 
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use Throwable;
 
 /**
  * Facebook's video player cannot play "share" short links (facebook.com/share/v/…, /share/r/…, fb.watch/…),
  * so they are followed once to the real video address and the answer is cached.
+ *
+ * Facebook also refuses to embed some videos (e.g. when they may contain music owned by someone else);
+ * isEmbeddable() asks its player once a week so those videos can link to Facebook instead.
  */
 final class FacebookVideoLink
 {
     private const MAX_REDIRECTS = 5;
 
     private const USER_AGENT = 'facebookexternalhit/1.1';
+
+    private const BROWSER_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36';
+
+    /**
+     * Phrases of the English "Unavailable" notice Facebook's player shows instead of a blocked video.
+     */
+    private const BLOCKED_PLAYER_PHRASES = ["can't be embedded", 'can&#039;t be embedded', 'This video is unavailable'];
+
+    /**
+     * Whether Facebook's player plays the video on other sites. Unknown answers (network errors) count as playable.
+     */
+    public static function isEmbeddable(string $url): bool
+    {
+        $embed = VideoEmbed::fromUrl($url);
+
+        if ($embed === null || $embed['provider'] !== VideoEmbed::PROVIDER_FACEBOOK) {
+            return true;
+        }
+
+        $cacheKey = 'facebook-video-embeddable.'.sha1($url);
+        $cached = Cache::get($cacheKey);
+
+        if (is_bool($cached)) {
+            return $cached;
+        }
+
+        try {
+            $response = Http::withUserAgent(self::BROWSER_USER_AGENT)
+                ->withHeaders(['Accept-Language' => 'en-US,en;q=0.9'])
+                ->timeout(6)
+                ->get($embed['embed_url']);
+        } catch (Throwable) {
+            $response = null;
+        }
+
+        if ($response === null || ! $response->successful()) {
+            Cache::put($cacheKey, true, now()->addHour());
+
+            return true;
+        }
+
+        $isEmbeddable = ! Str::contains($response->body(), self::BLOCKED_PLAYER_PHRASES);
+        Cache::put($cacheKey, $isEmbeddable, now()->addWeek());
+
+        return $isEmbeddable;
+    }
 
     public static function isShortLink(string $url): bool
     {

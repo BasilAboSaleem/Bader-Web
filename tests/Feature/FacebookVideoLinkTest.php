@@ -59,6 +59,33 @@ class FacebookVideoLinkTest extends TestCase
         Http::assertSentCount(1);
     }
 
+    public function test_videos_facebook_refuses_to_embed_link_to_facebook_instead_of_a_broken_player(): void
+    {
+        Http::fake(['www.facebook.com/plugins/video.php*' => Http::response('<div>Unavailable</div><div>This video can&#039;t be embedded because it may contain content owned by someone else.</div>')]);
+        $story = $this->publishedStoryWithVideo(self::REEL_LINK);
+
+        $this->get(route('news.show', $story->key))
+            ->assertOk()
+            ->assertSee('href="'.self::REEL_LINK.'" target="_blank"', false)
+            ->assertSee(__('media.watch_on_facebook'))
+            ->assertDontSee('<iframe', false);
+        $this->get(route('news.show', $story->key))->assertOk()->assertDontSee('<iframe', false);
+
+        Http::assertSentCount(1);
+    }
+
+    public function test_videos_facebook_plays_stay_embedded(): void
+    {
+        Http::fake(['www.facebook.com/plugins/video.php*' => Http::response('<video src="https://video.example/clip.mp4"></video>')]);
+        $story = $this->publishedStoryWithVideo(self::REEL_LINK);
+
+        $this->get(route('news.show', $story->key))
+            ->assertOk()
+            ->assertSee('<iframe', false)
+            ->assertSee(urlencode(self::REEL_LINK), false)
+            ->assertDontSee(__('media.watch_on_facebook'));
+    }
+
     private function publishedStoryWithVideo(string $videoUrl): Story
     {
         return Story::create([
