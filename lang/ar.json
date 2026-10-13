@@ -841,6 +841,8 @@
     "orphan_registration.fix_errors": "يرجى تصحيح ما يلي ثم إعادة اختيار المرفقات:",
     "orphan_registration.declaration": "بإرسال الطلب أقرّ بصحة البيانات والمرفقات، وأوافق على تواصل فريق بادر معي للتحقق منها.",
     "orphan_registration.submit": "إرسال طلب التسجيل",
+    "orphan_registration.sending": "جارٍ الإرسال… لا تغلق الصفحة",
+    "orphan_registration.too_many": "وصلتنا طلبات كثيرة من شبكتك خلال وقت قصير. انتظر دقيقة ثم أعد اختيار المرفقات وأرسل الطلب مرة أخرى.",
     "orphan_registration.success_title": "تم استلام طلب التسجيل بنجاح",
     "orphan_registration.success_text": "شكراً لك. سيراجع فريق بادر البيانات والمرفقات ويتواصل معك عند الحاجة، ولا يُعرض شيء على الموقع قبل الاعتماد.",
     "orphan_registration.back_home": "العودة إلى الرئيسية",

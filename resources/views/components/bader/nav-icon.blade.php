@@ -26,6 +26,7 @@
             <path d="M2 7v12a1 1 0 0 0 1 1" />
             @break
         @case('sponsorship')
+        @case('orphan-registration')
         @case('donate')
             <path d="M20.8 8.6c0 5.1-8.8 11-8.8 11s-8.8-5.9-8.8-11A4.6 4.6 0 0 1 12 6a4.6 4.6 0 0 1 8.8 2.6Z" />
             @break

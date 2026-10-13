@@ -81,10 +81,13 @@ Route::middleware('throttle:10,1')->group(function () {
     Route::post('/partners', [PublicFormController::class, 'submitPartnership'])->name('partners.submit');
     Route::post('/volunteer', [PublicFormController::class, 'submitVolunteer'])->name('volunteer.submit');
     Route::post('/sponsorship', [PublicFormController::class, 'submitSponsorship'])->name('sponsorship.submit');
-    Route::post('/sponsorship/register', [OrphanRegistrationController::class, 'store'])->name('orphan-registration.store');
     Route::post('/assistance', [PublicFormController::class, 'submitAssistance'])->name('assistance.submit');
     Route::post('/donate/transfer', [PublicFormController::class, 'notifyTransfer'])->name('donate.transfer.submit');
 });
+
+Route::post('/sponsorship/register', [OrphanRegistrationController::class, 'store'])
+    ->middleware('throttle:orphan-registration')
+    ->name('orphan-registration.store');
 
 // Online donations (the donate form carries a CSRF token, so it is never publicly cached)
 Route::get('/donate', [PublicPageController::class, 'donate'])->name('donate');

@@ -5,6 +5,8 @@
  * - [data-orphan-count] grows or shrinks [data-orphan-list] using template[data-orphan-template],
  *   whose markup carries __INDEX__ / __NUMBER__ placeholders; [data-orphan-remove] drops one orphan
  * - file inputs with data-max-bytes block the submit while a chosen file is still too large
+ * - submit buttons with data-sending-label lock while the upload is on its way, so a slow
+ *   connection does not tempt a second tap
  */
 const initOrphanForm = (root) => {
     const list = root.querySelector('[data-orphan-list]');
@@ -57,16 +59,28 @@ const initOrphanForm = (root) => {
         renumber();
     });
 
-    root.closest('form')?.addEventListener('submit', (event) => {
+    const form = root.closest('form');
+    const sendingButtons = form ? [...form.querySelectorAll('button[data-sending-label]')] : [];
+    sendingButtons.forEach((button) => { button.dataset.idleLabel = button.textContent; });
+    const setSending = (isSending) => sendingButtons.forEach((button) => {
+        button.disabled = isSending;
+        button.textContent = isSending ? button.dataset.sendingLabel : button.dataset.idleLabel;
+    });
+
+    form?.addEventListener('submit', (event) => {
         const tooLarge = [...root.querySelectorAll('input[type="file"][data-max-bytes]')]
             .find((input) => [...(input.files ?? [])].some((file) => file.size > Number(input.dataset.maxBytes)));
-        if (!tooLarge) return;
+        if (!tooLarge) {
+            setSending(true);
+            return;
+        }
 
         event.preventDefault();
         tooLarge.setCustomValidity(root.dataset.tooLargeMessage || '');
         tooLarge.reportValidity();
         tooLarge.addEventListener('change', () => tooLarge.setCustomValidity(''), { once: true });
     });
+    window.addEventListener('pageshow', (event) => { if (event.persisted) setSending(false); });
 
     syncType();
     if (list && template) renumber();

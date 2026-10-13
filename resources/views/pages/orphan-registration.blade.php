@@ -59,11 +59,17 @@
 
                 <form method="POST" action="{{ route('orphan-registration.store') }}" enctype="multipart/form-data" class="mt-6 space-y-6">
                     @csrf
+                    <input type="hidden" name="submission_token" value="{{ $submissionToken }}">
+                    <div class="sr-only" aria-hidden="true">
+                        <label>{{ __('orphan_registration.title') }}
+                            <input type="text" name="{{ \App\Http\Controllers\OrphanRegistrationController::HONEYPOT_FIELD }}" value="" tabindex="-1" autocomplete="off">
+                        </label>
+                    </div>
                     @include('partials.orphan-family-fields', ['family' => $family, 'documentsRequired' => true, 'ui' => $ui])
 
                     <div class="surface-card flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
                         <p class="text-sm leading-relaxed text-muted">{{ __('orphan_registration.declaration') }}</p>
-                        <button type="submit" class="btn-brand shrink-0">{{ __('orphan_registration.submit') }}</button>
+                        <button type="submit" class="btn-brand shrink-0 disabled:cursor-wait disabled:opacity-70" data-sending-label="{{ __('orphan_registration.sending') }}">{{ __('orphan_registration.submit') }}</button>
                     </div>
                 </form>
             @endif

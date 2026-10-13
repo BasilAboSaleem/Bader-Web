@@ -40,10 +40,10 @@
         </a>
       @endforeach
     </div>
-    <form method="GET" action="{{ route('dashboard.orphans.index') }}" class="flex items-center gap-2">
+    <form method="GET" action="{{ route('dashboard.orphans.index') }}" class="flex w-full items-center gap-2 sm:w-auto">
       <input type="hidden" name="status" value="{{ $currentStatus }}">
-      <input type="search" name="q" value="{{ $search }}" placeholder="{{ __('orphans.search_placeholder') }}"
-        class="h-10 w-64 rounded-lg border border-gray-300 bg-transparent px-3 text-theme-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+      <input type="search" name="q" value="{{ $search }}" placeholder="{{ __('orphans.search_placeholder') }}" aria-label="{{ __('orphans.search_placeholder') }}"
+        class="h-10 min-w-0 flex-1 sm:w-64 sm:flex-none rounded-lg border border-gray-300 bg-transparent px-3 text-theme-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
       <button type="submit" class="h-10 rounded-lg border border-gray-300 bg-white px-4 text-theme-sm font-medium text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">{{ __('orphans.search') }}</button>
     </form>
   </div>

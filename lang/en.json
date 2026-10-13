@@ -841,6 +841,8 @@
     "orphan_registration.fix_errors": "Please fix the following, then choose the attachments again:",
     "orphan_registration.declaration": "By sending this request I confirm the details and attachments are correct and agree that Bader's team may contact me to verify them.",
     "orphan_registration.submit": "Send registration",
+    "orphan_registration.sending": "Sending… please keep this page open",
+    "orphan_registration.too_many": "We received many requests from your network in a short time. Please wait a minute, choose the attachments again and resend.",
     "orphan_registration.success_title": "Your registration was received",
     "orphan_registration.success_text": "Thank you. Bader's team will review the details and attachments and contact you if needed. Nothing appears on the site before approval.",
     "orphan_registration.back_home": "Back to home",

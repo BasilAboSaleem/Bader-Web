@@ -94,6 +94,44 @@ class OrphanRegistrationTest extends TestCase
         $this->assertNull($family->mother_national_id);
     }
 
+    public function test_resending_the_same_form_on_a_slow_connection_saves_the_family_once(): void
+    {
+        $this->get(route('orphan-registration'))->assertSee('name="submission_token"', false);
+
+        $token = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
+
+        foreach (range(1, 2) as $attempt) {
+            $this->post(route('orphan-registration.store'), [...$this->widowFamilyInput(), 'submission_token' => $token])
+                ->assertRedirect(route('orphan-registration'))
+                ->assertSessionHas('orphan_registered', true);
+        }
+
+        $this->assertDatabaseCount('orphan_families', 1);
+        $this->assertDatabaseCount('orphans', 2);
+    }
+
+    public function test_bots_that_fill_the_hidden_field_see_success_but_nothing_is_saved(): void
+    {
+        $this->post(route('orphan-registration.store'), [...$this->widowFamilyInput(), 'website' => 'https://spam.example'])
+            ->assertRedirect(route('orphan-registration'))
+            ->assertSessionHas('orphan_registered', true);
+
+        $this->assertDatabaseCount('orphan_families', 0);
+        $this->assertSame([], Storage::disk('local')->allFiles());
+    }
+
+    public function test_a_busy_shared_network_gets_a_friendly_message_instead_of_an_error_page(): void
+    {
+        foreach (range(1, 30) as $attempt) {
+            $this->post(route('orphan-registration.store'), ['type' => OrphanFamily::TYPE_ORPHAN])
+                ->assertSessionDoesntHaveErrors('throttle');
+        }
+
+        $this->post(route('orphan-registration.store'), ['type' => OrphanFamily::TYPE_ORPHAN])
+            ->assertRedirect(route('orphan-registration'))
+            ->assertSessionHasErrors(['throttle' => __('orphan_registration.too_many')]);
+    }
+
     /**
      * @return array<string, mixed>
      */

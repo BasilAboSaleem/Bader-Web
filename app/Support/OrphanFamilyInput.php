@@ -22,9 +22,14 @@ final class OrphanFamilyInput
 
     public const DOCUMENT_DISK = 'local';
 
-    private const IMAGE_MAX_EDGE = 2000;
+    private const IMAGE_MAX_EDGE = 1600;
 
-    private const IMAGE_QUALITY = 80;
+    private const IMAGE_QUALITY = 72;
+
+    /**
+     * Decoding is skipped above this size so one oversized scan cannot exhaust PHP's memory limit.
+     */
+    private const IMAGE_MAX_DECODE_PIXELS = 12_000_000;
 
     private const CONTACT_FIELDS = ['contact_name', 'contact_relation', 'contact_phone'];
 
@@ -175,11 +180,14 @@ final class OrphanFamilyInput
     }
 
     /**
-     * Photos are re-encoded as compressed JPEG (which also strips anything hidden in the file); PDFs are kept as sent.
+     * Photos are re-encoded as compressed JPEG (which also strips anything hidden in the file); PDFs and
+     * images too large to decode safely are kept as sent.
      */
     private static function storeDocument(UploadedFile $file, string $directory): string
     {
-        $image = $file->getMimeType() === 'application/pdf' ? false : @imagecreatefromstring((string) file_get_contents($file->getRealPath()));
+        $dimensions = $file->getMimeType() === 'application/pdf' ? false : @getimagesize($file->getRealPath());
+        $canDecode = $dimensions && $dimensions[0] * $dimensions[1] <= self::IMAGE_MAX_DECODE_PIXELS;
+        $image = $canDecode ? @imagecreatefromstring((string) file_get_contents($file->getRealPath())) : false;
 
         if (! $image instanceof GdImage) {
             return $file->store($directory, self::DOCUMENT_DISK);
