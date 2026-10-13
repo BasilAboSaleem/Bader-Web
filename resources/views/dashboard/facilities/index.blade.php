@@ -67,6 +67,9 @@
             <tr class="hover:bg-gray-50/50 dark:hover:bg-white/[0.02]">
               <td class="px-5 py-4 text-theme-sm font-medium text-gray-800 dark:text-white/90">
                 {{ $facility->name_ar }}
+                @if ($facility->show_on_home)
+                  <span class="ms-2 inline-flex items-center rounded-full bg-brand-50 px-2 py-0.5 text-theme-xs font-medium text-brand-600 dark:bg-brand-500/15 dark:text-brand-400">{{ __('dashboard.facility_on_home') }}</span>
+                @endif
               </td>
               <td class="px-5 py-4 text-theme-sm text-gray-500 dark:text-gray-400" dir="ltr">
                 {{ $facility->name_en ?? '—' }}

@@ -14,6 +14,9 @@
             @case('regions')
                 <x-bader.regions-band :regions="$regions" :metrics="$metrics" />
                 @break
+            @case('facilities')
+                <x-bader.facilities-band :facilities="$facilities" />
+                @break
             @case('programs')
                 <x-bader.programs-tabs :programs="$programs" />
                 @break

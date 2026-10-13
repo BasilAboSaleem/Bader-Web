@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Models\Facility;
 use App\Models\Region;
+use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -50,7 +51,9 @@ class FacilityController extends Controller
             'gallery_files.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
             'order' => ['nullable', 'integer'],
             'status' => ['required', 'in:draft,under_review,published'],
+            'show_on_home' => ['nullable', 'boolean', $this->homeLimitRule()],
         ]);
+        $validated['show_on_home'] = $request->boolean('show_on_home');
 
         if ($request->hasFile('image_file')) {
             $path = $request->file('image_file')->store('facilities', 'public');
@@ -110,7 +113,9 @@ class FacilityController extends Controller
             'gallery_files.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
             'order' => ['nullable', 'integer'],
             'status' => ['required', 'in:draft,under_review,published'],
+            'show_on_home' => ['nullable', 'boolean', $this->homeLimitRule($facility)],
         ]);
+        $validated['show_on_home'] = $request->boolean('show_on_home');
 
         if ($request->hasFile('image_file')) {
             $path = $request->file('image_file')->store('facilities', 'public');
@@ -141,5 +146,26 @@ class FacilityController extends Controller
 
         return redirect()->route('dashboard.facilities.index')
             ->with('status', __('dashboard.deleted_successfully'));
+    }
+
+    /**
+     * Keeps the home page section to a fixed number of facilities.
+     */
+    private function homeLimitRule(?Facility $facility = null): Closure
+    {
+        return function (string $attribute, mixed $value, Closure $fail) use ($facility): void {
+            if (! filter_var($value, FILTER_VALIDATE_BOOLEAN)) {
+                return;
+            }
+
+            $alreadyOnHome = Facility::query()
+                ->where('show_on_home', true)
+                ->when($facility, fn ($query) => $query->whereKeyNot($facility->id))
+                ->count();
+
+            if ($alreadyOnHome >= Facility::HOME_LIMIT) {
+                $fail(__('dashboard.facility_home_limit', ['count' => Facility::HOME_LIMIT]));
+            }
+        };
     }
 }

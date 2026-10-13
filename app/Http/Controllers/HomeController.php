@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Campaign;
+use App\Models\Facility;
 use App\Models\ImpactMetric;
 use App\Models\Program;
 use App\Models\Region;
@@ -36,6 +37,7 @@ class HomeController extends Controller
             'regions' => Region::forImpactMap()->get(),
             'selectedRegion' => $request->string('region')->toString() ?: null,
             'metrics' => ImpactMetric::approved()->orderBy('order')->take(4)->get(),
+            'facilities' => Facility::forHome(),
             'programs' => Program::published()->withProjectsCount()->get(),
             'projects' => $projects,
             'stories' => Story::published()->take(4)->get(),

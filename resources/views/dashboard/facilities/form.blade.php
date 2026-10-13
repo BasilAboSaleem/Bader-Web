@@ -149,6 +149,19 @@
           @error('status') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
         </div>
 
+        <div class="md:col-span-2">
+          <input type="hidden" name="show_on_home" value="0">
+          <label class="flex items-start gap-3 rounded-lg border border-gray-200 px-4 py-3 dark:border-gray-700">
+            <input type="checkbox" name="show_on_home" value="1" @checked(old('show_on_home', $facility->show_on_home))
+              class="mt-0.5 size-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/20">
+            <span>
+              <span class="block text-theme-sm font-medium text-gray-800 dark:text-white/90">{{ __('dashboard.field.show_on_home') }}</span>
+              <span class="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">{{ __('dashboard.hint.facility_show_on_home', ['count' => \App\Models\Facility::HOME_LIMIT]) }}</span>
+            </span>
+          </label>
+          @error('show_on_home') <p class="mt-1 text-theme-xs text-error-500">{{ $message }}</p> @enderror
+        </div>
+
       </div>
     </div>
 

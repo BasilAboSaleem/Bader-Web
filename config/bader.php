@@ -87,7 +87,7 @@ return [
     | Homepage sections below the hero, in their default order. "quick_give" always sits right under
     | the hero (it overlaps it), so it can be hidden but not moved.
     */
-    'home_sections' => ['quick_give', 'regions', 'programs', 'projects', 'sponsorship', 'news', 'map', 'gift', 'ways_to_give', 'trust'],
+    'home_sections' => ['quick_give', 'regions', 'facilities', 'programs', 'projects', 'sponsorship', 'news', 'map', 'gift', 'ways_to_give', 'trust'],
 
     'max_donation_categories' => 12,
 

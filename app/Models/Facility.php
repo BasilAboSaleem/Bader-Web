@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -30,15 +31,32 @@ class Facility extends Model
         'capacity_en',
         'order',
         'status',
+        'show_on_home',
     ];
+
+    public const HOME_LIMIT = 4;
 
     protected $casts = [
         'gallery' => 'array',
+        'show_on_home' => 'boolean',
     ];
 
     public function scopePublished(Builder $query): Builder
     {
         return $query->where('status', 'published')->orderBy('order');
+    }
+
+    /**
+     * Published facilities picked for the home page, falling back to the first
+     * published ones until the team picks any.
+     *
+     * @return Collection<int, Facility>
+     */
+    public static function forHome(): Collection
+    {
+        $picked = static::published()->where('show_on_home', true)->take(self::HOME_LIMIT)->get();
+
+        return $picked->isNotEmpty() ? $picked : static::published()->take(self::HOME_LIMIT)->get();
     }
 
     public function region(): BelongsTo

@@ -546,8 +546,8 @@ class SiteSettings
     }
 
     /**
-     * Homepage sections in display order with their visibility; sections added to the config later are
-     * appended visible, and "quick_give" always stays first. The gift section drops out while gifts are suspended.
+     * Homepage sections in display order with their visibility; sections added to the config later show up
+     * visible right after the section that precedes them in the config, and "quick_give" always stays first. The gift section drops out while gifts are suspended.
      *
      * @return list<array{key: string, visible: bool}>
      */
@@ -558,15 +558,28 @@ class SiteSettings
         $sections = collect(is_array($stored) ? $stored : [])
             ->filter(fn ($section) => is_array($section) && in_array($section['key'] ?? null, $available, true))
             ->unique('key')
-            ->map(fn (array $section): array => ['key' => $section['key'], 'visible' => (bool) ($section['visible'] ?? true)]);
+            ->map(fn (array $section): array => ['key' => $section['key'], 'visible' => (bool) ($section['visible'] ?? true)])
+            ->values()
+            ->all();
 
-        foreach ($available as $key) {
-            if (! $sections->contains('key', $key)) {
-                $sections->push(['key' => $key, 'visible' => true]);
+        foreach ($available as $index => $key) {
+            if (in_array($key, array_column($sections, 'key'), true)) {
+                continue;
             }
+
+            $position = 0;
+            foreach (array_reverse(array_slice($available, 0, $index)) as $previousKey) {
+                $previousPosition = array_search($previousKey, array_column($sections, 'key'), true);
+                if ($previousPosition !== false) {
+                    $position = $previousPosition + 1;
+                    break;
+                }
+            }
+
+            array_splice($sections, $position, 0, [['key' => $key, 'visible' => true]]);
         }
 
-        return $sections->sortBy(fn (array $section): int => $section['key'] === 'quick_give' ? 0 : 1)->values()->all();
+        return collect($sections)->sortBy(fn (array $section): int => $section['key'] === 'quick_give' ? 0 : 1)->values()->all();
     }
 
     /**
