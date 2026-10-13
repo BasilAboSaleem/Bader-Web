@@ -17,6 +17,7 @@
         'donateLabel' => $intro['primary_label'],
         'detailsUrl' => $intro['secondary_url'],
         'detailsLabel' => $intro['secondary_label'],
+        'single_line_title' => mb_strlen(trim((string) $intro['title'])) <= 34,
     ];
 
     $slides = $campaigns->map(fn ($campaign) => [
@@ -65,7 +66,11 @@
                                 <span class="h-2 w-2 animate-pulse-dot rounded-full bg-gold-400"></span>
                                 {{ $slide['badge'] }}
                             </span>
-                            <h2 class="mt-5 text-4xl font-extrabold leading-[1.15] sm:text-5xl lg:text-6xl">
+                            <h2 @class([
+                                'mt-5 font-extrabold leading-[1.15]',
+                                'whitespace-nowrap text-[clamp(1.35rem,5.5vw,3.75rem)]' => $slide['single_line_title'] ?? false,
+                                'text-4xl sm:text-5xl lg:text-6xl' => ! ($slide['single_line_title'] ?? false),
+                            ])>
                                 @foreach (preg_split('/\s+/u', trim($slide['title'])) as $wordIndex => $word)
                                     <span class="inline-block animate-wordin motion-reduce:animate-none" style="animation-delay: {{ 120 + $wordIndex * 70 }}ms" data-replay>{{ $word }}</span>
                                 @endforeach
