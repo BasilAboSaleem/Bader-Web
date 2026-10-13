@@ -110,8 +110,8 @@ class DashboardGivingContentTest extends TestCase
         $this->actingAs($admin)->get(route('dashboard.sponsorship-cases.create'))->assertOk();
 
         $caseData = [
-            'type' => 'widow',
-            'name_ar' => 'أم محمد',
+            'type' => 'student',
+            'name_ar' => 'محمد سالم',
             'region_id' => $region->id,
             'monthly_amount' => 60,
             'duration_months' => 12,
@@ -120,6 +120,9 @@ class DashboardGivingContentTest extends TestCase
 
         $this->actingAs($admin)->post(route('dashboard.sponsorship-cases.store'), $caseData + ['code' => 'gz-100'])
             ->assertSessionHasErrors('code');
+
+        $this->actingAs($admin)->post(route('dashboard.sponsorship-cases.store'), ['type' => 'widow'] + $caseData + ['code' => 'gz-102'])
+            ->assertSessionHasErrors('type');
 
         $this->actingAs($admin)->post(route('dashboard.sponsorship-cases.store'), $caseData + ['code' => 'gz-101'])
             ->assertRedirect(route('dashboard.sponsorship-cases.index'));
@@ -148,7 +151,7 @@ class DashboardGivingContentTest extends TestCase
         $oversizedPhoto = new UploadedFile(UploadedFile::fake()->image('orphan.jpg')->getRealPath(), 'orphan.jpg', 'image/jpeg', UPLOAD_ERR_INI_SIZE, true);
 
         $this->actingAs($admin)->post(route('dashboard.sponsorship-cases.store'), [
-            'type' => 'orphan',
+            'type' => 'student',
             'code' => 'GZ-200',
             'name_ar' => 'محمد',
             'region_id' => $region->id,

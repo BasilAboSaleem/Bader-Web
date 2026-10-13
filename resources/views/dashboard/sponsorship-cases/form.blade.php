@@ -51,7 +51,7 @@
         <div>
           <label for="type" class="{{ $labelClass }}">{{ __('dashboard.field.case_type') }} <span class="text-error-500">*</span></label>
           <select id="type" name="type" class="{{ $inputClass }}">
-            @foreach (SponsorshipCase::TYPES as $type)
+            @foreach (\App\Http\Controllers\Dashboard\SponsorshipCaseController::typeOptions($isEdit ? $case : null) as $type)
               <option value="{{ $type }}" @selected(old('type', $case->type) === $type)>{{ __('sponsorship.type.'.$type) }}</option>
             @endforeach
           </select>

@@ -124,6 +124,19 @@ return [
     ],
 
     /*
+    | Cities and camps of the Gaza Strip offered as "current residence" on the orphan registration
+    | form, grouped by governorate. Labels live in lang files under "orphans.governorate.{key}"
+    | and "orphans.area.{key}".
+    */
+    'residence_areas' => [
+        'north_gaza' => ['jabalia', 'jabalia_camp', 'beit_lahia', 'beit_hanoun'],
+        'gaza_city' => ['gaza', 'beach_camp'],
+        'middle_area' => ['deir_al_balah', 'deir_al_balah_camp', 'nuseirat', 'nuseirat_camp', 'bureij', 'bureij_camp', 'maghazi', 'maghazi_camp', 'zawayda', 'zahra', 'mughraqa', 'wadi_gaza'],
+        'khan_younis' => ['khan_younis', 'khan_younis_camp', 'bani_suheila', 'abasan_kabira', 'abasan_jadida', 'khuzaa', 'qarara', 'fukhari', 'mawasi_khan_younis'],
+        'rafah' => ['rafah', 'rafah_camp', 'shokat_al_sufi', 'mawasi_rafah'],
+    ],
+
+    /*
     | Social platforms shown in the footer once a URL is saved in Site Settings.
     */
     'social_platforms' => ['facebook', 'instagram', 'x', 'youtube', 'tiktok', 'telegram', 'linkedin'],
@@ -136,7 +149,7 @@ return [
         'home' => ['home.'],
         'layout' => ['header.', 'nav.', 'footer.', 'brand.', 'cta.', 'common.'],
         'projects' => ['program_page.', 'campaigns_page.', 'campaign_page.', 'campaign.', 'region_page.', 'region.', 'facility_page.', 'completed_project_page.', 'project.', 'news_page.', 'story_page.', 'media.'],
-        'sponsorship' => ['sponsorship_page.', 'sponsorship.'],
+        'sponsorship' => ['sponsorship_page.', 'sponsorship.', 'orphan_registration.'],
         'giving' => ['donate_page.', 'donate_box.', 'donate_success.', 'gift_page.', 'donation.'],
         'zakat' => ['zakat_page.', 'zakat.'],
         'pages' => ['page.', 'about_page.', 'contact_page.', 'faq_page.', 'form_page.', 'form.', 'contact.', 'errors.'],

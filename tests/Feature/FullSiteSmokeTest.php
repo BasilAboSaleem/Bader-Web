@@ -12,6 +12,8 @@ use App\Models\ImpactMetric;
 use App\Models\MediaAsset;
 use App\Models\Program;
 use App\Models\Region;
+use App\Models\Orphan;
+use App\Models\OrphanFamily;
 use App\Models\SponsorshipCase;
 use App\Models\Story;
 use App\Models\User;
@@ -39,13 +41,14 @@ class FullSiteSmokeTest extends TestCase
         'impact' => ImpactMetric::class,
         'inbox' => FormSubmission::class,
         'medium' => MediaAsset::class,
+        'orphanFamily' => OrphanFamily::class,
         'program' => Program::class,
         'region' => Region::class,
         'sponsorship_case' => SponsorshipCase::class,
         'story' => Story::class,
     ];
 
-    private const LEAKED_KEY_PATTERN = '/>\s*(home|nav|footer|header|page|common|cta|brand|donation|donate_page|donate_box|gift_page|zakat_page|sponsorship_page|sponsorship|faq_page|about_page|contact_page|program_page|campaign_page|campaigns_page|region_page|facility_page|completed_project_page|media|story_page|news_page|form|form_page|errors|project|dashboard)\.[a-z0-9_.]+\s*</';
+    private const LEAKED_KEY_PATTERN = '/>\s*(home|nav|footer|header|page|common|cta|brand|donation|donate_page|donate_box|gift_page|zakat_page|sponsorship_page|sponsorship|faq_page|about_page|contact_page|program_page|campaign_page|campaigns_page|region_page|facility_page|completed_project_page|media|story_page|news_page|form|form_page|errors|project|dashboard|orphans|orphan_registration)\.[a-z0-9_.]+\s*</';
 
     protected function setUp(): void
     {
@@ -55,6 +58,7 @@ class FullSiteSmokeTest extends TestCase
 
         $region = Region::query()->firstOrFail();
         SponsorshipCase::factory()->create(['region_id' => $region->id]);
+        Orphan::factory()->for(OrphanFamily::factory()->approved()->widowFamily(), 'family')->create();
         Facility::query()->update(['region_id' => $region->id]);
         CompletedProject::factory()->create([
             'region_id' => $region->id,
@@ -83,7 +87,7 @@ class FullSiteSmokeTest extends TestCase
     {
         $superAdmin = User::factory()->create(['role' => User::ROLE_SUPER_ADMIN]);
 
-        foreach ($this->getRoutes(fn (string $name): bool => str_starts_with($name, 'dashboard')) as $route) {
+        foreach ($this->getRoutes(fn (string $name): bool => str_starts_with($name, 'dashboard') && $name !== 'dashboard.orphans.document') as $route) {
             $parameters = [];
 
             foreach ($route->parameterNames() as $parameter) {

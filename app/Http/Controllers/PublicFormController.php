@@ -96,6 +96,7 @@ class PublicFormController extends Controller
             'phone' => ['required', 'string', 'max:50'],
             'sponsorship_type' => ['required', 'string', 'max:100'],
             'beneficiaries_count' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'case_code' => ['nullable', 'string', 'max:100'],
             'message' => ['nullable', 'string', 'max:3000'],
         ]);
 
@@ -108,6 +109,7 @@ class PublicFormController extends Controller
             'payload' => [
                 'sponsorship_type' => $validated['sponsorship_type'],
                 'beneficiaries_count' => $validated['beneficiaries_count'] ?? 1,
+                'case_code' => $validated['case_code'] ?? null,
             ],
             'status' => 'unread',
         ]);

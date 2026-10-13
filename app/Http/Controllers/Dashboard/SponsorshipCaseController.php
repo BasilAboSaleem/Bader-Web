@@ -35,7 +35,7 @@ class SponsorshipCaseController extends Controller
     {
         return view('dashboard.sponsorship-cases.form', [
             'case' => new SponsorshipCase([
-                'type' => 'orphan',
+                'type' => 'student',
                 'status' => SponsorshipCase::STATUS_AVAILABLE,
                 'duration_months' => 12,
                 'waiting_since' => now(),
@@ -79,6 +79,16 @@ class SponsorshipCaseController extends Controller
     }
 
     /**
+     * New cases are students only (orphans and widows have their own files); an older case keeps its type.
+     *
+     * @return list<string>
+     */
+    public static function typeOptions(?SponsorshipCase $case = null): array
+    {
+        return array_values(array_unique([...SponsorshipCase::LISTED_TYPES, ...array_filter([$case?->type])]));
+    }
+
+    /**
      * @return list<string>
      */
     private function statuses(): array
@@ -95,7 +105,7 @@ class SponsorshipCaseController extends Controller
 
         $validated = $request->validate([
             'code' => ['required', 'string', 'max:30', 'regex:/^[A-Z0-9-]+$/', Rule::unique('sponsorship_cases', 'code')->ignore($case)],
-            'type' => ['required', Rule::in(SponsorshipCase::TYPES)],
+            'type' => ['required', Rule::in(self::typeOptions($case))],
             'name_ar' => ['required', 'string', 'max:255'],
             'name_en' => ['nullable', 'string', 'max:255'],
             'age' => ['nullable', 'integer', 'between:0,120'],

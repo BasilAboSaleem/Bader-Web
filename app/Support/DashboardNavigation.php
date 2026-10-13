@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\Donation;
 use App\Models\FormSubmission;
+use App\Models\OrphanFamily;
 use App\Models\User;
 
 class DashboardNavigation
@@ -29,6 +30,7 @@ class DashboardNavigation
             'campaigns' => 'dashboard.campaigns.index',
             'facilities' => 'dashboard.facilities.index',
             'regions' => 'dashboard.regions.index',
+            'orphans' => 'dashboard.orphans.index',
             'sponsorship_cases' => 'dashboard.sponsorship-cases.index',
             'stories' => 'dashboard.stories.index',
         ],
@@ -60,6 +62,10 @@ class DashboardNavigation
                     continue;
                 }
 
+                if ($module === 'orphans' && ! $user?->canManageContent()) {
+                    continue;
+                }
+
                 $items[] = [
                     'key' => $module,
                     'route' => $route,
@@ -77,15 +83,16 @@ class DashboardNavigation
     }
 
     /**
-     * Items waiting for the team: unread messages and donations not yet confirmed.
+     * Items waiting for the team: unread messages, donations not yet confirmed and orphan registrations to review.
      *
-     * @return array{inbox: int, donations: int}
+     * @return array{inbox: int, donations: int, orphans: int}
      */
     public static function badges(): array
     {
         return once(fn (): array => [
             'inbox' => FormSubmission::where('status', 'unread')->count(),
             'donations' => Donation::where('status', 'pending')->count(),
+            'orphans' => OrphanFamily::pending()->count(),
         ]);
     }
 }

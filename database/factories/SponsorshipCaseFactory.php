@@ -21,8 +21,8 @@ class SponsorshipCaseFactory extends Factory
 
         return [
             'code' => 'GZ-'.fake()->unique()->numberBetween(100, 99999),
-            'type' => 'orphan',
-            'name_ar' => 'الطفل '.$name,
+            'type' => 'student',
+            'name_ar' => 'الطالب '.$name,
             'name_en' => $name,
             'age' => fake()->numberBetween(4, 16),
             'gender' => fake()->randomElement(['male', 'female']),

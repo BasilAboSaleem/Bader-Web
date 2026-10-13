@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\Campaign;
 use App\Models\Donation;
+use App\Models\Orphan;
+use App\Models\OrphanFamily;
 use App\Models\SponsorshipCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -12,22 +14,38 @@ class PublicGivingPagesTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_sponsorship_page_lists_waiting_cases_and_filters_by_type(): void
+    public function test_sponsorship_page_lists_approved_orphans_widow_families_and_students_and_filters_by_type(): void
     {
-        $orphan = SponsorshipCase::factory()->create(['type' => 'orphan']);
-        $widow = SponsorshipCase::factory()->create(['type' => 'widow']);
+        $orphanFamily = OrphanFamily::factory()->approved()->create();
+        Orphan::factory()->for($orphanFamily, 'family')->create(['full_name' => 'أحمد محمد سالم أبو عيد', 'birth_date' => now()->subYears(8)->toDateString()]);
+        Orphan::factory()->for($orphanFamily, 'family')->sponsored()->create(['full_name' => 'سلمى محمد سالم أبو عيد']);
+        $widowFamily = OrphanFamily::factory()->approved()->widowFamily()->create();
+        Orphan::factory()->count(2)->for($widowFamily, 'family')->create();
+        Orphan::factory()->for(OrphanFamily::factory(), 'family')->create(['full_name' => 'تيماء خالد عمر الشاعر']);
+        $student = SponsorshipCase::factory()->create();
+        $legacyOrphanCase = SponsorshipCase::factory()->create(['type' => 'orphan']);
         SponsorshipCase::factory()->hidden()->create();
 
         $this->get(route('sponsorship'))
             ->assertOk()
-            ->assertSee($orphan->name_ar)
-            ->assertSee($widow->name_ar)
+            ->assertSee('أحمد')
+            ->assertSee(__('sponsorship.age_years', ['age' => 8]))
+            ->assertSee('سلمى')
+            ->assertSee(__('sponsorship.status.sponsored'))
+            ->assertSee('فاطمة')
+            ->assertSee($student->name_ar)
+            ->assertDontSee('أحمد محمد سالم')
+            ->assertDontSee($widowFamily->mother_full_name)
+            ->assertDontSee($widowFamily->mother_national_id)
+            ->assertDontSee('تيماء')
+            ->assertDontSee($legacyOrphanCase->name_ar)
             ->assertSee(route('sponsorship.submit'), false)
-            ->assertViewHas('cases', fn ($cases): bool => $cases->count() === 2);
+            ->assertSee(route('orphan-registration'), false)
+            ->assertViewHas('stats', fn (array $stats): bool => $stats['waiting'] === 3 && $stats['sponsored'] === 1);
 
-        $this->get(route('sponsorship', ['type' => 'widow']))
+        $this->get(route('sponsorship', ['type' => OrphanFamily::TYPE_WIDOW_FAMILY]))
             ->assertOk()
-            ->assertViewHas('cases', fn ($cases): bool => $cases->pluck('id')->all() === [$widow->id]);
+            ->assertViewHas('cases', fn ($cases): bool => $cases->count() === 1 && $cases->first()['family']->is($widowFamily));
     }
 
     public function test_case_page_offers_monthly_sponsorship_only_while_the_case_is_available(): void

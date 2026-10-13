@@ -11,6 +11,7 @@ use App\Http\Controllers\Dashboard\ImpactMetricController;
 use App\Http\Controllers\Dashboard\InboxController;
 use App\Http\Controllers\Dashboard\InstitutionalPageController;
 use App\Http\Controllers\Dashboard\MediaAssetController;
+use App\Http\Controllers\Dashboard\OrphanFamilyController;
 use App\Http\Controllers\Dashboard\ProgramController;
 use App\Http\Controllers\Dashboard\RegionController;
 use App\Http\Controllers\Dashboard\SiteSettingController;
@@ -22,6 +23,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DonationPaymentController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ImageVariantController;
+use App\Http\Controllers\OrphanRegistrationController;
 use App\Http\Controllers\PublicFormController;
 use App\Http\Controllers\PublicPageController;
 use App\Http\Controllers\SitemapController;
@@ -59,6 +61,7 @@ Route::middleware('cache.public')->group(function () {
     Route::get('/news/{key}', [PublicPageController::class, 'newsShow'])->name('news.show');
     Route::get('/facilities/{key}', [PublicPageController::class, 'facilityShow'])->name('facilities.show');
     Route::get('/sponsorship', [SponsorshipPageController::class, 'index'])->name('sponsorship');
+    Route::get('/sponsorship/register', [OrphanRegistrationController::class, 'create'])->name('orphan-registration');
     Route::get('/sponsorship/{code}', [SponsorshipPageController::class, 'show'])->name('sponsorship.show');
     Route::get('/gift', [PublicPageController::class, 'gift'])->name('gift');
     Route::get('/zakat-calculator', [PublicPageController::class, 'zakat'])->name('zakat');
@@ -78,6 +81,7 @@ Route::middleware('throttle:10,1')->group(function () {
     Route::post('/partners', [PublicFormController::class, 'submitPartnership'])->name('partners.submit');
     Route::post('/volunteer', [PublicFormController::class, 'submitVolunteer'])->name('volunteer.submit');
     Route::post('/sponsorship', [PublicFormController::class, 'submitSponsorship'])->name('sponsorship.submit');
+    Route::post('/sponsorship/register', [OrphanRegistrationController::class, 'store'])->name('orphan-registration.store');
     Route::post('/assistance', [PublicFormController::class, 'submitAssistance'])->name('assistance.submit');
     Route::post('/donate/transfer', [PublicFormController::class, 'notifyTransfer'])->name('donate.transfer.submit');
 });
@@ -123,6 +127,14 @@ Route::middleware('auth')->group(function () {
         ->parameters(['completed-projects' => 'completedProject'])
         ->except(['show']);
     Route::resource('dashboard/sponsorship-cases', SponsorshipCaseController::class)->names('dashboard.sponsorship-cases')->except(['show']);
+    Route::middleware('role:'.implode(',', User::CONTENT_ROLES))->group(function () {
+        Route::resource('dashboard/orphans', OrphanFamilyController::class)
+            ->names('dashboard.orphans')
+            ->parameters(['orphans' => 'orphanFamily']);
+        Route::patch('dashboard/orphans/{orphanFamily}/review', [OrphanFamilyController::class, 'review'])->name('dashboard.orphans.review');
+        Route::patch('dashboard/orphans/{orphanFamily}/sponsorship', [OrphanFamilyController::class, 'updateSponsorship'])->name('dashboard.orphans.sponsorship');
+        Route::get('dashboard/orphans/{orphanFamily}/documents/{document}', [OrphanFamilyController::class, 'document'])->name('dashboard.orphans.document');
+    });
     Route::resource('dashboard/stories', StoryController::class)->names('dashboard.stories')->except(['show']);
     Route::resource('dashboard/media', MediaAssetController::class)->names('dashboard.media')->except(['show']);
 

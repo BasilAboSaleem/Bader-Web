@@ -8,7 +8,6 @@
 @php
     $filterUrl = fn (array $overrides) => route('sponsorship', array_filter(array_merge([
         'type' => $selectedType,
-        'region' => $selectedRegion?->key,
     ], $overrides)));
     $steps = ['choose', 'sponsor', 'follow', 'impact'];
     $questions = ['who', 'amount', 'reports', 'stop'];
@@ -46,39 +45,33 @@
                     <h2 id="sponsorship-cases-title" class="section-title mt-2">{{ __('sponsorship_page.cases_title') }}</h2>
                     <p class="section-lead mt-2">{{ __('sponsorship_page.cases_intro') }}</p>
                 </div>
+                <a href="{{ route('orphan-registration') }}" class="btn-ghost shrink-0" data-reveal>
+                    <x-bader.icon name="users" class="h-4 w-4" />
+                    {{ __('sponsorship_page.register_orphan_cta') }}
+                </a>
             </div>
 
             <div class="mt-6 space-y-3" data-reveal>
                 <nav aria-label="{{ __('sponsorship_page.filter_type') }}" class="-mx-4 overflow-x-auto px-4 [scrollbar-width:none]">
                     <ul class="flex w-max gap-2">
                         <li><a href="{{ $filterUrl(['type' => null]) }}" class="chip {{ $selectedType ? '' : 'is-active' }}" @unless ($selectedType) aria-current="true" @endunless>{{ __('sponsorship_page.all_types') }}</a></li>
-                        @foreach (\App\Models\SponsorshipCase::TYPES as $type)
+                        @foreach (\App\Http\Controllers\SponsorshipPageController::FILTER_TYPES as $type)
                             <li><a href="{{ $filterUrl(['type' => $type]) }}" class="chip {{ $selectedType === $type ? 'is-active' : '' }}" @if ($selectedType === $type) aria-current="true" @endif>{{ __('sponsorship.type.'.$type) }}</a></li>
                         @endforeach
                     </ul>
                 </nav>
-                @if ($regions->isNotEmpty())
-                    <nav aria-label="{{ __('campaigns_page.filter_region') }}" class="-mx-4 overflow-x-auto px-4 [scrollbar-width:none]">
-                        <ul class="flex w-max gap-2">
-                            <li><a href="{{ $filterUrl(['region' => null]) }}" class="chip {{ $selectedRegion ? '' : 'is-active' }}" @unless ($selectedRegion) aria-current="true" @endunless>{{ __('campaigns_page.all_regions') }}</a></li>
-                            @foreach ($regions as $region)
-                                @php $isSelected = $selectedRegion?->is($region); @endphp
-                                <li>
-                                    <a href="{{ $filterUrl(['region' => $region->key]) }}" class="chip whitespace-nowrap {{ $isSelected ? 'is-active' : '' }}" @if ($isSelected) aria-current="true" @endif>
-                                        <x-bader.icon name="map-pin" class="h-3.5 w-3.5" />
-                                        {{ $region->name }}
-                                    </a>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </nav>
-                @endif
             </div>
 
             @if ($cases->isNotEmpty())
                 <div class="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    @foreach ($cases as $case)
-                        <x-bader.sponsorship-case-card :case="$case" />
+                    @foreach ($cases as $entry)
+                        @if (isset($entry['case']))
+                            <x-bader.sponsorship-case-card :case="$entry['case']" />
+                        @elseif (isset($entry['family']))
+                            <x-bader.orphan-card :family="$entry['family']" />
+                        @else
+                            <x-bader.orphan-card :orphan="$entry['orphan']" />
+                        @endif
                     @endforeach
                 </div>
                 @if ($cases->hasPages())
@@ -161,9 +154,13 @@
                                 <span class="field-label">{{ __('form.field.sponsorship_type') }} *</span>
                                 <select name="sponsorship_type" required class="field-input">
                                     @foreach (['orphan', 'widow', 'family', 'student'] as $type)
-                                        <option value="{{ $type }}" @selected(old('sponsorship_type') === $type)>{{ __('form.sponsorship_type_'.$type) }}</option>
+                                        <option value="{{ $type }}" @selected(old('sponsorship_type', request('sponsorship_type')) === $type)>{{ __('form.sponsorship_type_'.$type) }}</option>
                                     @endforeach
                                 </select>
+                            </label>
+                            <label class="block sm:col-span-2">
+                                <span class="field-label">{{ __('form.field.case_code') }}</span>
+                                <input type="text" name="case_code" value="{{ old('case_code', request('case')) }}" maxlength="100" class="field-input">
                             </label>
                             <label class="block">
                                 <span class="field-label">{{ __('form.field.email') }} *</span>

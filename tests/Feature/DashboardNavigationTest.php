@@ -21,7 +21,7 @@ class DashboardNavigationTest extends TestCase
         foreach ([
             'dashboard.pages.edit', 'dashboard.site-texts.edit', 'dashboard.faqs.index', 'dashboard.impact.index', 'dashboard.media.index',
             'dashboard.programs.index', 'dashboard.campaigns.index', 'dashboard.facilities.index', 'dashboard.regions.index',
-            'dashboard.sponsorship-cases.index', 'dashboard.stories.index', 'dashboard.inbox.index', 'dashboard.donations.index',
+            'dashboard.orphans.index', 'dashboard.sponsorship-cases.index', 'dashboard.stories.index', 'dashboard.inbox.index', 'dashboard.donations.index',
             'dashboard.settings.edit',
         ] as $route) {
             $response->assertSee('href="'.route($route).'"', false);

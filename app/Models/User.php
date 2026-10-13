@@ -22,6 +22,9 @@ class User extends Authenticatable
 
     const ROLE_VIEWER = 'viewer';
 
+    /** Roles that may create and edit live content. */
+    const CONTENT_ROLES = [self::ROLE_SUPER_ADMIN, self::ROLE_ADMIN, self::ROLE_EDITOR];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -91,7 +94,7 @@ class User extends Authenticatable
     /** Admin and Editor can create / edit live content. */
     public function canManageContent(): bool
     {
-        return in_array($this->role, [self::ROLE_SUPER_ADMIN, self::ROLE_ADMIN, self::ROLE_EDITOR], true);
+        return in_array($this->role, self::CONTENT_ROLES, true);
     }
 
     /** Only Admins (and the Super Admin) can touch site-wide settings. */

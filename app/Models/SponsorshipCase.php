@@ -16,6 +16,9 @@ class SponsorshipCase extends Model
 
     public const TYPES = ['orphan', 'widow', 'student'];
 
+    /** Orphans and widows moved to the orphan sponsorship files, so only these cases still reach the public site. */
+    public const LISTED_TYPES = ['student'];
+
     public const STATUS_AVAILABLE = 'available';
 
     public const STATUS_SPONSORED = 'sponsored';
@@ -57,12 +60,12 @@ class SponsorshipCase extends Model
      */
     public function scopeVisible(Builder $query): Builder
     {
-        return $query->whereIn('status', [self::STATUS_AVAILABLE, self::STATUS_SPONSORED]);
+        return $query->whereIn('type', self::LISTED_TYPES)->whereIn('status', [self::STATUS_AVAILABLE, self::STATUS_SPONSORED]);
     }
 
     public function scopeAvailable(Builder $query): Builder
     {
-        return $query->where('status', self::STATUS_AVAILABLE);
+        return $query->whereIn('type', self::LISTED_TYPES)->where('status', self::STATUS_AVAILABLE);
     }
 
     /**
