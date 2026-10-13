@@ -289,9 +289,10 @@ class PublicPageController extends Controller
             'category' => $category,
             'categories' => $categories,
             'paymentMethods' => $stripe->isAvailable() ? ['stripe', 'bank_transfer'] : ['bank_transfer'],
+            'giftEnabled' => SiteSettings::giftEnabled(),
             'giftDesigns' => $giftDesigns,
             'gift' => [
-                'enabled' => $request->boolean('gift'),
+                'enabled' => SiteSettings::giftEnabled() && $request->boolean('gift'),
                 'design' => array_key_exists($query('gift_design'), $giftDesigns) ? $query('gift_design') : array_key_first($giftDesigns),
                 'recipient_name' => Str::limit($query('gift_recipient_name'), 255, ''),
                 'recipient_contact' => Str::limit($query('gift_recipient_contact'), 255, ''),
@@ -301,8 +302,15 @@ class PublicPageController extends Controller
         ]);
     }
 
-    public function gift(Request $request): View
+    /**
+     * While gifts are suspended, old gift links land on the regular donate form for the same target.
+     */
+    public function gift(Request $request): View|RedirectResponse
     {
+        if (! SiteSettings::giftEnabled()) {
+            return redirect()->route('donate', $request->only(['target_type', 'target_id']));
+        }
+
         $target = $this->donationTarget(
             is_string($request->query('target_type')) ? $request->query('target_type') : '',
             is_numeric($request->query('target_id')) ? (int) $request->query('target_id') : null,

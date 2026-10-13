@@ -54,7 +54,7 @@ class DonationPaymentController extends Controller
 
         $target = $this->resolveTarget($validated['target_type'], $validated['target_id'] ?? null);
         $isStripe = $validated['payment_method'] === 'stripe';
-        $isGift = (bool) ($validated['is_gift'] ?? false);
+        $isGift = SiteSettings::giftEnabled() && (bool) ($validated['is_gift'] ?? false);
 
         $donation = Donation::create([
             'donor_name' => $validated['donor_name'] ?? null,

@@ -10,10 +10,10 @@ use App\Models\Faq;
 use App\Models\FormSubmission;
 use App\Models\ImpactMetric;
 use App\Models\MediaAsset;
-use App\Models\Program;
-use App\Models\Region;
 use App\Models\Orphan;
 use App\Models\OrphanFamily;
+use App\Models\Program;
+use App\Models\Region;
 use App\Models\SponsorshipCase;
 use App\Models\Story;
 use App\Models\User;
@@ -113,7 +113,7 @@ class FullSiteSmokeTest extends TestCase
             'news.show' => ['key' => Story::published()->firstOrFail()->key],
             'sponsorship.show' => ['code' => SponsorshipCase::query()->firstOrFail()->code],
         ];
-        $skipped = ['locale.switch', 'donate.success', 'donate.cancel', 'sitemap', 'robots', 'login', 'image-variant', 'regions.show'];
+        $skipped = ['locale.switch', 'donate.success', 'donate.cancel', 'sitemap', 'robots', 'login', 'image-variant', 'regions.show', 'gift'];
 
         $routes = $this->getRoutes(fn (string $name): bool => ! str_starts_with($name, 'dashboard') && ! in_array($name, $skipped, true));
 

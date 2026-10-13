@@ -3,14 +3,14 @@
     use App\Support\SiteSettings;
 
     $menus = $navMenus ?? PublicNavigation::menus();
-    $givingLinks = [
+    $givingLinks = array_values(array_filter([
         ['route' => 'donate', 'key' => 'nav.donate'],
         ['route' => 'campaigns', 'key' => 'nav.campaigns'],
         ['route' => 'sponsorship', 'key' => 'nav.sponsorship'],
         ['route' => 'orphan-registration', 'key' => 'nav.register_orphan'],
-        ['route' => 'gift', 'key' => 'nav.gift'],
+        SiteSettings::giftEnabled() ? ['route' => 'gift', 'key' => 'nav.gift'] : null,
         ['route' => 'zakat', 'key' => 'nav.zakat'],
-    ];
+    ]));
     $socialLinks = SiteSettings::socialLinks();
 @endphp
 

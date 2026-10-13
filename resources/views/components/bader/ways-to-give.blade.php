@@ -1,12 +1,12 @@
 @props(['goldPricePerGram'])
 
 @php
-    $ways = [
+    $ways = array_values(array_filter([
         ['key' => 'monthly', 'icon' => 'repeat', 'url' => route('donate', ['frequency' => 'monthly'])],
         ['key' => 'sadaqah_jariyah', 'icon' => 'sprout', 'url' => route('donate', ['category' => 'sadaqah_jariyah'])],
-        ['key' => 'gift', 'icon' => 'gift', 'url' => route('gift')],
+        \App\Support\SiteSettings::giftEnabled() ? ['key' => 'gift', 'icon' => 'gift', 'url' => route('gift')] : null,
         ['key' => 'partner', 'icon' => 'building', 'url' => route('partners')],
-    ];
+    ]));
 @endphp
 
 <section class="band-tint section-y" aria-labelledby="ways-to-give-title">
@@ -20,7 +20,7 @@
         <div class="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)]">
             <div class="grid gap-4 sm:grid-cols-2">
                 @foreach ($ways as $way)
-                    <a href="{{ $way['url'] }}" class="surface-card surface-card-hover group flex flex-col p-6" data-reveal style="animation-delay: {{ $loop->index * 70 }}ms">
+                    <a href="{{ $way['url'] }}" @class(['surface-card surface-card-hover group flex flex-col p-6', 'sm:col-span-2' => $loop->last && $loop->count % 2 === 1]) data-reveal style="animation-delay: {{ $loop->index * 70 }}ms">
                         <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-forest-600/10 text-forest-700 transition group-hover:bg-forest-700 group-hover:text-white">
                             <x-bader.icon :name="$way['icon']" class="h-6 w-6" />
                         </span>

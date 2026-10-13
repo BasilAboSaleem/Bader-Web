@@ -104,6 +104,8 @@ class DonationPaymentTest extends TestCase
 
     public function test_gift_donation_requires_a_recipient_and_stores_the_card_details(): void
     {
+        config(['bader.gift_enabled' => true]);
+
         $giftDonation = [
             'target_type' => 'general',
             'amount' => 25,

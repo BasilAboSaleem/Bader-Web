@@ -127,6 +127,7 @@
                     </fieldset>
 
                     {{-- Gift --}}
+                    @if ($giftEnabled)
                     <fieldset class="surface-card p-6 sm:p-8">
                         <legend class="sr-only">{{ __('donate_page.step_gift') }}</legend>
                         <label class="flex cursor-pointer items-center justify-between gap-4">
@@ -173,6 +174,7 @@
                             </div>
                         </div>
                     </fieldset>
+                    @endif
 
                     {{-- Payment --}}
                     <fieldset class="surface-card p-6 sm:p-8">
@@ -263,15 +265,17 @@
                         </div>
                     </div>
 
-                    <div class="gift-card" data-gift-preview data-gift-summary>
-                        <div class="flex items-center justify-between text-xs">
-                            <span class="font-bold opacity-80" data-gift-design-label></span>
-                            <x-bader.icon name="gift" class="h-4 w-4 text-[var(--gift-accent)]" />
+                    @if ($giftEnabled)
+                        <div class="gift-card" data-gift-preview data-gift-summary>
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="font-bold opacity-80" data-gift-design-label></span>
+                                <x-bader.icon name="gift" class="h-4 w-4 text-[var(--gift-accent)]" />
+                            </div>
+                            <p class="mt-3 text-xs opacity-70">{{ __('gift_page.preview_to') }}</p>
+                            <p class="text-lg font-extrabold text-[var(--gift-accent)]" data-gift-out="recipient" data-placeholder="{{ __('gift_page.preview_recipient') }}">{{ __('gift_page.preview_recipient') }}</p>
+                            <p class="mt-2 line-clamp-2 text-xs opacity-90" data-gift-out="message" data-placeholder="{{ __('gift_page.preview_message') }}">{{ __('gift_page.preview_message') }}</p>
                         </div>
-                        <p class="mt-3 text-xs opacity-70">{{ __('gift_page.preview_to') }}</p>
-                        <p class="text-lg font-extrabold text-[var(--gift-accent)]" data-gift-out="recipient" data-placeholder="{{ __('gift_page.preview_recipient') }}">{{ __('gift_page.preview_recipient') }}</p>
-                        <p class="mt-2 line-clamp-2 text-xs opacity-90" data-gift-out="message" data-placeholder="{{ __('gift_page.preview_message') }}">{{ __('gift_page.preview_message') }}</p>
-                    </div>
+                    @endif
 
                     <button type="submit" class="btn-primary min-h-13 w-full text-base">
                         <x-bader.icon name="lock" class="h-5 w-5" />

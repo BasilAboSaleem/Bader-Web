@@ -334,6 +334,11 @@ class SiteSettings
         return $links;
     }
 
+    public static function giftEnabled(): bool
+    {
+        return (bool) config('bader.gift_enabled');
+    }
+
     /**
      * Gift card designs keyed by design key; custom designs from Site Settings replace the config defaults.
      *
@@ -542,13 +547,13 @@ class SiteSettings
 
     /**
      * Homepage sections in display order with their visibility; sections added to the config later are
-     * appended visible, and "quick_give" always stays first.
+     * appended visible, and "quick_give" always stays first. The gift section drops out while gifts are suspended.
      *
      * @return list<array{key: string, visible: bool}>
      */
     public static function homeSections(): array
     {
-        $available = config('bader.home_sections');
+        $available = array_values(array_diff(config('bader.home_sections'), self::giftEnabled() ? [] : ['gift']));
         $stored = json_decode((string) Setting::get('home_sections', ''), true);
         $sections = collect(is_array($stored) ? $stored : [])
             ->filter(fn ($section) => is_array($section) && in_array($section['key'] ?? null, $available, true))

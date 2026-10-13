@@ -42,15 +42,15 @@ final class PublicNavigation
      */
     public static function secondary(): array
     {
-        return [
+        return array_values(array_filter([
             ['route' => 'impact', 'key' => 'nav.impact'],
-            ['route' => 'gift', 'key' => 'nav.gift'],
+            SiteSettings::giftEnabled() ? ['route' => 'gift', 'key' => 'nav.gift'] : null,
             ['route' => 'zakat', 'key' => 'nav.zakat'],
             ['route' => 'partners', 'key' => 'nav.partners'],
             ['route' => 'volunteer', 'key' => 'nav.volunteer'],
             ['route' => 'faq', 'key' => 'nav.faq'],
             ['route' => 'contact', 'key' => 'nav.contact'],
-        ];
+        ]));
     }
 
     /**

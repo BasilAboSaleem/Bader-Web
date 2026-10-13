@@ -104,11 +104,13 @@
                     @endif
                 </x-bader.donate-box>
 
-                <a href="{{ route('gift', ['target_type' => 'campaign', 'target_id' => $campaign->id]) }}" class="mt-4 flex items-center gap-3 rounded-2xl border border-hairline bg-white p-4 text-sm font-bold text-ink-800 transition hover:border-forest-600 hover:text-forest-700">
-                    <x-bader.icon name="gift" class="h-5 w-5 text-forest-600" />
-                    {{ __('campaign_page.gift_this') }}
-                    <x-bader.icon name="arrow" class="ms-auto h-4 w-4" />
-                </a>
+                @if (\App\Support\SiteSettings::giftEnabled())
+                    <a href="{{ route('gift', ['target_type' => 'campaign', 'target_id' => $campaign->id]) }}" class="mt-4 flex items-center gap-3 rounded-2xl border border-hairline bg-white p-4 text-sm font-bold text-ink-800 transition hover:border-forest-600 hover:text-forest-700">
+                        <x-bader.icon name="gift" class="h-5 w-5 text-forest-600" />
+                        {{ __('campaign_page.gift_this') }}
+                        <x-bader.icon name="arrow" class="ms-auto h-4 w-4" />
+                    </a>
+                @endif
             </aside>
         </div>
     </section>

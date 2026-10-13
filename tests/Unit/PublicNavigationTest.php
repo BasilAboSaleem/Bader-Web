@@ -3,7 +3,7 @@
 namespace Tests\Unit;
 
 use App\Support\PublicNavigation;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 class PublicNavigationTest extends TestCase
 {

@@ -68,8 +68,28 @@ class PublicGivingPagesTest extends TestCase
         $this->get(route('sponsorship.show', $hidden->code))->assertNotFound();
     }
 
+    public function test_gift_donations_are_suspended_everywhere_and_old_gift_links_land_on_the_donate_form(): void
+    {
+        $campaign = Campaign::factory()->create();
+
+        $this->get(route('gift', ['target_type' => 'campaign', 'target_id' => $campaign->id]))
+            ->assertRedirect(route('donate', ['target_type' => 'campaign', 'target_id' => $campaign->id]));
+
+        foreach ([route('home'), route('donate', ['gift' => 1]), route('campaigns.show', $campaign->key)] as $page) {
+            $this->get($page)
+                ->assertOk()
+                ->assertDontSee('href="'.route('gift'), false)
+                ->assertDontSee('name="is_gift"', false)
+                ->assertDontSee('aria-labelledby="gift-section-title"', false);
+        }
+
+        $this->get(route('sitemap'))->assertDontSee(route('gift'), false);
+    }
+
     public function test_gift_and_zakat_pages_render_in_both_languages(): void
     {
+        config(['bader.gift_enabled' => true]);
+
         foreach (['ar', 'en'] as $locale) {
             $this->withSession(['locale' => $locale])
                 ->get(route('gift'))
@@ -126,6 +146,8 @@ class PublicGivingPagesTest extends TestCase
 
     public function test_donate_page_prefills_gift_details_from_the_gift_page(): void
     {
+        config(['bader.gift_enabled' => true]);
+
         $this->get(route('donate', [
             'gift' => 1,
             'gift_design' => 'mother',

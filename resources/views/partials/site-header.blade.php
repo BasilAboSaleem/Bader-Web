@@ -22,10 +22,12 @@
             {{ __('header.topbar_text') }}
         </p>
         <nav class="flex items-center gap-1 ms-auto" aria-label="{{ __('header.utility_nav') }}">
-            <a href="{{ route('gift') }}" class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-semibold transition-colors hover:bg-white/10 hover:text-white">
-                <x-bader.icon name="gift" class="h-3.5 w-3.5 text-gold-400" />
-                <span>{{ __('nav.gift') }}</span>
-            </a>
+            @if (\App\Support\SiteSettings::giftEnabled())
+                <a href="{{ route('gift') }}" class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-semibold transition-colors hover:bg-white/10 hover:text-white">
+                    <x-bader.icon name="gift" class="h-3.5 w-3.5 text-gold-400" />
+                    <span>{{ __('nav.gift') }}</span>
+                </a>
+            @endif
             <a href="{{ route('zakat') }}" class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-semibold transition-colors hover:bg-white/10 hover:text-white">
                 <x-bader.icon name="calculator" class="h-3.5 w-3.5 text-gold-400" />
                 <span>{{ __('nav.zakat') }}</span>
@@ -277,7 +279,9 @@
             <a href="{{ route('sponsorship') }}" class="drawer-link">{{ __('nav.sponsorship') }}</a>
             <a href="{{ route('orphan-registration') }}" class="drawer-link">{{ __('nav.register_orphan') }}</a>
             <a href="{{ route('news') }}" class="drawer-link">{{ __('nav.news') }}</a>
-            <a href="{{ route('gift') }}" class="drawer-link">{{ __('nav.gift') }}</a>
+            @if (\App\Support\SiteSettings::giftEnabled())
+                <a href="{{ route('gift') }}" class="drawer-link">{{ __('nav.gift') }}</a>
+            @endif
             <a href="{{ route('zakat') }}" class="drawer-link">{{ __('nav.zakat') }}</a>
         </nav>
 

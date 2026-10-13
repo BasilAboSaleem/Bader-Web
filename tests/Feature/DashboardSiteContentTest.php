@@ -153,6 +153,8 @@ class DashboardSiteContentTest extends TestCase
 
     public function test_custom_gift_designs_replace_the_defaults(): void
     {
+        config(['bader.gift_enabled' => true]);
+
         $this->actingAs(User::factory()->create())
             ->put(route('dashboard.settings.update'), [
                 'gift_designs' => [

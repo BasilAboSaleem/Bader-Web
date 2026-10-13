@@ -8,6 +8,7 @@ use App\Models\Facility;
 use App\Models\Program;
 use App\Models\Region;
 use App\Models\Story;
+use App\Support\SiteSettings;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -22,14 +23,14 @@ class SitemapController extends Controller
     {
         $lastmod = Carbon::now()->toAtomString();
 
-        $staticPages = [
+        $staticPages = array_values(array_filter([
             ['route' => 'home', 'priority' => '1.0', 'changefreq' => 'daily'],
             ['route' => 'about', 'priority' => '0.9', 'changefreq' => 'monthly'],
             ['route' => 'programs', 'priority' => '0.8', 'changefreq' => 'weekly'],
             ['route' => 'campaigns', 'priority' => '0.9', 'changefreq' => 'daily'],
             ['route' => 'projects', 'priority' => '0.9', 'changefreq' => 'weekly'],
             ['route' => 'sponsorship', 'priority' => '0.8', 'changefreq' => 'weekly'],
-            ['route' => 'gift', 'priority' => '0.7', 'changefreq' => 'monthly'],
+            SiteSettings::giftEnabled() ? ['route' => 'gift', 'priority' => '0.7', 'changefreq' => 'monthly'] : null,
             ['route' => 'zakat', 'priority' => '0.7', 'changefreq' => 'monthly'],
             ['route' => 'impact', 'priority' => '0.8', 'changefreq' => 'weekly'],
             ['route' => 'impact-map', 'priority' => '0.7', 'changefreq' => 'weekly'],
@@ -39,7 +40,7 @@ class SitemapController extends Controller
             ['route' => 'volunteer', 'priority' => '0.7', 'changefreq' => 'monthly'],
             ['route' => 'faq', 'priority' => '0.6', 'changefreq' => 'monthly'],
             ['route' => 'contact', 'priority' => '0.6', 'changefreq' => 'monthly'],
-        ];
+        ]));
 
         $detailPages = [
             ['route' => 'programs.show', 'models' => Program::published()->get(), 'priority' => '0.7', 'changefreq' => 'weekly'],

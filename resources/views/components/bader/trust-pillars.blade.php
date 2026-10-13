@@ -41,16 +41,5 @@
                 @endforeach
             </div>
         </div>
-
-        <div class="mt-12 flex flex-col items-center justify-between gap-4 rounded-3xl bg-white/5 p-6 text-center ring-1 ring-white/10 sm:flex-row sm:text-start" data-reveal>
-            <p class="text-lg font-extrabold">{{ __('home.cta_title') }}</p>
-            <div class="flex flex-wrap justify-center gap-3">
-                <a href="{{ route('donate') }}" class="btn-primary">
-                    <x-bader.icon name="heart" class="h-4 w-4" />
-                    {{ __('nav.donate') }}
-                </a>
-                <a href="{{ route('partners') }}" class="btn-ghost">{{ __('home.cta_partner') }}</a>
-            </div>
-        </div>
     </div>
 </section>

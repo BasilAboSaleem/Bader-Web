@@ -45,6 +45,12 @@ return [
     ],
 
     /*
+    | Gift donations: the gift page, the gift option on the donate form, the homepage gift section and every
+    | link to them. Suspended for now; set back to true to bring the whole feature back.
+    */
+    'gift_enabled' => false,
+
+    /*
     | Gift card designs available when donating on behalf of someone.
     */
     'gift_designs' => [

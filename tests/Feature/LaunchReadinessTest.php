@@ -38,7 +38,6 @@ class LaunchReadinessTest extends TestCase
             'impact' => ['impact'],
             'news' => ['news'],
             'sponsorship' => ['sponsorship'],
-            'gift' => ['gift'],
             'zakat' => ['zakat'],
             'donate' => ['donate'],
             'partners' => ['partners'],
