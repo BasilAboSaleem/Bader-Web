@@ -11,11 +11,6 @@
   $detail = 'mt-0.5 text-theme-sm font-medium text-gray-800 dark:text-white/90';
   $inputClass = 'h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90';
   $date = fn ($value) => $value?->format('Y-m-d') ?? '—';
-  $reviewBadge = match ($family->review_status) {
-    OrphanFamily::REVIEW_APPROVED => 'bg-success-50 text-success-700 dark:bg-success-500/15 dark:text-success-400',
-    OrphanFamily::REVIEW_REJECTED => 'bg-error-50 text-error-700 dark:bg-error-500/15 dark:text-error-400',
-    default => 'bg-warning-50 text-warning-700 dark:bg-warning-500/15 dark:text-warning-400',
-  };
 @endphp
 
 @section('content')
@@ -25,7 +20,7 @@
     <div>
       <h1 class="flex flex-wrap items-center gap-3 text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
         <span dir="ltr">{{ $family->code }}</span>
-        <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $reviewBadge }}">{{ __('orphans.review_status.'.$family->review_status) }}</span>
+        <x-dashboard.orphan-status :status="$family->currentStatus()" />
       </h1>
       <nav class="mt-1 flex items-center gap-1.5 text-theme-xs text-gray-500 dark:text-gray-400">
         <a href="{{ route('dashboard.orphans.index', ['status' => $family->review_status]) }}" class="hover:text-brand-500">{{ __('dashboard.module.orphans') }}</a>
@@ -50,6 +45,10 @@
       <span>{{ session('status') }}</span>
     </div>
   @endif
+
+  @error('sponsorship')
+    <div class="rounded-xl border border-error-500/20 bg-error-50 p-4 text-theme-sm font-medium text-error-700 dark:bg-error-500/10 dark:text-error-400" role="alert">{{ $message }}</div>
+  @enderror
 
   @if ($duplicates !== [])
     <div class="rounded-xl border border-warning-500/30 bg-warning-50 p-4 text-theme-sm text-warning-800 dark:bg-warning-500/10 dark:text-warning-400" role="alert">
@@ -184,34 +183,33 @@
         </div>
       </form>
 
-      <form action="{{ route('dashboard.orphans.sponsorship', $family) }}" method="POST" class="{{ $card }}">
-        @csrf
-        @method('PATCH')
-        <h2 class="{{ $cardTitle }}">{{ __('orphans.sponsorship_title') }}</h2>
-        @if ($family->isWidowFamily())
-          <label for="sponsorship_status" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">{{ __('orphans.family_sponsorship') }}</label>
-          <select id="sponsorship_status" name="sponsorship_status" class="{{ $inputClass }}">
-            @foreach (OrphanFamily::SPONSORSHIP_STATUSES as $status)
-              <option value="{{ $status }}" @selected($family->sponsorship_status === $status)>{{ __('sponsorship.status.'.$status) }}</option>
-            @endforeach
-          </select>
-        @else
-          <input type="hidden" name="sponsorship_status" value="{{ $family->sponsorship_status }}">
-          <div class="space-y-3">
-            @foreach ($family->orphans as $orphan)
-              <label class="block">
-                <span class="mb-1 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">{{ $orphan->full_name }}</span>
-                <select name="orphans[{{ $orphan->id }}]" class="{{ $inputClass }}">
-                  @foreach (OrphanFamily::SPONSORSHIP_STATUSES as $status)
-                    <option value="{{ $status }}" @selected($orphan->sponsorship_status === $status)>{{ __('sponsorship.status.'.$status) }}</option>
-                  @endforeach
-                </select>
-              </label>
-            @endforeach
-          </div>
-        @endif
-        <button type="submit" class="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-theme-sm font-medium text-white hover:bg-brand-600">{{ __('dashboard.save_changes') }}</button>
-      </form>
+      @if ($family->isApproved())
+        <form action="{{ route('dashboard.orphans.sponsorship', $family) }}" method="POST" class="{{ $card }}">
+          @csrf
+          @method('PATCH')
+          <h2 class="{{ $cardTitle }}">{{ __('orphans.sponsorship_title') }}</h2>
+          <p class="mb-4 flex items-start gap-2 text-theme-xs text-gray-500 dark:text-gray-400">
+            <svg class="mt-0.5 size-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2" stroke-width="2"/><path stroke-linecap="round" stroke-width="2" d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            {{ __('orphans.sponsor_private_hint') }}
+          </p>
+          @if ($family->isWidowFamily())
+            <x-dashboard.orphan-sponsor-fields :record="$family" :label="__('orphans.family_sponsorship')" :input-class="$inputClass" />
+          @else
+            <div class="space-y-4">
+              @foreach ($family->orphans as $orphan)
+                <x-dashboard.orphan-sponsor-fields :record="$orphan" :label="$orphan->full_name" :prefix="'orphans['.$orphan->id.']'" :input-class="$inputClass"
+                  class="rounded-xl border border-gray-200 p-3 dark:border-gray-800" />
+              @endforeach
+            </div>
+          @endif
+          <button type="submit" class="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-theme-sm font-medium text-white hover:bg-brand-600">{{ __('dashboard.save_changes') }}</button>
+        </form>
+      @else
+        <div class="{{ $card }}">
+          <h2 class="{{ $cardTitle }}">{{ __('orphans.sponsorship_title') }}</h2>
+          <p class="text-theme-sm text-gray-500 dark:text-gray-400">{{ __('orphans.sponsorship_needs_approval') }}</p>
+        </div>
+      @endif
     </aside>
   </div>
 </div>

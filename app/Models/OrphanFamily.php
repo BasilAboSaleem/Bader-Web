@@ -42,6 +42,15 @@ class OrphanFamily extends Model
 
     public const SPONSORSHIP_STATUSES = [self::SPONSORSHIP_AVAILABLE, self::SPONSORSHIP_SPONSORED];
 
+    /** Internal sponsor details, kept on the family (widow's family) or on each orphan; never shown to visitors. */
+    public const SPONSOR_FIELDS = ['sponsor_name', 'sponsorship_monthly_amount', 'sponsorship_started_at'];
+
+    public const STATUS_PENDING_REVIEW = 'pending_review';
+
+    public const STATUS_REJECTED = 'rejected';
+
+    public const STATUS_PARTIALLY_SPONSORED = 'partially_sponsored';
+
     /** Attachments every registration must carry. */
     public const DOCUMENTS = ['father_death_certificate', 'martyr_certificate', 'mother_id'];
 
@@ -52,6 +61,9 @@ class OrphanFamily extends Model
         'source',
         'review_status',
         'sponsorship_status',
+        'sponsor_name',
+        'sponsorship_monthly_amount',
+        'sponsorship_started_at',
         'contact_name',
         'contact_relation',
         'contact_phone',
@@ -85,6 +97,8 @@ class OrphanFamily extends Model
             'mother_birth_date' => 'date',
             'documents' => 'array',
             'reviewed_at' => 'datetime',
+            'sponsorship_monthly_amount' => 'decimal:2',
+            'sponsorship_started_at' => 'date',
         ];
     }
 
@@ -128,6 +142,36 @@ class OrphanFamily extends Model
     public function isAvailable(): bool
     {
         return $this->sponsorship_status === self::SPONSORSHIP_AVAILABLE;
+    }
+
+    /**
+     * Where the file stands for the team: waiting for approval, rejected, then waiting for a sponsor or sponsored.
+     * Orphan files are sponsored child by child, so they can also be partially sponsored.
+     * Uses the orphans_count / sponsored_orphans_count aggregates when loaded, otherwise the orphans relation.
+     */
+    public function currentStatus(): string
+    {
+        if ($this->review_status === self::REVIEW_PENDING) {
+            return self::STATUS_PENDING_REVIEW;
+        }
+
+        if ($this->review_status === self::REVIEW_REJECTED) {
+            return self::STATUS_REJECTED;
+        }
+
+        if ($this->isWidowFamily()) {
+            return $this->sponsorship_status;
+        }
+
+        $total = $this->orphans_count ?? $this->orphans->count();
+        $sponsored = $this->sponsored_orphans_count
+            ?? $this->orphans->where('sponsorship_status', self::SPONSORSHIP_SPONSORED)->count();
+
+        return match (true) {
+            $sponsored === 0 => self::SPONSORSHIP_AVAILABLE,
+            $sponsored >= $total => self::SPONSORSHIP_SPONSORED,
+            default => self::STATUS_PARTIALLY_SPONSORED,
+        };
     }
 
     /**

@@ -42,7 +42,9 @@ class DashboardOrphansTest extends TestCase
         $this->actingAs($admin)->get(route('dashboard.orphans.index'))
             ->assertOk()
             ->assertViewHas('currentStatus', OrphanFamily::REVIEW_PENDING)
-            ->assertSee($family->code);
+            ->assertSee($family->code)
+            ->assertSee(__('orphans.status.pending_review'))
+            ->assertDontSee(__('orphans.status.available'));
 
         $this->actingAs($admin)->get(route('dashboard.orphans.show', $family))
             ->assertOk()
@@ -110,8 +112,9 @@ class DashboardOrphansTest extends TestCase
         ])->assertSessionHasNoErrors();
 
         $family = OrphanFamily::sole();
-        $this->assertSame(OrphanFamily::REVIEW_APPROVED, $family->review_status);
+        $this->assertSame(OrphanFamily::REVIEW_PENDING, $family->review_status);
         $this->assertSame(OrphanFamily::SOURCE_DASHBOARD, $family->source);
+        $this->get(route('sponsorship'))->assertDontSee('سلمى');
         [$ahmad, $salma] = $family->orphans()->get()->all();
 
         $this->actingAs($admin)->get(route('dashboard.orphans.edit', $family))->assertOk()->assertSee('سلمى محمد سالم أبو عيد');
@@ -142,22 +145,93 @@ class DashboardOrphansTest extends TestCase
         Storage::disk('local')->assertMissing('orphan-documents/'.$family->id);
     }
 
-    public function test_sponsorship_status_changes_only_touch_orphans_of_the_same_file(): void
+    public function test_sponsorship_cannot_be_recorded_before_the_file_is_approved(): void
     {
         $admin = User::factory()->create();
-        $family = OrphanFamily::factory()->approved()->create();
-        $orphan = Orphan::factory()->for($family, 'family')->create();
-        $otherOrphan = Orphan::factory()->create();
+        $family = OrphanFamily::factory()->widowFamily()->create();
+
+        $this->actingAs($admin)->get(route('dashboard.orphans.show', $family))
+            ->assertSee(__('orphans.sponsorship_needs_approval'))
+            ->assertDontSee('name="sponsor_name"', false);
+
+        $this->actingAs($admin)->patch(route('dashboard.orphans.sponsorship', $family), [
+            'sponsorship_status' => OrphanFamily::SPONSORSHIP_SPONSORED,
+            'sponsor_name' => 'خالد الحارثي',
+            'sponsorship_monthly_amount' => 150,
+            'sponsorship_started_at' => '2026-10-01',
+        ])->assertSessionHasErrors('sponsorship');
+
+        $this->assertTrue($family->refresh()->isAvailable());
+        $this->assertNull($family->sponsor_name);
+    }
+
+    public function test_sponsoring_a_widow_family_records_internal_sponsor_details_that_visitors_never_see(): void
+    {
+        $admin = User::factory()->create();
+        $family = OrphanFamily::factory()->approved()->widowFamily()->create();
+        Orphan::factory()->for($family, 'family')->create();
+
+        $this->actingAs($admin)->patch(route('dashboard.orphans.sponsorship', $family), [
+            'sponsorship_status' => OrphanFamily::SPONSORSHIP_SPONSORED,
+        ])->assertSessionHasErrors(['sponsor_name', 'sponsorship_monthly_amount', 'sponsorship_started_at']);
+
+        $this->assertTrue($family->refresh()->isAvailable());
+
+        $this->actingAs($admin)->patch(route('dashboard.orphans.sponsorship', $family), [
+            'sponsorship_status' => OrphanFamily::SPONSORSHIP_SPONSORED,
+            'sponsor_name' => 'خالد الحارثي',
+            'sponsorship_monthly_amount' => 150,
+            'sponsorship_started_at' => '2026-10-01',
+        ])->assertRedirect(route('dashboard.orphans.show', $family));
+
+        $family->refresh();
+        $this->assertSame(OrphanFamily::SPONSORSHIP_SPONSORED, $family->currentStatus());
+        $this->assertSame('خالد الحارثي', $family->sponsor_name);
+        $this->assertSame('150.00', $family->sponsorship_monthly_amount);
+        $this->assertSame('2026-10-01', $family->sponsorship_started_at->toDateString());
+
+        $this->get(route('sponsorship'))
+            ->assertOk()
+            ->assertSee(__('sponsorship.status.sponsored'))
+            ->assertDontSee('خالد الحارثي')
+            ->assertDontSee('150.00');
 
         $this->actingAs($admin)->patch(route('dashboard.orphans.sponsorship', $family), [
             'sponsorship_status' => OrphanFamily::SPONSORSHIP_AVAILABLE,
+            'sponsor_name' => 'خالد الحارثي',
+        ]);
+
+        $family->refresh();
+        $this->assertTrue($family->isAvailable());
+        $this->assertNull($family->sponsor_name);
+        $this->assertNull($family->sponsorship_monthly_amount);
+    }
+
+    public function test_orphan_files_are_sponsored_child_by_child_within_the_same_file_only(): void
+    {
+        $admin = User::factory()->create();
+        $family = OrphanFamily::factory()->approved()->create();
+        [$ahmad, $salma] = Orphan::factory()->for($family, 'family')->count(2)->create()->all();
+        $otherOrphan = Orphan::factory()->create();
+        $sponsor = ['sponsorship_status' => OrphanFamily::SPONSORSHIP_SPONSORED, 'sponsor_name' => 'خالد الحارثي', 'sponsorship_monthly_amount' => 50, 'sponsorship_started_at' => '2026-10-01'];
+
+        $this->actingAs($admin)->patch(route('dashboard.orphans.sponsorship', $family), [
+            'orphans' => [$ahmad->id => ['sponsorship_status' => OrphanFamily::SPONSORSHIP_SPONSORED]],
+        ])->assertSessionHasErrors("orphans.{$ahmad->id}.sponsor_name");
+
+        $this->actingAs($admin)->patch(route('dashboard.orphans.sponsorship', $family), [
             'orphans' => [
-                $orphan->id => OrphanFamily::SPONSORSHIP_SPONSORED,
-                $otherOrphan->id => OrphanFamily::SPONSORSHIP_SPONSORED,
+                $ahmad->id => $sponsor,
+                $salma->id => ['sponsorship_status' => OrphanFamily::SPONSORSHIP_AVAILABLE],
+                $otherOrphan->id => $sponsor,
             ],
         ])->assertRedirect(route('dashboard.orphans.show', $family));
 
-        $this->assertFalse($orphan->refresh()->isAvailable());
+        $this->assertSame('خالد الحارثي', $ahmad->refresh()->sponsor_name);
+        $this->assertFalse($ahmad->isAvailable());
+        $this->assertTrue($salma->refresh()->isAvailable());
         $this->assertTrue($otherOrphan->refresh()->isAvailable());
+        $this->assertNull($otherOrphan->sponsor_name);
+        $this->assertSame(OrphanFamily::STATUS_PARTIALLY_SPONSORED, $family->refresh()->currentStatus());
     }
 }

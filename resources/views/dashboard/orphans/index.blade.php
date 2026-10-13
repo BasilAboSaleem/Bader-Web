@@ -53,7 +53,7 @@
       <table class="w-full">
         <thead>
           <tr class="border-b border-gray-100 dark:border-gray-800">
-            @foreach (['orphans.column.code', 'orphans.column.name', 'orphans.column.type', 'orphans.column.orphans_count', 'orphans.column.source', 'orphans.column.sponsorship', 'orphans.column.submitted_at'] as $heading)
+            @foreach (['orphans.column.code', 'orphans.column.name', 'orphans.column.type', 'orphans.column.orphans_count', 'orphans.column.source', 'orphans.column.status', 'orphans.column.submitted_at'] as $heading)
               <th class="px-5 py-4 text-start text-theme-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __($heading) }}</th>
             @endforeach
             <th class="px-5 py-4 text-end text-theme-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('dashboard.actions') }}</th>
@@ -70,7 +70,7 @@
               <td class="px-5 py-4 text-theme-sm text-gray-700 dark:text-gray-300">{{ $family->orphans_count }}</td>
               <td class="px-5 py-4 text-theme-xs text-gray-500 dark:text-gray-400">{{ __('orphans.source.'.$family->source) }}</td>
               <td class="px-5 py-4">
-                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $family->isAvailable() ? 'bg-warning-50 text-warning-700 dark:bg-warning-500/15 dark:text-warning-400' : 'bg-success-50 text-success-700 dark:bg-success-500/15 dark:text-success-400' }}">{{ __('sponsorship.status.'.$family->sponsorship_status) }}</span>
+                <x-dashboard.orphan-status :status="$family->currentStatus()" />
               </td>
               <td class="px-5 py-4 text-theme-xs text-gray-500 dark:text-gray-400" dir="ltr">{{ $family->created_at->format('Y-m-d') }}</td>
               <td class="px-5 py-4">

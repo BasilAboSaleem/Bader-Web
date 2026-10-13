@@ -9,6 +9,7 @@ import { initRegionMaps } from './public/region-map';
 import { initLightboxes } from './public/lightbox';
 import { initImageUploads } from './dashboard/image-uploads';
 import { initOrphanForms } from './public/orphan-form';
+import { initSponsorFields } from './dashboard/sponsor-fields';
 
 const isPublicSite = () => document.body?.classList.contains('bader-public');
 
@@ -36,6 +37,7 @@ document.documentElement.classList.add('js');
 const initializePublicEnhancements = () => {
     initImageUploads(isPublicSite() ? 'input[type="file"][data-max-bytes]' : 'input[type="file"]');
     initOrphanForms();
+    initSponsorFields();
 
     initReveal();
     initCountUp();

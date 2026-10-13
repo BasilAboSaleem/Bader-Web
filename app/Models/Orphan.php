@@ -25,6 +25,9 @@ class Orphan extends Model
         'health_status',
         'health_notes',
         'sponsorship_status',
+        'sponsor_name',
+        'sponsorship_monthly_amount',
+        'sponsorship_started_at',
     ];
 
     /**
@@ -34,6 +37,8 @@ class Orphan extends Model
     {
         return [
             'birth_date' => 'date',
+            'sponsorship_monthly_amount' => 'decimal:2',
+            'sponsorship_started_at' => 'date',
         ];
     }
 

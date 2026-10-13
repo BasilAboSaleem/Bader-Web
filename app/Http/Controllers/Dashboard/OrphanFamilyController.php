@@ -40,7 +40,7 @@ class OrphanFamilyController extends Controller
                     ->orWhere('mother_national_id', $search)
                     ->orWhereHas('orphans', fn (Builder $orphans) => $orphans->where('full_name', 'like', "%{$search}%")->orWhere('national_id', $search));
             }))
-            ->withCount('orphans')
+            ->withCount(['orphans', 'orphans as sponsored_orphans_count' => fn (Builder $orphans) => $orphans->where('sponsorship_status', OrphanFamily::SPONSORSHIP_SPONSORED)])
             ->latest()
             ->paginate(20)
             ->withQueryString();
@@ -64,9 +64,7 @@ class OrphanFamilyController extends Controller
             $family = OrphanFamily::create([
                 ...OrphanFamilyInput::familyAttributes($validated),
                 'source' => OrphanFamily::SOURCE_DASHBOARD,
-                'review_status' => OrphanFamily::REVIEW_APPROVED,
-                'reviewed_by' => $request->user()->id,
-                'reviewed_at' => now(),
+                'review_status' => OrphanFamily::REVIEW_PENDING,
             ]);
 
             OrphanFamilyInput::syncOrphans($family, $validated['orphans']);
@@ -139,18 +137,29 @@ class OrphanFamilyController extends Controller
             ->with('status', __('orphans.review_saved.'.$validated['review_status']));
     }
 
+    /**
+     * A widow's family is sponsored as one unit; an orphan file is sponsored child by child.
+     * Marking anyone as sponsored records the sponsor's name, monthly amount and start date for the team only.
+     */
     public function updateSponsorship(Request $request, OrphanFamily $orphanFamily): RedirectResponse
     {
-        $validated = $request->validate([
-            'sponsorship_status' => ['required', Rule::in(OrphanFamily::SPONSORSHIP_STATUSES)],
-            'orphans' => ['nullable', 'array'],
-            'orphans.*' => [Rule::in(OrphanFamily::SPONSORSHIP_STATUSES)],
-        ]);
+        if (! $orphanFamily->isApproved()) {
+            return redirect()->route('dashboard.orphans.show', $orphanFamily)
+                ->withErrors(['sponsorship' => __('orphans.sponsorship_needs_approval')]);
+        }
 
-        $orphanFamily->update(['sponsorship_status' => $validated['sponsorship_status']]);
+        if ($orphanFamily->isWidowFamily()) {
+            $validated = $request->validate($this->sponsorRules(''), [], $this->sponsorAttributeNames(''));
+            $orphanFamily->update($this->sponsorAttributes($validated));
+        } else {
+            $validated = $request->validate([
+                'orphans' => ['required', 'array'],
+                ...$this->sponsorRules('orphans.*.'),
+            ], [], $this->sponsorAttributeNames('orphans.*.'));
 
-        foreach ($validated['orphans'] ?? [] as $orphanId => $status) {
-            Orphan::where('orphan_family_id', $orphanFamily->id)->whereKey($orphanId)->update(['sponsorship_status' => $status]);
+            foreach ($validated['orphans'] as $orphanId => $sponsorship) {
+                Orphan::where('orphan_family_id', $orphanFamily->id)->whereKey($orphanId)->update($this->sponsorAttributes($sponsorship));
+            }
         }
 
         return redirect()->route('dashboard.orphans.show', $orphanFamily)
@@ -167,6 +176,49 @@ class OrphanFamilyController extends Controller
         abort_unless($disk->exists($path), 404);
 
         return $disk->response($path, $orphanFamily->code.'-'.$document.'.'.pathinfo($path, PATHINFO_EXTENSION));
+    }
+
+    /**
+     * @return array<string, list<mixed>>
+     */
+    private function sponsorRules(string $prefix): array
+    {
+        $whenSponsored = 'required_if:'.$prefix.'sponsorship_status,'.OrphanFamily::SPONSORSHIP_SPONSORED;
+
+        return [
+            $prefix.'sponsorship_status' => ['required', Rule::in(OrphanFamily::SPONSORSHIP_STATUSES)],
+            $prefix.'sponsor_name' => [$whenSponsored, 'nullable', 'string', 'max:255'],
+            $prefix.'sponsorship_monthly_amount' => [$whenSponsored, 'nullable', 'numeric', 'min:1', 'max:100000'],
+            $prefix.'sponsorship_started_at' => [$whenSponsored, 'nullable', 'date'],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function sponsorAttributeNames(string $prefix): array
+    {
+        return collect(OrphanFamily::SPONSOR_FIELDS)
+            ->mapWithKeys(fn (string $field): array => [$prefix.$field => __('orphans.field.'.$field)])
+            ->all();
+    }
+
+    /**
+     * Sponsor details only make sense while sponsored, so they are cleared when the status goes back to available.
+     *
+     * @param  array<string, mixed>  $input
+     * @return array{sponsorship_status: string, sponsor_name: ?string, sponsorship_monthly_amount: mixed, sponsorship_started_at: ?string}
+     */
+    private function sponsorAttributes(array $input): array
+    {
+        $isSponsored = $input['sponsorship_status'] === OrphanFamily::SPONSORSHIP_SPONSORED;
+
+        return [
+            'sponsorship_status' => $input['sponsorship_status'],
+            'sponsor_name' => $isSponsored ? $input['sponsor_name'] : null,
+            'sponsorship_monthly_amount' => $isSponsored ? $input['sponsorship_monthly_amount'] : null,
+            'sponsorship_started_at' => $isSponsored ? $input['sponsorship_started_at'] : null,
+        ];
     }
 
     /**
