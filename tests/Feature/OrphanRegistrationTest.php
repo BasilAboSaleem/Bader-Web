@@ -6,6 +6,7 @@ use App\Models\OrphanFamily;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class OrphanRegistrationTest extends TestCase
@@ -98,7 +99,7 @@ class OrphanRegistrationTest extends TestCase
     {
         $this->get(route('orphan-registration'))->assertSee('name="submission_token"', false);
 
-        $token = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
+        $token = (string) Str::uuid();
 
         foreach (range(1, 2) as $attempt) {
             $this->post(route('orphan-registration.store'), [...$this->widowFamilyInput(), 'submission_token' => $token])
