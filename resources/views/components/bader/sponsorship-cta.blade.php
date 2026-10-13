@@ -32,6 +32,10 @@
                     {{ __('home.sponsorship.browse') }}
                     <x-bader.icon name="arrow" class="h-4 w-4" />
                 </a>
+                <a href="{{ route('orphan-registration') }}" class="btn-ghost">
+                    <x-bader.icon name="users" class="h-4 w-4" />
+                    {{ __('nav.register_orphan') }}
+                </a>
                 <a href="{{ route('sponsorship') }}#sponsorship-how" class="btn-ghost">{{ __('home.sponsorship.how') }}</a>
             </div>
         </div>

@@ -10,7 +10,7 @@
         'programs' => ['label' => __('nav.programs'), 'active' => request()->routeIs('programs', 'programs.*')],
         // Temporarily hidden; restore this entry and the drawer link below to bring the projects menu back.
         // 'projects' => ['label' => __('nav.projects'), 'active' => request()->routeIs('campaigns', 'campaigns.*', 'projects', 'projects.*')],
-        'sponsorship' => ['label' => __('nav.sponsorship'), 'active' => request()->routeIs('sponsorship', 'sponsorship.*')],
+        'sponsorship' => ['label' => __('nav.sponsorship'), 'active' => request()->routeIs('sponsorship', 'sponsorship.*', 'orphan-registration')],
     ];
 @endphp
 
@@ -177,7 +177,10 @@
                                             <p class="kicker">{{ __('nav.sponsorship') }}</p>
                                             <p class="mt-3 text-lg font-extrabold leading-snug text-ink-900">{{ __('header.sponsorship_title') }}</p>
                                             <p class="mt-2 text-sm leading-relaxed text-muted">{{ __('header.sponsorship_intro') }}</p>
-                                            <a href="{{ route('sponsorship') }}" class="btn-brand mt-5">{{ __('header.all_cases') }}</a>
+                                            <div class="mt-5 flex flex-wrap gap-2">
+                                                <a href="{{ route('sponsorship') }}" class="btn-brand">{{ __('header.all_cases') }}</a>
+                                                <a href="{{ route('orphan-registration') }}" class="btn-outline">{{ __('nav.register_orphan') }}</a>
+                                            </div>
                                         </div>
                                         <ul class="grid gap-3 md:grid-cols-3">
                                             @forelse ($menus['waitingCases'] as $case)
@@ -272,6 +275,7 @@
             {{-- <a href="{{ route('projects') }}" class="drawer-link">{{ __('nav.projects') }}</a> --}}
             <a href="{{ route('campaigns') }}" class="drawer-link">{{ __('nav.campaigns') }}</a>
             <a href="{{ route('sponsorship') }}" class="drawer-link">{{ __('nav.sponsorship') }}</a>
+            <a href="{{ route('orphan-registration') }}" class="drawer-link">{{ __('nav.register_orphan') }}</a>
             <a href="{{ route('news') }}" class="drawer-link">{{ __('nav.news') }}</a>
             <a href="{{ route('gift') }}" class="drawer-link">{{ __('nav.gift') }}</a>
             <a href="{{ route('zakat') }}" class="drawer-link">{{ __('nav.zakat') }}</a>

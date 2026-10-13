@@ -7,6 +7,7 @@
         ['route' => 'donate', 'key' => 'nav.donate'],
         ['route' => 'campaigns', 'key' => 'nav.campaigns'],
         ['route' => 'sponsorship', 'key' => 'nav.sponsorship'],
+        ['route' => 'orphan-registration', 'key' => 'nav.register_orphan'],
         ['route' => 'gift', 'key' => 'nav.gift'],
         ['route' => 'zakat', 'key' => 'nav.zakat'],
     ];

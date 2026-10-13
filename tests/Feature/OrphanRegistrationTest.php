@@ -21,6 +21,8 @@ class OrphanRegistrationTest extends TestCase
 
     public function test_visitor_registers_a_widow_family_that_waits_privately_for_review(): void
     {
+        $this->get(route('home'))->assertSee('href="'.route('orphan-registration').'"', false);
+
         $this->get(route('orphan-registration'))
             ->assertOk()
             ->assertSee('name="documents[mother_id]"', false)
