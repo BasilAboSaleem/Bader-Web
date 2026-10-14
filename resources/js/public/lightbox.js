@@ -34,6 +34,7 @@ export const initLightboxes = () => {
         </button>
         <button type="button" class="lightbox-nav lightbox-prev" data-lightbox-prev hidden>${chevron(backChevron)}</button>
         <img class="lightbox-image" alt="">
+        <span class="lightbox-spinner" aria-hidden="true"></span>
         <button type="button" class="lightbox-nav lightbox-next" data-lightbox-next hidden>${chevron(forwardChevron)}</button>
         <p class="lightbox-counter" data-lightbox-counter hidden></p>
     `;
@@ -48,12 +49,56 @@ export const initLightboxes = () => {
 
     let group = [];
     let index = 0;
+    let loadToken = 0;
+
+    /** Resized copies come in several widths, so the browser picks the one that fits the screen at full sharpness. */
+    const fullImage = (trigger) => {
+        const loader = new Image();
+        const href = trigger.getAttribute('href');
+
+        if (/\/variants\/\d+\//.test(href)) {
+            loader.sizes = '(min-width: 1252px) 72rem, 92vw';
+            loader.srcset = [960, 1280, 1920].map((width) => `${href.replace(/\/variants\/\d+\//, `/variants/${width}/`)} ${width}w`).join(', ');
+        }
+
+        loader.src = href;
+
+        return loader;
+    };
+
+    const loadedThumbnail = (trigger) => {
+        const thumbnail = trigger.querySelector('img');
+
+        return thumbnail?.complete && thumbnail.naturalWidth > 0 ? thumbnail : null;
+    };
 
     const show = (position) => {
         index = (position + group.length) % group.length;
         const trigger = group[index];
-        image.src = trigger.getAttribute('href');
+        const token = ++loadToken;
+        const thumbnail = loadedThumbnail(trigger);
+
+        if (thumbnail) {
+            image.src = thumbnail.currentSrc || thumbnail.src;
+            image.style.setProperty('--lightbox-ratio', thumbnail.naturalWidth / thumbnail.naturalHeight);
+        } else {
+            image.removeAttribute('src');
+        }
+
+        dialog.classList.add('is-loading');
         image.alt = trigger.querySelector('img')?.alt || '';
+
+        const loader = fullImage(trigger);
+        loader.decode().catch(() => null).then(() => {
+            if (token !== loadToken) return;
+            image.src = loader.currentSrc || loader.src;
+            dialog.classList.remove('is-loading');
+
+            if (group.length > 1) {
+                fullImage(group[(index + 1) % group.length]);
+                fullImage(group[(index - 1 + group.length) % group.length]);
+            }
+        });
 
         const hasSiblings = group.length > 1;
         prevButton.hidden = !hasSiblings;
@@ -87,5 +132,10 @@ export const initLightboxes = () => {
     dialog.addEventListener('click', (event) => {
         if (event.target === dialog) dialog.close();
     });
-    dialog.addEventListener('close', () => image.removeAttribute('src'));
+    dialog.addEventListener('close', () => {
+        if (dialog.open) return;
+        loadToken++;
+        image.removeAttribute('src');
+        dialog.classList.remove('is-loading');
+    });
 };
