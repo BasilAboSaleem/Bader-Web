@@ -55,14 +55,14 @@
                 <figure class="overflow-hidden rounded-3xl bg-paper-3 shadow-card-md" data-reveal>
                     @if ($facility->image)
                         <a href="{{ \App\Support\ResponsiveImage::url($facilityImage, \App\Support\ResponsiveImage::LIGHTBOX_WIDTH) }}" data-lightbox data-close-label="{{ __('common.close') }}" class="group relative block cursor-zoom-in">
-                            <x-bader.responsive-image :src="$facilityImage" sizes="(min-width: 1024px) 50rem, 100vw" :alt="$facility->name" class="aspect-[16/9] w-full object-cover transition duration-700 ease-bader group-hover:scale-[1.02]" />
+                            <x-bader.responsive-image :src="$facilityImage" sizes="(min-width: 1024px) 50rem, 100vw" :alt="$facility->name" fetchpriority="high" class="aspect-[16/9] w-full object-cover transition duration-700 ease-bader group-hover:scale-[1.02]" />
                             <span class="absolute bottom-3 end-3 inline-flex items-center gap-1.5 rounded-full bg-black/55 px-3 py-1.5 text-xs font-bold text-white backdrop-blur">
                                 <x-bader.icon name="eye" class="h-3.5 w-3.5" />
                                 {{ __('common.zoom_image') }}
                             </span>
                         </a>
                     @else
-                        <x-bader.responsive-image :src="$facilityImage" sizes="(min-width: 1024px) 50rem, 100vw" :alt="$facility->name" class="aspect-[16/9] w-full object-cover" />
+                        <x-bader.responsive-image :src="$facilityImage" sizes="(min-width: 1024px) 50rem, 100vw" :alt="$facility->name" fetchpriority="high" class="aspect-[16/9] w-full object-cover" />
                     @endif
                 </figure>
 
