@@ -139,6 +139,62 @@ final class ResponsiveImage
         return $target;
     }
 
+    /**
+     * Create every missing variant of the uploaded and bundled photos and return how many were created.
+     * With a cut-off timestamp, only uploads modified since then are processed.
+     */
+    public static function warm(?int $uploadedSince = null): int
+    {
+        $created = 0;
+
+        foreach (self::publicPhotoPaths($uploadedSince) as $path) {
+            foreach (array_keys(self::FORMATS) as $format) {
+                foreach (self::WIDTHS as $width) {
+                    if (! File::exists(self::variantPath($width, $path, $format)) && self::generate($width, $path, $format) !== null) {
+                        $created++;
+                    }
+                }
+            }
+        }
+
+        return $created;
+    }
+
+    /**
+     * Public-relative paths such as "storage/stories/a.jpg" and "images/programs/water.jpg".
+     *
+     * @return list<string>
+     */
+    private static function publicPhotoPaths(?int $uploadedSince): array
+    {
+        $paths = [];
+        $roots = ['storage' => storage_path('app/public')];
+
+        if ($uploadedSince === null) {
+            $roots['images'] = public_path('images');
+        }
+
+        foreach ($roots as $prefix => $root) {
+            if (! File::isDirectory($root)) {
+                continue;
+            }
+
+            foreach (File::allFiles($root) as $file) {
+                if ($uploadedSince !== null && $file->getMTime() < $uploadedSince) {
+                    continue;
+                }
+
+                $path = $prefix.'/'.str_replace('\\', '/', $file->getRelativePathname());
+
+                if (self::localPath($path) === $path) {
+                    $paths[] = $path;
+                }
+            }
+        }
+
+        return $paths;
+    }
+
     private static function original(?string $image): string
     {
         $image = trim((string) $image);

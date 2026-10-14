@@ -14,9 +14,6 @@
     @endif
     <link rel="icon" href="{{ \App\Support\SiteSettings::brandAsset('favicon') }}">
     <link rel="apple-touch-icon" href="{{ asset(config('bader.assets.apple_touch_icon')) }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bader-public min-h-screen bg-paper text-ink-900 antialiased selection:bg-gold-500 selection:text-teal-950">

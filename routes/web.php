@@ -28,6 +28,7 @@ use App\Http\Controllers\PublicFormController;
 use App\Http\Controllers\PublicPageController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SponsorshipPageController;
+use App\Http\Middleware\WarmUploadedImages;
 use App\Models\User;
 use App\Support\ResponsiveImage;
 use Illuminate\Http\Request;
@@ -109,7 +110,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'store'])->middleware('throttle:5,1')->name('login.store');
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', WarmUploadedImages::class])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/dashboard/settings', [SiteSettingController::class, 'edit'])->name('dashboard.settings.edit');
     Route::put('/dashboard/settings', [SiteSettingController::class, 'update'])->name('dashboard.settings.update');
