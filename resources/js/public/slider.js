@@ -37,9 +37,10 @@ const initSlider = (root) => {
         });
     };
 
+    /** Phones in battery-saver mode often report reduced motion; the slides still rotate, just without the sliding animation. */
     const restart = () => {
         window.clearInterval(timer);
-        if (!interval || slides.length < 2 || prefersReducedMotion()) return;
+        if (!interval || slides.length < 2) return;
         timer = window.setInterval(() => {
             if (!isPaused && !document.hidden) render(activeIndex + 1);
         }, interval);
@@ -64,19 +65,22 @@ const initSlider = (root) => {
         go(activeIndex + (forward ? 1 : -1));
     });
 
-    let pointerStartX = null;
-    root.addEventListener('pointerdown', (event) => {
-        if (event.pointerType === 'mouse') return;
-        pointerStartX = event.clientX;
-    });
-    root.addEventListener('pointerup', (event) => {
-        if (pointerStartX === null) return;
-        const deltaX = event.clientX - pointerStartX;
-        pointerStartX = null;
-        if (Math.abs(deltaX) < 40) return;
+    let touchStart = null;
+    root.addEventListener('touchstart', (event) => {
+        const [touch] = event.touches;
+        touchStart = event.touches.length === 1 ? { x: touch.clientX, y: touch.clientY } : null;
+    }, { passive: true });
+    root.addEventListener('touchcancel', () => { touchStart = null; });
+    root.addEventListener('touchend', (event) => {
+        if (!touchStart) return;
+        const [touch] = event.changedTouches;
+        const deltaX = touch.clientX - touchStart.x;
+        const deltaY = touch.clientY - touchStart.y;
+        touchStart = null;
+        if (Math.abs(deltaX) < 40 || Math.abs(deltaX) < Math.abs(deltaY)) return;
         const forward = isRtl() ? deltaX > 0 : deltaX < 0;
         go(activeIndex + (forward ? 1 : -1));
-    });
+    }, { passive: true });
 
     render(0);
     restart();

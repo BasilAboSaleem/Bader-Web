@@ -41,7 +41,7 @@
     $particles = [[8, 0], [17, 3.2], [29, 6.1], [41, 1.4], [55, 4.6], [66, 2.3], [78, 7.2], [90, 5.1]];
 @endphp
 
-<section class="relative isolate overflow-hidden bg-teal-950 text-white"
+<section class="relative isolate touch-pan-y overflow-hidden bg-teal-950 text-white"
     data-slider
     data-autoplay="4500"
     aria-roledescription="carousel"
