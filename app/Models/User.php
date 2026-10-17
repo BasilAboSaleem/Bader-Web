@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use OTPHP\TOTP;
@@ -22,8 +23,17 @@ class User extends Authenticatable
 
     const ROLE_VIEWER = 'viewer';
 
+    /** An outside sponsor: signs in only to follow their own sponsored orphans and reports. */
+    const ROLE_SPONSOR = 'sponsor';
+
     /** Roles that may create and edit live content. */
     const CONTENT_ROLES = [self::ROLE_SUPER_ADMIN, self::ROLE_ADMIN, self::ROLE_EDITOR];
+
+    /** The organisation's own team, the only accounts allowed into the dashboard. */
+    const STAFF_ROLES = [self::ROLE_SUPER_ADMIN, self::ROLE_ADMIN, self::ROLE_EDITOR, self::ROLE_VIEWER];
+
+    /** Roles that manage sponsors, sponsorship amounts and the money paid out to orphans. */
+    const FINANCE_ROLES = [self::ROLE_SUPER_ADMIN, self::ROLE_ADMIN];
 
     /**
      * The attributes that are mass assignable.
@@ -101,6 +111,27 @@ class User extends Authenticatable
     public function canManageSettings(): bool
     {
         return in_array($this->role, [self::ROLE_SUPER_ADMIN, self::ROLE_ADMIN], true);
+    }
+
+    public function isSponsor(): bool
+    {
+        return $this->role === self::ROLE_SPONSOR;
+    }
+
+    public function isStaff(): bool
+    {
+        return in_array($this->role, self::STAFF_ROLES, true);
+    }
+
+    public function canManageFinance(): bool
+    {
+        return in_array($this->role, self::FINANCE_ROLES, true);
+    }
+
+    /** The sponsor record behind a sponsor account. */
+    public function sponsor(): HasOne
+    {
+        return $this->hasOne(Sponsor::class);
     }
 
     // ── Two-Factor helpers ──────────────────────────────────────────────────────

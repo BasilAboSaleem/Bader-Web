@@ -31,6 +31,7 @@ class DashboardNavigation
             'facilities' => 'dashboard.facilities.index',
             'regions' => 'dashboard.regions.index',
             'orphans' => 'dashboard.orphans.index',
+            'sponsors' => 'dashboard.sponsors.index',
             'sponsorship_cases' => 'dashboard.sponsorship-cases.index',
             'stories' => 'dashboard.stories.index',
         ],
@@ -45,12 +46,28 @@ class DashboardNavigation
     ];
 
     /**
+     * Sponsors only ever see their own portal.
+     *
+     * @var array{key: string, modules: list<array{key: string, route: string, pattern: string, badge: int}>}
+     */
+    private const SPONSOR_GROUP = [
+        'key' => 'sponsor_portal',
+        'modules' => [
+            ['key' => 'my_sponsorships', 'route' => 'sponsor.home', 'pattern' => 'sponsor.*', 'badge' => 0],
+        ],
+    ];
+
+    /**
      * Sections the given user may open, grouped, with a count of items waiting for action.
      *
      * @return list<array{key: string, modules: list<array{key: string, route: string, pattern: string, badge: int}>}>
      */
     public static function groups(?User $user): array
     {
+        if (! $user?->isStaff()) {
+            return $user?->isSponsor() ? [self::SPONSOR_GROUP] : [];
+        }
+
         $badges = self::badges();
         $groups = [];
 
@@ -58,11 +75,15 @@ class DashboardNavigation
             $items = [];
 
             foreach ($modules as $module => $route) {
-                if ($module === 'users' && ! $user?->isSuperAdmin()) {
+                if ($module === 'users' && ! $user->isSuperAdmin()) {
                     continue;
                 }
 
-                if ($module === 'orphans' && ! $user?->canManageContent()) {
+                if ($module === 'orphans' && ! $user->canManageContent()) {
+                    continue;
+                }
+
+                if ($module === 'sponsors' && ! $user->canManageFinance()) {
                     continue;
                 }
 

@@ -6,6 +6,8 @@ use Database\Factories\OrphanFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 
 class Orphan extends Model
@@ -25,9 +27,6 @@ class Orphan extends Model
         'health_status',
         'health_notes',
         'sponsorship_status',
-        'sponsor_name',
-        'sponsorship_monthly_amount',
-        'sponsorship_started_at',
     ];
 
     /**
@@ -37,8 +36,6 @@ class Orphan extends Model
     {
         return [
             'birth_date' => 'date',
-            'sponsorship_monthly_amount' => 'decimal:2',
-            'sponsorship_started_at' => 'date',
         ];
     }
 
@@ -50,6 +47,16 @@ class Orphan extends Model
     public function family(): BelongsTo
     {
         return $this->belongsTo(OrphanFamily::class, 'orphan_family_id');
+    }
+
+    public function sponsorships(): HasMany
+    {
+        return $this->hasMany(Sponsorship::class);
+    }
+
+    public function activeSponsorship(): HasOne
+    {
+        return $this->hasOne(Sponsorship::class)->active();
     }
 
     /**

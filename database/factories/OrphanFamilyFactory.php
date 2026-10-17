@@ -48,12 +48,7 @@ class OrphanFamilyFactory extends Factory
 
     public function sponsored(): static
     {
-        return $this->state(fn (): array => [
-            'sponsorship_status' => OrphanFamily::SPONSORSHIP_SPONSORED,
-            'sponsor_name' => fake()->name(),
-            'sponsorship_monthly_amount' => 150,
-            'sponsorship_started_at' => now()->startOfMonth(),
-        ]);
+        return $this->state(fn (): array => ['sponsorship_status' => OrphanFamily::SPONSORSHIP_SPONSORED]);
     }
 
     public function widowFamily(): static

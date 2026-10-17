@@ -59,7 +59,7 @@
         >
         <div>
           <span class="block text-base font-bold text-gray-900 dark:text-white">{{ __('brand.name') }}</span>
-          <span class="block text-[11px] font-medium text-brand-500">{{ __('dashboard.team_area') }}</span>
+          <span class="block text-[11px] font-medium text-brand-500">{{ auth()->user()?->isSponsor() ? __('sponsors.portal_name') : __('dashboard.team_area') }}</span>
         </div>
       </a>
     </div>
@@ -69,6 +69,7 @@
       <nav class="mb-6">
         <div class="flex flex-col gap-4">
 
+          @if (auth()->user()?->isStaff())
           <div>
             <ul class="flex flex-col gap-1">
 
@@ -90,6 +91,7 @@
 
             </ul>
           </div>
+          @endif
 
           @foreach (\App\Support\DashboardNavigation::groups(auth()->user()) as $navGroup)
             <div>
@@ -129,7 +131,7 @@
             {{ __('brand.name') }}
           </h3>
           <p class="mb-4 text-theme-sm text-gray-500 dark:text-gray-400">
-            {{ __('dashboard.private_notice') }}
+            {{ auth()->user()?->isSponsor() ? __('sponsors.portal_notice') : __('dashboard.private_notice') }}
           </p>
           <a
             href="{{ route('home') }}"

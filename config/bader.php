@@ -92,6 +92,12 @@ return [
     'max_donation_categories' => 12,
 
     /*
+    | Currencies the orphan sponsorship programme records amounts in. Labels live in lang files
+    | under "sponsors.currency.{code}".
+    */
+    'sponsorship_currencies' => ['USD', 'ILS', 'SAR'],
+
+    /*
     | Governorates drawn on the impact map, projected from geoBoundaries PSE ADM2 (CC BY 4.0) into
     | map_view_box with north at the top. "center" is the governorate centroid as map_x/map_y
     | percentages. A region is linked to one of them from Dashboard → Regions.

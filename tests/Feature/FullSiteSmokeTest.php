@@ -14,6 +14,8 @@ use App\Models\Orphan;
 use App\Models\OrphanFamily;
 use App\Models\Program;
 use App\Models\Region;
+use App\Models\Sponsor;
+use App\Models\Sponsorship;
 use App\Models\SponsorshipCase;
 use App\Models\Story;
 use App\Models\User;
@@ -44,11 +46,12 @@ class FullSiteSmokeTest extends TestCase
         'orphanFamily' => OrphanFamily::class,
         'program' => Program::class,
         'region' => Region::class,
+        'sponsor' => Sponsor::class,
         'sponsorship_case' => SponsorshipCase::class,
         'story' => Story::class,
     ];
 
-    private const LEAKED_KEY_PATTERN = '/>\s*(home|nav|footer|header|page|common|cta|brand|donation|donate_page|donate_box|gift_page|zakat_page|sponsorship_page|sponsorship|faq_page|about_page|contact_page|program_page|campaign_page|campaigns_page|region_page|facility_page|completed_project_page|media|story_page|news_page|form|form_page|errors|project|dashboard|orphans|orphan_registration)\.[a-z0-9_.]+\s*</';
+    private const LEAKED_KEY_PATTERN = '/>\s*(home|nav|footer|header|page|common|cta|brand|donation|donate_page|donate_box|gift_page|zakat_page|sponsorship_page|sponsorship|faq_page|about_page|contact_page|program_page|campaign_page|campaigns_page|region_page|facility_page|completed_project_page|media|story_page|news_page|form|form_page|errors|project|dashboard|orphans|orphan_registration|sponsors)\.[a-z0-9_.]+\s*</';
 
     protected function setUp(): void
     {
@@ -59,6 +62,7 @@ class FullSiteSmokeTest extends TestCase
         $region = Region::query()->firstOrFail();
         SponsorshipCase::factory()->create(['region_id' => $region->id]);
         Orphan::factory()->for(OrphanFamily::factory()->approved()->widowFamily(), 'family')->create();
+        Sponsorship::factory()->create();
         Facility::query()->update(['region_id' => $region->id]);
         CompletedProject::factory()->create([
             'region_id' => $region->id,
@@ -112,8 +116,9 @@ class FullSiteSmokeTest extends TestCase
             'facilities.show' => ['key' => Facility::published()->firstOrFail()->key],
             'news.show' => ['key' => Story::published()->firstOrFail()->key],
             'sponsorship.show' => ['code' => SponsorshipCase::query()->firstOrFail()->code],
+            'password.reset' => ['token' => 'invitation-token', 'email' => 'sponsor@example.com'],
         ];
-        $skipped = ['locale.switch', 'donate.success', 'donate.cancel', 'sitemap', 'robots', 'login', 'image-variant', 'regions.show', 'gift'];
+        $skipped = ['locale.switch', 'donate.success', 'donate.cancel', 'sitemap', 'robots', 'login', 'image-variant', 'regions.show', 'gift', 'sponsor.home'];
 
         $routes = $this->getRoutes(fn (string $name): bool => ! str_starts_with($name, 'dashboard') && ! in_array($name, $skipped, true));
 

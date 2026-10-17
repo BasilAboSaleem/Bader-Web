@@ -145,6 +145,13 @@
         </div>
       </div>
 
+      @if ($family->activeSponsorships->isNotEmpty())
+        <div class="{{ $card }}">
+          <h2 class="{{ $cardTitle }}">{{ __('sponsors.active_title') }} ({{ $family->activeSponsorships->count() }})</h2>
+          <x-dashboard.sponsorships-table :sponsorships="$family->activeSponsorships" show-sponsor />
+        </div>
+      @endif
+
       <div class="{{ $card }}">
         <h2 class="{{ $cardTitle }}">{{ __('orphans.section.documents') }}</h2>
         <ul class="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -183,7 +190,7 @@
         </div>
       </form>
 
-      @if ($family->isApproved())
+      @if ($family->isApproved() && $sponsors !== null)
         <form action="{{ route('dashboard.orphans.sponsorship', $family) }}" method="POST" class="{{ $card }}">
           @csrf
           @method('PATCH')
@@ -192,18 +199,51 @@
             <svg class="mt-0.5 size-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2" stroke-width="2"/><path stroke-linecap="round" stroke-width="2" d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
             {{ __('orphans.sponsor_private_hint') }}
           </p>
+          @if ($sponsors->isEmpty())
+            <p class="mb-4 rounded-lg bg-warning-50 p-3 text-theme-xs text-warning-800 dark:bg-warning-500/10 dark:text-warning-400">
+              {{ __('sponsors.none_yet') }}
+              <a href="{{ route('dashboard.sponsors.create') }}" class="font-semibold underline">{{ __('sponsors.add') }}</a>
+            </p>
+          @endif
           @if ($family->isWidowFamily())
-            <x-dashboard.orphan-sponsor-fields :record="$family" :label="__('orphans.family_sponsorship')" :input-class="$inputClass" />
+            @php
+              $familySponsorships = $family->activeSponsorships;
+              $motherSponsorship = $familySponsorships->firstWhere('beneficiary_type', \App\Models\Sponsorship::BENEFICIARY_MOTHER);
+              $anySponsorship = $motherSponsorship ?? $familySponsorships->first();
+            @endphp
+            <x-dashboard.orphan-sponsor-fields :label="__('orphans.family_sponsorship')" :status="$family->sponsorship_status" :sponsorship="$anySponsorship"
+              :sponsors="$sponsors" :input-class="$inputClass" :with-amount="false">
+              <div class="space-y-3 border-t border-gray-200 pt-3 dark:border-gray-700">
+                <p class="text-theme-xs text-gray-500 dark:text-gray-400">{{ __('sponsors.widow_amounts_hint') }}</p>
+                <label class="block">
+                  <span class="mb-1 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">{{ __('sponsors.beneficiary.mother') }} — {{ $family->mother_full_name }}</span>
+                  <input type="number" name="mother_amount" value="{{ old('mother_amount', $motherSponsorship?->monthly_amount) }}" min="0" max="100000" step="0.01" dir="ltr" class="{{ $inputClass }}">
+                </label>
+                @foreach ($family->orphans as $orphan)
+                  <label class="block">
+                    <span class="mb-1 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">{{ $orphan->full_name }}</span>
+                    <input type="number" name="orphans[{{ $orphan->id }}][monthly_amount]" value="{{ old('orphans.'.$orphan->id.'.monthly_amount', $familySponsorships->firstWhere('orphan_id', $orphan->id)?->monthly_amount) }}" min="0" max="100000" step="0.01" dir="ltr" class="{{ $inputClass }}">
+                  </label>
+                @endforeach
+                @error('mother_amount') <p class="text-theme-xs text-error-600">{{ $message }}</p> @enderror
+              </div>
+            </x-dashboard.orphan-sponsor-fields>
           @else
             <div class="space-y-4">
               @foreach ($family->orphans as $orphan)
-                <x-dashboard.orphan-sponsor-fields :record="$orphan" :label="$orphan->full_name" :prefix="'orphans['.$orphan->id.']'" :input-class="$inputClass"
+                <x-dashboard.orphan-sponsor-fields :label="$orphan->full_name" :status="$orphan->sponsorship_status" :sponsorship="$orphan->activeSponsorship"
+                  :sponsors="$sponsors" :prefix="'orphans['.$orphan->id.']'" :input-class="$inputClass"
                   class="rounded-xl border border-gray-200 p-3 dark:border-gray-800" />
               @endforeach
             </div>
           @endif
           <button type="submit" class="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-theme-sm font-medium text-white hover:bg-brand-600">{{ __('dashboard.save_changes') }}</button>
         </form>
+      @elseif ($family->isApproved())
+        <div class="{{ $card }}">
+          <h2 class="{{ $cardTitle }}">{{ __('orphans.sponsorship_title') }}</h2>
+          <p class="text-theme-sm text-gray-500 dark:text-gray-400">{{ __('sponsors.managed_by_admins') }}</p>
+        </div>
       @else
         <div class="{{ $card }}">
           <h2 class="{{ $cardTitle }}">{{ __('orphans.sponsorship_title') }}</h2>

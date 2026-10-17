@@ -16,6 +16,7 @@ use App\Http\Controllers\Dashboard\ProgramController;
 use App\Http\Controllers\Dashboard\RegionController;
 use App\Http\Controllers\Dashboard\SiteSettingController;
 use App\Http\Controllers\Dashboard\SiteTextController;
+use App\Http\Controllers\Dashboard\SponsorController;
 use App\Http\Controllers\Dashboard\SponsorshipCaseController;
 use App\Http\Controllers\Dashboard\StoryController;
 use App\Http\Controllers\Dashboard\UserController;
@@ -24,9 +25,11 @@ use App\Http\Controllers\DonationPaymentController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ImageVariantController;
 use App\Http\Controllers\OrphanRegistrationController;
+use App\Http\Controllers\PasswordSetupController;
 use App\Http\Controllers\PublicFormController;
 use App\Http\Controllers\PublicPageController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\SponsorPortalController;
 use App\Http\Controllers\SponsorshipPageController;
 use App\Http\Middleware\WarmUploadedImages;
 use App\Models\User;
@@ -108,10 +111,20 @@ Route::get('/locale/{locale}', function (string $locale) {
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'create'])->name('login');
     Route::post('/login', [AuthController::class, 'store'])->middleware('throttle:5,1')->name('login.store');
+    Route::get('/reset-password/{token}', [PasswordSetupController::class, 'create'])->name('password.reset');
+    Route::post('/reset-password', [PasswordSetupController::class, 'store'])->middleware('throttle:5,1')->name('password.store');
 });
 
-Route::middleware(['auth', WarmUploadedImages::class])->group(function () {
+Route::middleware('auth')->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
+});
+
+Route::middleware(['auth', 'role:'.User::ROLE_SPONSOR])->group(function () {
+    Route::get('/my-sponsorships', [SponsorPortalController::class, 'index'])->name('sponsor.home');
+});
+
+Route::middleware(['auth', 'role:'.implode(',', User::STAFF_ROLES), WarmUploadedImages::class])->group(function () {
     Route::get('/dashboard/settings', [SiteSettingController::class, 'edit'])->name('dashboard.settings.edit');
     Route::put('/dashboard/settings', [SiteSettingController::class, 'update'])->name('dashboard.settings.update');
     Route::get('/dashboard/homepage', [HomepageController::class, 'edit'])->name('dashboard.homepage.edit');
@@ -136,7 +149,9 @@ Route::middleware(['auth', WarmUploadedImages::class])->group(function () {
             ->names('dashboard.orphans')
             ->parameters(['orphans' => 'orphanFamily']);
         Route::patch('dashboard/orphans/{orphanFamily}/review', [OrphanFamilyController::class, 'review'])->name('dashboard.orphans.review');
-        Route::patch('dashboard/orphans/{orphanFamily}/sponsorship', [OrphanFamilyController::class, 'updateSponsorship'])->name('dashboard.orphans.sponsorship');
+        Route::patch('dashboard/orphans/{orphanFamily}/sponsorship', [OrphanFamilyController::class, 'updateSponsorship'])
+            ->middleware('role:'.implode(',', User::FINANCE_ROLES))
+            ->name('dashboard.orphans.sponsorship');
         Route::get('dashboard/orphans/{orphanFamily}/documents/{document}', [OrphanFamilyController::class, 'document'])->name('dashboard.orphans.document');
     });
     Route::resource('dashboard/stories', StoryController::class)->names('dashboard.stories')->except(['show']);
@@ -153,5 +168,8 @@ Route::middleware(['auth', WarmUploadedImages::class])->group(function () {
         ->only(['index', 'create', 'store', 'destroy'])
         ->middleware('role:'.User::ROLE_SUPER_ADMIN);
 
-    Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
+    Route::middleware('role:'.implode(',', User::FINANCE_ROLES))->group(function () {
+        Route::resource('dashboard/sponsors', SponsorController::class)->names('dashboard.sponsors');
+        Route::post('dashboard/sponsors/{sponsor}/invite', [SponsorController::class, 'invite'])->name('dashboard.sponsors.invite');
+    });
 });

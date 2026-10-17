@@ -29,6 +29,10 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
+        if ($request->user()->isSponsor()) {
+            return redirect()->route('sponsor.home');
+        }
+
         return redirect()->intended(route('dashboard'));
     }
 
