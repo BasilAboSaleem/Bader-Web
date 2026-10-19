@@ -145,6 +145,9 @@ Route::middleware(['auth', 'role:'.implode(',', User::STAFF_ROLES), WarmUploaded
         ->except(['show']);
     Route::resource('dashboard/sponsorship-cases', SponsorshipCaseController::class)->names('dashboard.sponsorship-cases')->except(['show']);
     Route::middleware('role:'.implode(',', User::CONTENT_ROLES))->group(function () {
+        Route::get('dashboard/orphans/import', [OrphanFamilyController::class, 'importForm'])->name('dashboard.orphans.import');
+        Route::get('dashboard/orphans/import/template', [OrphanFamilyController::class, 'importTemplate'])->name('dashboard.orphans.import.template');
+        Route::post('dashboard/orphans/import', [OrphanFamilyController::class, 'import'])->name('dashboard.orphans.import.store');
         Route::resource('dashboard/orphans', OrphanFamilyController::class)
             ->names('dashboard.orphans')
             ->parameters(['orphans' => 'orphanFamily']);

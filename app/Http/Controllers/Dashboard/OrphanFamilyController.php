@@ -7,10 +7,12 @@ use App\Models\Orphan;
 use App\Models\OrphanFamily;
 use App\Models\Sponsor;
 use App\Support\OrphanFamilyInput;
+use App\Support\OrphanImport;
 use App\Support\SponsorshipManager;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -57,6 +59,37 @@ class OrphanFamilyController extends Controller
             'family' => new OrphanFamily(['type' => OrphanFamily::TYPE_ORPHAN]),
             'isEdit' => false,
         ]);
+    }
+
+    public function importForm(): View
+    {
+        return view('dashboard.orphans.import', [
+            'columns' => OrphanImport::COLUMNS,
+            'types' => OrphanImport::allowedTypeLabels(),
+            'educationStages' => OrphanImport::allowedEducationLabels(),
+            'healthStatuses' => OrphanImport::allowedHealthLabels(),
+            'residenceAreas' => OrphanImport::allowedResidenceLabels(),
+        ]);
+    }
+
+    public function importTemplate(): Response
+    {
+        return response(OrphanImport::templateBytes(), 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="bader-orphans-import.xlsx"',
+        ]);
+    }
+
+    public function import(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:xlsx,csv,txt', 'max:5120'],
+        ], [], ['file' => __('orphans.import.file')]);
+
+        $result = OrphanImport::import($request->file('file'), $request->user());
+
+        return redirect()->route('dashboard.orphans.index', ['status' => OrphanFamily::REVIEW_APPROVED])
+            ->with('status', __('orphans.import.success', $result));
     }
 
     public function store(Request $request): RedirectResponse
