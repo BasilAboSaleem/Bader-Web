@@ -20,6 +20,10 @@ class DashboardController extends Controller
 
         abort_unless($request->user()->isStaff(), 403);
 
+        if ($request->user()->isBoardMember()) {
+            return redirect()->route('dashboard.orphans.index');
+        }
+
         $badges = DashboardNavigation::badges();
 
         $stats = [

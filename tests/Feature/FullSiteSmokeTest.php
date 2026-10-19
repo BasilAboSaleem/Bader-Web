@@ -15,8 +15,10 @@ use App\Models\OrphanFamily;
 use App\Models\Program;
 use App\Models\Region;
 use App\Models\Sponsor;
+use App\Models\SponsorRequest;
 use App\Models\Sponsorship;
 use App\Models\SponsorshipCase;
+use App\Models\SponsorshipDisbursement;
 use App\Models\Story;
 use App\Models\User;
 use Database\Seeders\ContentSeeder;
@@ -47,6 +49,8 @@ class FullSiteSmokeTest extends TestCase
         'program' => Program::class,
         'region' => Region::class,
         'sponsor' => Sponsor::class,
+        'sponsorRequest' => SponsorRequest::class,
+        'disbursement' => SponsorshipDisbursement::class,
         'sponsorship_case' => SponsorshipCase::class,
         'story' => Story::class,
     ];
@@ -62,7 +66,9 @@ class FullSiteSmokeTest extends TestCase
         $region = Region::query()->firstOrFail();
         SponsorshipCase::factory()->create(['region_id' => $region->id]);
         Orphan::factory()->for(OrphanFamily::factory()->approved()->widowFamily(), 'family')->create();
-        Sponsorship::factory()->create();
+        $sponsorship = Sponsorship::factory()->create();
+        SponsorRequest::factory()->create(['sponsorship_id' => $sponsorship->id, 'sponsor_id' => $sponsorship->sponsor_id]);
+        SponsorshipDisbursement::factory()->create(['sponsorship_id' => $sponsorship->id]);
         Facility::query()->update(['region_id' => $region->id]);
         CompletedProject::factory()->create([
             'region_id' => $region->id,
@@ -118,9 +124,11 @@ class FullSiteSmokeTest extends TestCase
             'sponsorship.show' => ['code' => SponsorshipCase::query()->firstOrFail()->code],
             'password.reset' => ['token' => 'invitation-token', 'email' => 'sponsor@example.com'],
         ];
-        $skipped = ['locale.switch', 'donate.success', 'donate.cancel', 'sitemap', 'robots', 'login', 'image-variant', 'regions.show', 'gift', 'sponsor.home'];
+        $skipped = ['locale.switch', 'donate.success', 'donate.cancel', 'sitemap', 'robots', 'login', 'image-variant', 'regions.show', 'gift'];
 
-        $routes = $this->getRoutes(fn (string $name): bool => ! str_starts_with($name, 'dashboard') && ! in_array($name, $skipped, true));
+        $routes = $this->getRoutes(fn (string $name): bool => ! str_starts_with($name, 'dashboard')
+            && ! str_starts_with($name, 'sponsor.')
+            && ! in_array($name, $skipped, true));
 
         foreach (['ar', 'en'] as $locale) {
             foreach ($routes as $route) {

@@ -53,6 +53,15 @@
           <label for="password_confirmation" class="{{ $labelClass }}">{{ __('dashboard.users_password_confirmation') }} <span class="text-error-500">*</span></label>
           <input type="password" id="password_confirmation" name="password_confirmation" required minlength="12" dir="ltr" autocomplete="new-password" class="{{ $inputClass }}">
         </div>
+        <div class="md:col-span-2">
+          <label for="role" class="{{ $labelClass }}">{{ __('dashboard.users_role') }} <span class="text-error-500">*</span></label>
+          <select id="role" name="role" required class="{{ $inputClass }}">
+            @foreach (\App\Models\User::MANAGED_ROLES as $role)
+              <option value="{{ $role }}" @selected(old('role', \App\Models\User::ROLE_ADMIN) === $role)>{{ __('dashboard.role.'.$role) }}</option>
+            @endforeach
+          </select>
+          <p class="mt-1 text-theme-xs text-gray-400">{{ __('dashboard.users_role_hint') }}</p>
+        </div>
       </div>
     </div>
 

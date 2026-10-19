@@ -28,5 +28,15 @@ export const initSponsorFields = () => {
             const preferred = sponsor.selectedOptions[0]?.dataset.currency;
             if (!currencyChosen && preferred) currency.value = preferred;
         });
+
+        const renewal = scope.querySelector('[data-renewal-type]');
+        const plannedEnd = scope.querySelector('[data-planned-end] input');
+        if (renewal && plannedEnd) {
+            const syncRenewal = () => {
+                plannedEnd.required = renewal.value === 'one_time';
+            };
+            renewal.addEventListener('change', syncRenewal);
+            syncRenewal();
+        }
     });
 };

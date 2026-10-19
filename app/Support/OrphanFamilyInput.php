@@ -82,6 +82,34 @@ final class OrphanFamilyInput
     }
 
     /**
+     * Public self-update: type and mother ID stay as stored; missing certificates must be uploaded.
+     *
+     * @return array<string, list<mixed>>
+     */
+    public static function publicUpdateRules(OrphanFamily $family): array
+    {
+        $rules = self::rules(documentsRequired: false);
+        $rules['type'] = ['required', Rule::in([$family->type])];
+
+        if ($family->type === OrphanFamily::TYPE_WIDOW_FAMILY && filled($family->mother_national_id)) {
+            $rules['mother_national_id'] = ['required', 'digits:9', Rule::in([$family->mother_national_id])];
+        }
+
+        $rules['documents'] = ['nullable', 'array'];
+
+        foreach (OrphanFamily::DOCUMENTS as $document) {
+            $rules['documents.'.$document] = [
+                $family->hasDocument($document) ? 'nullable' : 'required',
+                'file',
+                'mimes:jpg,jpeg,png,webp,pdf',
+                'max:'.self::DOCUMENT_MAX_KB,
+            ];
+        }
+
+        return $rules;
+    }
+
+    /**
      * Readable field names for validation messages.
      *
      * @return array<string, string>

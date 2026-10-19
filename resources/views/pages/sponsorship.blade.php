@@ -45,10 +45,15 @@
                     <h2 id="sponsorship-cases-title" class="section-title mt-2">{{ __('sponsorship_page.cases_title') }}</h2>
                     <p class="section-lead mt-2">{{ __('sponsorship_page.cases_intro') }}</p>
                 </div>
-                <a href="{{ route('orphan-registration') }}" class="btn-ghost shrink-0" data-reveal>
-                    <x-bader.icon name="users" class="h-4 w-4" />
-                    {{ __('sponsorship_page.register_orphan_cta') }}
-                </a>
+                <div class="flex shrink-0 flex-col gap-2 sm:flex-row" data-reveal>
+                    <a href="{{ route('orphan-registration') }}" class="btn-ghost">
+                        <x-bader.icon name="users" class="h-4 w-4" />
+                        {{ __('sponsorship_page.register_orphan_cta') }}
+                    </a>
+                    <a href="{{ route('orphan-case-update') }}" class="btn-outline">
+                        {{ __('sponsorship_page.update_case_cta') }}
+                    </a>
+                </div>
             </div>
 
             <div class="mt-6 space-y-3" data-reveal>

@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Orphan;
 use App\Models\OrphanFamily;
 use App\Models\Sponsor;
+use App\Models\Sponsorship;
+use App\Models\SponsorshipDisbursement;
 use App\Support\OrphanFamilyInput;
 use App\Support\OrphanImport;
+use App\Support\SponsorshipFinanceReport;
 use App\Support\SponsorshipManager;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -115,14 +118,34 @@ class OrphanFamilyController extends Controller
 
     public function show(Request $request, OrphanFamily $orphanFamily): View
     {
-        $orphanFamily->load(['orphans.activeSponsorship', 'reviewer', 'activeSponsorships.sponsor', 'activeSponsorships.orphan', 'activeSponsorships.family']);
+        $orphanFamily->load([
+            'orphans.activeSponsorship',
+            'reviewer',
+            'activeSponsorships.sponsor',
+            'activeSponsorships.orphan',
+            'activeSponsorships.family',
+            'sponsorships' => fn ($query) => $query->with('sponsor')->orderByDesc('started_at'),
+        ]);
+
+        $disbursements = SponsorshipDisbursement::query()
+            ->whereHas('sponsorship', fn ($query) => $query->where('orphan_family_id', $orphanFamily->id))
+            ->with(['sponsorship.sponsor', 'sponsorship.orphan'])
+            ->orderByDesc('period_year')
+            ->orderByDesc('period_month')
+            ->get();
 
         return view('dashboard.orphans.show', [
             'family' => $orphanFamily,
             'duplicates' => $this->duplicateNationalIds($orphanFamily),
+            'sponsorName' => SponsorshipFinanceReport::primarySponsorName($orphanFamily),
+            'approvedAmounts' => SponsorshipFinanceReport::approvedAmounts($orphanFamily),
+            'monthRows' => SponsorshipFinanceReport::caseMonthRows($disbursements),
+            'financeTotals' => $disbursements->groupBy('currency')->map->sum(fn ($row): float => (float) $row->amount),
             'sponsors' => $request->user()->canManageFinance()
                 ? Sponsor::query()->orderBy('name')->get(['id', 'code', 'name', 'preferred_currency'])
                 : null,
+            'canManageOrphans' => $request->user()->canManageOrphans(),
+            'canManageFinance' => $request->user()->canManageFinance(),
         ]);
     }
 
@@ -260,6 +283,8 @@ class OrphanFamilyController extends Controller
             $prefix.'sponsor_id' => [$whenSponsored, 'nullable', 'integer', Rule::exists('sponsors', 'id')],
             $prefix.'currency' => [$whenSponsored, 'nullable', Rule::in(config('bader.sponsorship_currencies'))],
             $prefix.'started_at' => [$whenSponsored, 'nullable', 'date', 'after_or_equal:2000-01-01', 'before_or_equal:'.now()->addYear()->toDateString()],
+            $prefix.'renewal_type' => ['nullable', Rule::in(Sponsorship::RENEWAL_TYPES)],
+            $prefix.'planned_ended_at' => ['nullable', 'date', 'after_or_equal:'.$prefix.'started_at', 'before_or_equal:'.now()->addYears(10)->toDateString()],
         ];
     }
 
@@ -268,7 +293,14 @@ class OrphanFamilyController extends Controller
      */
     private function sponsorAttributeNames(string $prefix): array
     {
-        return collect(['sponsorship_status' => 'orphans.sponsorship_title', 'sponsor_id' => 'sponsors.field.sponsor', 'currency' => 'sponsors.field.currency', 'started_at' => 'sponsors.field.started_at'])
+        return collect([
+            'sponsorship_status' => 'orphans.sponsorship_title',
+            'sponsor_id' => 'sponsors.field.sponsor',
+            'currency' => 'sponsors.field.currency',
+            'started_at' => 'sponsors.field.started_at',
+            'renewal_type' => 'sponsors.field.renewal_type',
+            'planned_ended_at' => 'sponsors.field.planned_ended_at',
+        ])
             ->mapWithKeys(fn (string $label, string $field): array => [$prefix.$field => __($label)])
             ->all();
     }

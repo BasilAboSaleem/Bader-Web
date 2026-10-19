@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * One sponsor paying a monthly amount for one beneficiary: an orphan, or the mother of a widow family.
@@ -22,6 +23,12 @@ class Sponsorship extends Model
 
     public const BENEFICIARY_MOTHER = 'mother';
 
+    public const RENEWAL_RECURRING = 'recurring';
+
+    public const RENEWAL_ONE_TIME = 'one_time';
+
+    public const RENEWAL_TYPES = [self::RENEWAL_RECURRING, self::RENEWAL_ONE_TIME];
+
     protected $fillable = [
         'sponsor_id',
         'orphan_family_id',
@@ -30,6 +37,8 @@ class Sponsorship extends Model
         'monthly_amount',
         'currency',
         'started_at',
+        'renewal_type',
+        'planned_ended_at',
         'ended_at',
         'created_by',
         'ended_by',
@@ -43,6 +52,7 @@ class Sponsorship extends Model
         return [
             'monthly_amount' => 'decimal:2',
             'started_at' => 'date',
+            'planned_ended_at' => 'date',
             'ended_at' => 'date',
         ];
     }
@@ -67,6 +77,16 @@ class Sponsorship extends Model
         return $this->belongsTo(Orphan::class);
     }
 
+    public function requests(): HasMany
+    {
+        return $this->hasMany(SponsorRequest::class);
+    }
+
+    public function disbursements(): HasMany
+    {
+        return $this->hasMany(SponsorshipDisbursement::class);
+    }
+
     public function isActive(): bool
     {
         return $this->ended_at === null;
@@ -75,6 +95,11 @@ class Sponsorship extends Model
     public function isForMother(): bool
     {
         return $this->beneficiary_type === self::BENEFICIARY_MOTHER;
+    }
+
+    public function isRecurring(): bool
+    {
+        return $this->renewal_type === self::RENEWAL_RECURRING;
     }
 
     /**

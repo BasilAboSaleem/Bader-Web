@@ -5,6 +5,8 @@
 @php
   use App\Models\OrphanFamily;
 
+  $canManageOrphans = $canManageOrphans ?? auth()->user()?->canManageOrphans() ?? false;
+  $canManageFinance = $canManageFinance ?? auth()->user()?->canManageFinance() ?? false;
   $card = 'rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6';
   $cardTitle = 'mb-4 border-b border-gray-100 pb-3 text-base font-semibold text-gray-900 dark:border-gray-800 dark:text-white';
   $term = 'text-theme-xs text-gray-500 dark:text-gray-400';
@@ -28,14 +30,20 @@
         <span>{{ __('orphans.type.'.$family->type) }} — {{ __('orphans.source.'.$family->source) }} — <span dir="ltr">{{ $family->created_at->format('Y-m-d H:i') }}</span></span>
       </nav>
     </div>
-    <div class="flex items-center gap-2">
-      <a href="{{ route('dashboard.orphans.edit', $family) }}"
-        class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">{{ __('dashboard.edit') }}</a>
-      <form action="{{ route('dashboard.orphans.destroy', $family) }}" method="POST" onsubmit="return confirm('{{ __('dashboard.confirm_delete') }}')">
-        @csrf
-        @method('DELETE')
-        <button type="submit" class="inline-flex items-center rounded-lg border border-error-200 bg-error-50 px-4 py-2.5 text-theme-sm font-medium text-error-600 hover:bg-error-100 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-400">{{ __('dashboard.delete') }}</button>
-      </form>
+    <div class="flex flex-wrap items-center gap-2">
+      <a href="{{ route('dashboard.orphans.print', $family) }}" target="_blank" rel="noopener"
+        class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">{{ __('sponsors.report.print_case') }}</a>
+      <a href="{{ route('dashboard.orphans.finance', $family) }}"
+        class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">{{ __('sponsors.report.finance_case') }}</a>
+      @if ($canManageOrphans)
+        <a href="{{ route('dashboard.orphans.edit', $family) }}"
+          class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">{{ __('dashboard.edit') }}</a>
+        <form action="{{ route('dashboard.orphans.destroy', $family) }}" method="POST" onsubmit="return confirm('{{ __('dashboard.confirm_delete') }}')">
+          @csrf
+          @method('DELETE')
+          <button type="submit" class="inline-flex items-center rounded-lg border border-error-200 bg-error-50 px-4 py-2.5 text-theme-sm font-medium text-error-600 hover:bg-error-100 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-400">{{ __('dashboard.delete') }}</button>
+        </form>
+      @endif
     </div>
   </div>
 
@@ -64,85 +72,12 @@
   <div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
     <div class="min-w-0 space-y-6">
 
-      @if ($family->isWidowFamily())
-        <div class="{{ $card }}">
-          <h2 class="{{ $cardTitle }}">{{ __('orphans.section.mother') }}</h2>
-          <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            @foreach (['mother_full_name', 'mother_national_id', 'mother_birth_date', 'mother_passport_number', 'mother_residence_area', 'mother_neighborhood', 'mother_nearest_landmark', 'mother_birth_country', 'mother_birth_place', 'mother_nationality', 'mother_phone'] as $field)
-              <div>
-                <dt class="{{ $term }}">{{ __('orphans.field.'.$field) }}</dt>
-                <dd class="{{ $detail }}" @if (in_array($field, ['mother_national_id', 'mother_passport_number', 'mother_phone'], true)) dir="ltr" @endif>
-                  @switch($field)
-                    @case('mother_birth_date') {{ $date($family->mother_birth_date) }} @break
-                    @case('mother_residence_area') {{ $family->mother_residence_area ? __('orphans.area.'.$family->mother_residence_area) : '—' }} @break
-                    @default {{ $family->{$field} ?: '—' }}
-                  @endswitch
-                </dd>
-              </div>
-            @endforeach
-          </dl>
-        </div>
-      @else
-        <div class="{{ $card }}">
-          <h2 class="{{ $cardTitle }}">{{ __('orphans.section.contact') }}</h2>
-          <dl class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            @foreach (['contact_name', 'contact_relation', 'contact_phone'] as $field)
-              <div>
-                <dt class="{{ $term }}">{{ __('orphans.field.'.$field) }}</dt>
-                <dd class="{{ $detail }}" @if ($field === 'contact_phone') dir="ltr" @endif>{{ $family->{$field} ?: '—' }}</dd>
-              </div>
-            @endforeach
-          </dl>
-        </div>
-      @endif
-
       <div class="{{ $card }}">
-        <h2 class="{{ $cardTitle }}">{{ __('orphans.section.father') }}</h2>
-        <dl class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div>
-            <dt class="{{ $term }}">{{ __('orphans.field.father_full_name') }}</dt>
-            <dd class="{{ $detail }}">{{ $family->father_full_name }}</dd>
-          </div>
-          <div>
-            <dt class="{{ $term }}">{{ __('orphans.field.father_death_date') }}</dt>
-            <dd class="{{ $detail }}" dir="ltr">{{ $date($family->father_death_date) }}</dd>
-          </div>
-          <div>
-            <dt class="{{ $term }}">{{ __('orphans.field.father_death_cause') }}</dt>
-            <dd class="{{ $detail }}">{{ $family->father_death_cause }}</dd>
-          </div>
-        </dl>
-      </div>
-
-      <div class="{{ $card }}">
-        <h2 class="{{ $cardTitle }}">{{ __('orphans.section.orphans') }} ({{ $family->orphans->count() }})</h2>
-        <div class="overflow-x-auto">
-          <table class="w-full">
-            <thead>
-              <tr class="border-b border-gray-100 dark:border-gray-800">
-                @foreach (['orphan_full_name', 'orphan_birth_date', 'orphan_national_id', 'orphan_education_stage', 'orphan_health_status'] as $field)
-                  <th class="px-3 py-2 text-start text-theme-xs font-semibold text-gray-500 dark:text-gray-400">{{ __('orphans.field.'.$field) }}</th>
-                @endforeach
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-              @foreach ($family->orphans as $orphan)
-                <tr>
-                  <td class="px-3 py-3 text-theme-sm font-medium text-gray-800 dark:text-white/90">{{ $orphan->full_name }}</td>
-                  <td class="px-3 py-3 text-theme-sm text-gray-600 dark:text-gray-300"><span dir="ltr">{{ $date($orphan->birth_date) }}</span> ({{ __('sponsorship.age_years', ['age' => $orphan->age]) }})</td>
-                  <td class="px-3 py-3 text-theme-sm text-gray-600 dark:text-gray-300" dir="ltr">{{ $orphan->national_id }}</td>
-                  <td class="px-3 py-3 text-theme-sm text-gray-600 dark:text-gray-300">{{ __('orphans.education.'.$orphan->education_stage) }}</td>
-                  <td class="px-3 py-3 text-theme-sm text-gray-600 dark:text-gray-300">
-                    {{ __('orphans.health.'.$orphan->health_status) }}
-                    @if ($orphan->health_notes)
-                      <span class="block text-theme-xs text-gray-500">{{ $orphan->health_notes }}</span>
-                    @endif
-                  </td>
-                </tr>
-              @endforeach
-            </tbody>
-          </table>
-        </div>
+        <h2 class="{{ $cardTitle }}">{{ __('sponsors.report.form_heading') }}</h2>
+        @include('sponsor.partials.case-tables', [
+            'family' => $family,
+            'sponsorship' => $family->activeSponsorships->first() ?? $family->sponsorships->sortByDesc('started_at')->first(),
+        ])
       </div>
 
       @if ($family->activeSponsorships->isNotEmpty())
@@ -151,6 +86,18 @@
           <x-dashboard.sponsorships-table :sponsorships="$family->activeSponsorships" show-sponsor />
         </div>
       @endif
+
+      <div class="{{ $card }}">
+        <h2 class="{{ $cardTitle }}">{{ __('sponsors.report.finance_case') }}</h2>
+        @include('reports.partials.case-finance-body', [
+            'family' => $family,
+            'sponsorName' => $sponsorName ?? '—',
+            'approvedAmounts' => $approvedAmounts ?? collect(),
+            'monthRows' => $monthRows ?? collect(),
+            'totals' => $financeTotals ?? collect(),
+            'print' => false,
+        ])
+      </div>
 
       <div class="{{ $card }}">
         <h2 class="{{ $cardTitle }}">{{ __('orphans.section.documents') }}</h2>
@@ -170,6 +117,7 @@
     </div>
 
     <aside class="space-y-6">
+      @if ($canManageOrphans)
       <form action="{{ route('dashboard.orphans.review', $family) }}" method="POST" class="{{ $card }}">
         @csrf
         @method('PATCH')
@@ -189,8 +137,19 @@
             class="inline-flex flex-1 items-center justify-center rounded-lg border border-error-200 bg-error-50 px-4 py-2.5 text-theme-sm font-medium text-error-600 hover:bg-error-100 disabled:opacity-50 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-400">{{ __('orphans.reject') }}</button>
         </div>
       </form>
+      @elseif ($family->reviewed_at || $family->review_notes)
+        <div class="{{ $card }}">
+          <h2 class="{{ $cardTitle }}">{{ __('orphans.review_title') }}</h2>
+          @if ($family->reviewed_at)
+            <p class="mb-2 text-theme-xs text-gray-500 dark:text-gray-400">
+              {{ __('orphans.reviewed_by', ['name' => $family->reviewer?->name ?? '—']) }} — <span dir="ltr">{{ $family->reviewed_at->format('Y-m-d H:i') }}</span>
+            </p>
+          @endif
+          <p class="text-theme-sm text-gray-700 dark:text-gray-300">{{ $family->review_notes ?: '—' }}</p>
+        </div>
+      @endif
 
-      @if ($family->isApproved() && $sponsors !== null)
+      @if ($family->isApproved() && $sponsors !== null && $canManageFinance)
         <form action="{{ route('dashboard.orphans.sponsorship', $family) }}" method="POST" class="{{ $card }}">
           @csrf
           @method('PATCH')

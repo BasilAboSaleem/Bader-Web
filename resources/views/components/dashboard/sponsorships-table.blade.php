@@ -4,8 +4,8 @@
 @php
   use App\Support\SponsorshipAmounts;
 
-  $heading = 'px-3 py-2 text-start text-theme-xs font-semibold text-gray-500 dark:text-gray-400';
-  $cell = 'px-3 py-3 text-theme-sm text-gray-600 dark:text-gray-300';
+  $heading = 'px-3 py-2 text-center align-middle text-theme-xs font-semibold text-gray-500 dark:text-gray-400';
+  $cell = 'px-3 py-3 text-center align-middle text-theme-sm text-gray-600 dark:text-gray-300';
   $canOpenSponsors = auth()->user()?->canManageFinance() ?? false;
 @endphp
 
@@ -26,7 +26,7 @@
       @foreach ($sponsorships as $sponsorship)
         <tr>
           <td class="{{ $cell }} font-medium text-gray-800 dark:text-white/90">
-            {{ $sponsorship->beneficiaryName() }}
+            <span class="block">{{ $sponsorship->beneficiaryName() }}</span>
             <span class="block text-theme-xs font-normal text-gray-500">{{ __('sponsors.beneficiary.'.$sponsorship->beneficiary_type) }}</span>
           </td>
           @if ($showSponsor)

@@ -16,7 +16,9 @@ const initOrphanForm = (root) => {
     let nextIndex = list ? list.querySelectorAll('[data-orphan-item]').length : 0;
 
     const syncType = () => {
-        const selected = root.querySelector('[data-orphan-type]:checked')?.value;
+        // Radios use :checked; locked public-update forms use a hidden [data-orphan-type] input.
+        const selected = root.querySelector('[data-orphan-type]:checked')?.value
+            ?? root.querySelector('input[data-orphan-type][type="hidden"]')?.value;
         root.querySelectorAll('[data-show-for-type]').forEach((fieldset) => {
             const isActive = fieldset.dataset.showForType === selected;
             fieldset.hidden = !isActive;

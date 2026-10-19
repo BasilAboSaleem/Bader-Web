@@ -21,7 +21,7 @@ class SuperAdminAccessTest extends TestCase
             'email' => 'content-admin@example.com',
             'password' => 'a-secure-password-123',
             'password_confirmation' => 'a-secure-password-123',
-            'role' => User::ROLE_SUPER_ADMIN,
+            'role' => User::ROLE_ADMIN,
         ]);
 
         $response->assertRedirect(route('dashboard.users.index'));
@@ -101,6 +101,7 @@ class SuperAdminAccessTest extends TestCase
                 'email' => 'weak@example.com',
                 'password' => 'short',
                 'password_confirmation' => 'different',
+                'role' => User::ROLE_ADMIN,
             ])
             ->assertSessionHasErrors(['password']);
 

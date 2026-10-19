@@ -10,22 +10,24 @@
       <h1 class="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">{{ __('dashboard.module.orphans') }}</h1>
       <p class="mt-1 text-theme-sm text-gray-500 dark:text-gray-400">{{ __('dashboard.module.orphans_desc') }}</p>
     </div>
-    <div class="flex flex-wrap items-center gap-2">
-      <a href="{{ route('orphan-registration') }}" target="_blank" rel="noopener"
-        class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
-        {{ __('orphans.public_form_link') }}
-      </a>
-      <a href="{{ route('dashboard.orphans.import') }}"
-        class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
-        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L9 8m4-4v12"/></svg>
-        <span>{{ __('orphans.import.action') }}</span>
-      </a>
-      <a href="{{ route('dashboard.orphans.create') }}"
-        class="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-brand-600 transition">
-        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-        <span>{{ __('orphans.add_manually') }}</span>
-      </a>
-    </div>
+    @if (auth()->user()?->canManageOrphans())
+      <div class="flex flex-wrap items-center gap-2">
+        <a href="{{ route('orphan-registration') }}" target="_blank" rel="noopener"
+          class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
+          {{ __('orphans.public_form_link') }}
+        </a>
+        <a href="{{ route('dashboard.orphans.import') }}"
+          class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
+          <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L9 8m4-4v12"/></svg>
+          <span>{{ __('orphans.import.action') }}</span>
+        </a>
+        <a href="{{ route('dashboard.orphans.create') }}"
+          class="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-brand-600 transition">
+          <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          <span>{{ __('orphans.add_manually') }}</span>
+        </a>
+      </div>
+    @endif
   </div>
 
   @if (session('status'))
@@ -59,35 +61,37 @@
         <thead>
           <tr class="border-b border-gray-100 dark:border-gray-800">
             @foreach (['orphans.column.code', 'orphans.column.name', 'orphans.column.type', 'orphans.column.orphans_count', 'orphans.column.source', 'orphans.column.status', 'orphans.column.submitted_at'] as $heading)
-              <th class="px-5 py-4 text-start text-theme-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __($heading) }}</th>
+              <th class="px-5 py-4 text-center align-middle text-theme-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __($heading) }}</th>
             @endforeach
-            <th class="px-5 py-4 text-end text-theme-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('dashboard.actions') }}</th>
+            <th class="px-5 py-4 text-center align-middle text-theme-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('dashboard.actions') }}</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
           @forelse ($families as $family)
             <tr class="hover:bg-gray-50/50 dark:hover:bg-white/[0.02]">
-              <td class="px-5 py-4 font-mono text-theme-xs text-gray-600 dark:text-gray-300" dir="ltr">{{ $family->code }}</td>
-              <td class="px-5 py-4 text-theme-sm font-medium text-gray-800 dark:text-white/90">
+              <td class="px-5 py-4 text-center align-middle font-mono text-theme-xs text-gray-600 dark:text-gray-300" dir="ltr">{{ $family->code }}</td>
+              <td class="px-5 py-4 text-center align-middle text-theme-sm font-medium text-gray-800 dark:text-white/90">
                 <a href="{{ route('dashboard.orphans.show', $family) }}" class="hover:text-brand-500">{{ $family->display_name }}</a>
               </td>
-              <td class="px-5 py-4 text-theme-sm text-gray-500 dark:text-gray-400">{{ __('orphans.type.'.$family->type) }}</td>
-              <td class="px-5 py-4 text-theme-sm text-gray-700 dark:text-gray-300">{{ $family->orphans_count }}</td>
-              <td class="px-5 py-4 text-theme-xs text-gray-500 dark:text-gray-400">{{ __('orphans.source.'.$family->source) }}</td>
-              <td class="px-5 py-4">
+              <td class="px-5 py-4 text-center align-middle text-theme-sm text-gray-500 dark:text-gray-400">{{ __('orphans.type.'.$family->type) }}</td>
+              <td class="px-5 py-4 text-center align-middle text-theme-sm text-gray-700 dark:text-gray-300">{{ $family->orphans_count }}</td>
+              <td class="px-5 py-4 text-center align-middle text-theme-xs text-gray-500 dark:text-gray-400">{{ __('orphans.source.'.$family->source) }}</td>
+              <td class="px-5 py-4 text-center align-middle">
                 <x-dashboard.orphan-status :status="$family->currentStatus()" />
               </td>
-              <td class="px-5 py-4 text-theme-xs text-gray-500 dark:text-gray-400" dir="ltr">{{ $family->created_at->format('Y-m-d') }}</td>
-              <td class="px-5 py-4">
-                <div class="flex items-center justify-end gap-2">
+              <td class="px-5 py-4 text-center align-middle text-theme-xs text-gray-500 dark:text-gray-400" dir="ltr">{{ $family->created_at->format('Y-m-d') }}</td>
+              <td class="px-5 py-4 text-center align-middle">
+                <div class="flex items-center justify-center gap-2">
                   <a href="{{ route('dashboard.orphans.show', $family) }}"
                     class="inline-flex items-center gap-1.5 rounded-lg bg-brand-500 px-3 py-2 text-theme-xs font-medium text-white shadow-theme-xs hover:bg-brand-600">
-                    {{ $family->review_status === \App\Models\OrphanFamily::REVIEW_PENDING ? __('orphans.review_action') : __('orphans.view') }}
+                    {{ auth()->user()?->canManageOrphans() && $family->review_status === \App\Models\OrphanFamily::REVIEW_PENDING ? __('orphans.review_action') : __('orphans.view') }}
                   </a>
-                  <a href="{{ route('dashboard.orphans.edit', $family) }}"
-                    class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-theme-xs font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03]">
-                    {{ __('dashboard.edit') }}
-                  </a>
+                  @if (auth()->user()?->canManageOrphans())
+                    <a href="{{ route('dashboard.orphans.edit', $family) }}"
+                      class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-theme-xs font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03]">
+                      {{ __('dashboard.edit') }}
+                    </a>
+                  @endif
                 </div>
               </td>
             </tr>

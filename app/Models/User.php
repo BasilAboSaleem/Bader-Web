@@ -23,17 +23,32 @@ class User extends Authenticatable
 
     const ROLE_VIEWER = 'viewer';
 
+    /** Board member: read-only orphan case files and monthly finance reports. */
+    const ROLE_BOARD_MEMBER = 'board_member';
+
     /** An outside sponsor: signs in only to follow their own sponsored orphans and reports. */
     const ROLE_SPONSOR = 'sponsor';
 
     /** Roles that may create and edit live content. */
     const CONTENT_ROLES = [self::ROLE_SUPER_ADMIN, self::ROLE_ADMIN, self::ROLE_EDITOR];
 
+    /** Staff who manage the public site and operations (excludes board members). */
+    const DASHBOARD_MANAGE_ROLES = [self::ROLE_SUPER_ADMIN, self::ROLE_ADMIN, self::ROLE_EDITOR, self::ROLE_VIEWER];
+
     /** The organisation's own team, the only accounts allowed into the dashboard. */
-    const STAFF_ROLES = [self::ROLE_SUPER_ADMIN, self::ROLE_ADMIN, self::ROLE_EDITOR, self::ROLE_VIEWER];
+    const STAFF_ROLES = [self::ROLE_SUPER_ADMIN, self::ROLE_ADMIN, self::ROLE_EDITOR, self::ROLE_VIEWER, self::ROLE_BOARD_MEMBER];
+
+    /** Roles that may open orphan case files (full details, including read-only board access). */
+    const ORPHAN_VIEW_ROLES = [self::ROLE_SUPER_ADMIN, self::ROLE_ADMIN, self::ROLE_EDITOR, self::ROLE_BOARD_MEMBER];
 
     /** Roles that manage sponsors, sponsorship amounts and the money paid out to orphans. */
     const FINANCE_ROLES = [self::ROLE_SUPER_ADMIN, self::ROLE_ADMIN];
+
+    /** Roles that may open the monthly finance reports (including read-only board access). */
+    const FINANCE_REPORT_ROLES = [self::ROLE_SUPER_ADMIN, self::ROLE_ADMIN, self::ROLE_BOARD_MEMBER];
+
+    /** Accounts the super admin may create from the users screen. */
+    const MANAGED_ROLES = [self::ROLE_ADMIN, self::ROLE_BOARD_MEMBER];
 
     /**
      * The attributes that are mass assignable.
@@ -101,6 +116,11 @@ class User extends Authenticatable
         return $this->role === self::ROLE_VIEWER;
     }
 
+    public function isBoardMember(): bool
+    {
+        return $this->role === self::ROLE_BOARD_MEMBER;
+    }
+
     /** Admin and Editor can create / edit live content. */
     public function canManageContent(): bool
     {
@@ -126,6 +146,24 @@ class User extends Authenticatable
     public function canManageFinance(): bool
     {
         return in_array($this->role, self::FINANCE_ROLES, true);
+    }
+
+    /** Open orphan case files with full details (board members: view only). */
+    public function canViewOrphans(): bool
+    {
+        return in_array($this->role, self::ORPHAN_VIEW_ROLES, true);
+    }
+
+    /** Create, edit, review and delete orphan case files. */
+    public function canManageOrphans(): bool
+    {
+        return in_array($this->role, self::CONTENT_ROLES, true);
+    }
+
+    /** Open monthly finance reports and export them as PDF (board members: view only). */
+    public function canViewFinanceReports(): bool
+    {
+        return in_array($this->role, self::FINANCE_REPORT_ROLES, true);
     }
 
     /** The sponsor record behind a sponsor account. */

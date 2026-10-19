@@ -36,37 +36,37 @@
         <thead>
           <tr class="border-b border-gray-100 dark:border-gray-800">
             @foreach (['code', 'name', 'contact', 'active_sponsorships', 'account'] as $column)
-              <th class="px-5 py-4 text-start text-theme-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('sponsors.column.'.$column) }}</th>
+              <th class="px-5 py-4 text-center align-middle text-theme-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('sponsors.column.'.$column) }}</th>
             @endforeach
-            <th class="px-5 py-4 text-end text-theme-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('dashboard.actions') }}</th>
+            <th class="px-5 py-4 text-center align-middle text-theme-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('dashboard.actions') }}</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
           @forelse ($sponsors as $sponsor)
             <tr class="hover:bg-gray-50/50 dark:hover:bg-white/[0.02]">
-              <td class="px-5 py-4 font-mono text-theme-xs text-gray-600 dark:text-gray-300" dir="ltr">{{ $sponsor->code }}</td>
-              <td class="px-5 py-4 text-theme-sm font-medium text-gray-800 dark:text-white/90">
+              <td class="px-5 py-4 text-center align-middle font-mono text-theme-xs text-gray-600 dark:text-gray-300" dir="ltr">{{ $sponsor->code }}</td>
+              <td class="px-5 py-4 text-center align-middle text-theme-sm font-medium text-gray-800 dark:text-white/90">
                 <a href="{{ route('dashboard.sponsors.show', $sponsor) }}" class="hover:text-brand-500">{{ $sponsor->name }}</a>
                 @if ($sponsor->country)
                   <span class="block text-theme-xs font-normal text-gray-500 dark:text-gray-400">{{ $sponsor->country }}</span>
                 @endif
               </td>
-              <td class="px-5 py-4 text-theme-xs text-gray-600 dark:text-gray-300" dir="ltr">
+              <td class="px-5 py-4 text-center align-middle text-theme-xs text-gray-600 dark:text-gray-300" dir="ltr">
                 {{ $sponsor->email ?: '—' }}
                 @if ($sponsor->phone)
                   <span class="block">{{ $sponsor->phone }}</span>
                 @endif
               </td>
-              <td class="px-5 py-4 text-theme-sm text-gray-700 dark:text-gray-300">{{ $sponsor->active_sponsorships_count }}</td>
-              <td class="px-5 py-4">
+              <td class="px-5 py-4 text-center align-middle text-theme-sm text-gray-700 dark:text-gray-300">{{ $sponsor->active_sponsorships_count }}</td>
+              <td class="px-5 py-4 text-center align-middle">
                 @if ($sponsor->user_id)
                   <span class="inline-flex rounded-full bg-success-50 px-2.5 py-0.5 text-theme-xs font-medium text-success-700 dark:bg-success-500/15 dark:text-success-500">{{ __('sponsors.account_active') }}</span>
                 @else
                   <span class="inline-flex rounded-full bg-gray-100 px-2.5 py-0.5 text-theme-xs font-medium text-gray-600 dark:bg-white/5 dark:text-gray-400">{{ __('sponsors.account_none') }}</span>
                 @endif
               </td>
-              <td class="px-5 py-4">
-                <div class="flex items-center justify-end gap-2">
+              <td class="px-5 py-4 text-center align-middle">
+                <div class="flex items-center justify-center gap-2">
                   <a href="{{ route('dashboard.sponsors.show', $sponsor) }}"
                     class="inline-flex items-center rounded-lg bg-brand-500 px-3 py-2 text-theme-xs font-medium text-white shadow-theme-xs hover:bg-brand-600">{{ __('orphans.view') }}</a>
                   <a href="{{ route('dashboard.sponsors.edit', $sponsor) }}"

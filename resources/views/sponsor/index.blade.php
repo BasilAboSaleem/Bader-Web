@@ -47,7 +47,9 @@
             <article class="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
               <div class="flex items-start justify-between gap-3">
                 <div>
-                  <h3 class="text-theme-sm font-semibold text-gray-900 dark:text-white">{{ $sponsorship->beneficiaryName() }}</h3>
+                  <h3 class="text-theme-sm font-semibold text-gray-900 dark:text-white">
+                    <a href="{{ route('sponsor.show', $sponsorship) }}" class="hover:text-brand-500">{{ $sponsorship->beneficiaryName() }}</a>
+                  </h3>
                   <p class="text-theme-xs text-gray-500 dark:text-gray-400">{{ __('sponsors.beneficiary.'.$sponsorship->beneficiary_type) }}</p>
                 </div>
                 <span class="rounded-full bg-brand-50 px-3 py-1 text-theme-sm font-bold text-brand-600 dark:bg-brand-500/10 dark:text-brand-400" dir="ltr">
@@ -79,6 +81,7 @@
                   <dd class="{{ $detail }}" dir="ltr">{{ $sponsorship->started_at->format('Y-m-d') }}</dd>
                 </div>
               </dl>
+              <a href="{{ route('sponsor.show', $sponsorship) }}" class="mt-4 inline-flex text-theme-sm font-medium text-brand-500 hover:underline">{{ __('sponsors.portal.open_case') }}</a>
             </article>
           @endforeach
         </div>
@@ -104,6 +107,5 @@
     </section>
   @endif
 
-  <p class="text-theme-xs text-gray-500 dark:text-gray-400">{{ __('sponsors.portal.reports_soon') }}</p>
 </div>
 @endsection

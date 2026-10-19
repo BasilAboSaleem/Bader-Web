@@ -10,7 +10,7 @@
         'programs' => ['label' => __('nav.programs'), 'active' => request()->routeIs('programs', 'programs.*')],
         // Temporarily hidden; restore this entry and the drawer link below to bring the projects menu back.
         // 'projects' => ['label' => __('nav.projects'), 'active' => request()->routeIs('campaigns', 'campaigns.*', 'projects', 'projects.*')],
-        'sponsorship' => ['label' => __('nav.sponsorship'), 'active' => request()->routeIs('sponsorship', 'sponsorship.*', 'orphan-registration')],
+        'sponsorship' => ['label' => __('nav.sponsorship'), 'active' => request()->routeIs('sponsorship', 'sponsorship.*', 'orphan-registration', 'orphan-case-update*')],
     ];
 @endphp
 
@@ -182,6 +182,7 @@
                                             <div class="mt-5 flex flex-wrap gap-2">
                                                 <a href="{{ route('sponsorship') }}" class="btn-brand">{{ __('header.all_cases') }}</a>
                                                 <a href="{{ route('orphan-registration') }}" class="btn-outline">{{ __('nav.register_orphan') }}</a>
+                                                <a href="{{ route('orphan-case-update') }}" class="btn-ghost">{{ __('nav.update_orphan_case') }}</a>
                                             </div>
                                         </div>
                                         <ul class="grid gap-3 md:grid-cols-3">
@@ -278,6 +279,7 @@
             <a href="{{ route('campaigns') }}" class="drawer-link">{{ __('nav.campaigns') }}</a>
             <a href="{{ route('sponsorship') }}" class="drawer-link">{{ __('nav.sponsorship') }}</a>
             <a href="{{ route('orphan-registration') }}" class="drawer-link">{{ __('nav.register_orphan') }}</a>
+            <a href="{{ route('orphan-case-update') }}" class="drawer-link">{{ __('nav.update_orphan_case') }}</a>
             <a href="{{ route('news') }}" class="drawer-link">{{ __('nav.news') }}</a>
             @if (\App\Support\SiteSettings::giftEnabled())
                 <a href="{{ route('gift') }}" class="drawer-link">{{ __('nav.gift') }}</a>

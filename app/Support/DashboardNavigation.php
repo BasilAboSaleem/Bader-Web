@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\Donation;
 use App\Models\FormSubmission;
 use App\Models\OrphanFamily;
+use App\Models\SponsorRequest;
 use App\Models\User;
 
 class DashboardNavigation
@@ -32,6 +33,9 @@ class DashboardNavigation
             'regions' => 'dashboard.regions.index',
             'orphans' => 'dashboard.orphans.index',
             'sponsors' => 'dashboard.sponsors.index',
+            'sponsor_requests' => 'dashboard.sponsor-requests.index',
+            'disbursements' => 'dashboard.disbursements.index',
+            'finance_reports' => 'dashboard.reports.finance',
             'sponsorship_cases' => 'dashboard.sponsorship-cases.index',
             'stories' => 'dashboard.stories.index',
         ],
@@ -42,6 +46,19 @@ class DashboardNavigation
         'settings' => [
             'site_settings' => 'dashboard.settings.edit',
             'users' => 'dashboard.users.index',
+        ],
+    ];
+
+    /**
+     * Board members only ever see orphan case files and monthly finance reports.
+     *
+     * @var array{key: string, modules: list<array{key: string, route: string, pattern: string, badge: int}>}
+     */
+    private const BOARD_GROUP = [
+        'key' => 'projects',
+        'modules' => [
+            ['key' => 'orphans', 'route' => 'dashboard.orphans.index', 'pattern' => 'dashboard.orphans.*', 'badge' => 0],
+            ['key' => 'finance_reports', 'route' => 'dashboard.reports.finance', 'pattern' => 'dashboard.reports.*', 'badge' => 0],
         ],
     ];
 
@@ -68,6 +85,18 @@ class DashboardNavigation
             return $user?->isSponsor() ? [self::SPONSOR_GROUP] : [];
         }
 
+        if ($user->isBoardMember()) {
+            $badges = self::badges();
+            $group = self::BOARD_GROUP;
+            $group['modules'] = array_map(function (array $module) use ($badges): array {
+                $module['badge'] = $badges[$module['key']] ?? 0;
+
+                return $module;
+            }, $group['modules']);
+
+            return [$group];
+        }
+
         $badges = self::badges();
         $groups = [];
 
@@ -79,11 +108,15 @@ class DashboardNavigation
                     continue;
                 }
 
-                if ($module === 'orphans' && ! $user->canManageContent()) {
+                if ($module === 'orphans' && ! $user->canViewOrphans()) {
                     continue;
                 }
 
-                if ($module === 'sponsors' && ! $user->canManageFinance()) {
+                if (in_array($module, ['sponsors', 'sponsor_requests', 'disbursements'], true) && ! $user->canManageFinance()) {
+                    continue;
+                }
+
+                if ($module === 'finance_reports' && ! $user->canViewFinanceReports()) {
                     continue;
                 }
 
@@ -104,9 +137,9 @@ class DashboardNavigation
     }
 
     /**
-     * Items waiting for the team: unread messages, donations not yet confirmed and orphan registrations to review.
+     * Items waiting for the team: unread messages, donations not yet confirmed, orphan registrations and sponsor requests.
      *
-     * @return array{inbox: int, donations: int, orphans: int}
+     * @return array{inbox: int, donations: int, orphans: int, sponsor_requests: int}
      */
     public static function badges(): array
     {
@@ -114,6 +147,7 @@ class DashboardNavigation
             'inbox' => FormSubmission::where('status', 'unread')->count(),
             'donations' => Donation::where('status', 'pending')->count(),
             'orphans' => OrphanFamily::pending()->count(),
+            'sponsor_requests' => SponsorRequest::pending()->count(),
         ]);
     }
 }

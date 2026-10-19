@@ -1,12 +1,15 @@
 {{--
     Orphan sponsorship file fields, shared by the public registration page and the dashboard.
     Expects: $family (OrphanFamily), $documentsRequired (bool), $ui (CSS classes for this context).
+    Optional: $lockIdentity (bool), $showDocumentLinks (bool, default true).
 --}}
 @php
     use App\Models\Orphan;
     use App\Models\OrphanFamily;
     use App\Support\OrphanFamilyInput;
 
+    $lockIdentity = $lockIdentity ?? false;
+    $showDocumentLinks = $showDocumentLinks ?? true;
     $selectedType = old('type', $family->type ?? OrphanFamily::TYPE_ORPHAN);
     $orphanRows = array_values(old('orphans', $family->exists
         ? $family->orphans->map(fn (Orphan $orphan): array => [
@@ -26,17 +29,7 @@
 @endphp
 
 <div data-orphan-form data-too-large-message="{{ __('orphans.document_too_large') }}" class="space-y-6">
-    <section class="{{ $ui['section'] }}">
-        <h2 class="{{ $ui['sectionTitle'] }}">{{ __('orphans.section.type') }} {!! $star !!}</h2>
-        <div class="{{ $ui['grid'] }}">
-            @foreach (OrphanFamily::TYPES as $type)
-                <label class="{{ $ui['choice'] }}">
-                    <input type="radio" name="type" value="{{ $type }}" @checked($selectedType === $type) required data-orphan-type>
-                    <span>{{ __('orphans.type.'.$type) }}</span>
-                </label>
-            @endforeach
-        </div>
-    </section>
+    @include('partials.orphan-family-type-fields', ['selectedType' => $selectedType, 'lockIdentity' => $lockIdentity, 'ui' => $ui, 'star' => $star])
 
     <fieldset data-show-for-type="{{ OrphanFamily::TYPE_WIDOW_FAMILY }}" class="{{ $ui['section'] }}" @disabled($selectedType !== OrphanFamily::TYPE_WIDOW_FAMILY) @if ($selectedType !== OrphanFamily::TYPE_WIDOW_FAMILY) hidden @endif>
         <legend class="sr-only">{{ __('orphans.section.mother') }}</legend>
@@ -49,7 +42,10 @@
             </label>
             <label class="block">
                 <span class="{{ $ui['label'] }}">{{ __('orphans.field.mother_national_id') }} {!! $star !!}</span>
-                <input type="text" name="mother_national_id" value="{{ $value('mother_national_id') }}" required inputmode="numeric" pattern="\d{9}" maxlength="9" dir="ltr" class="{{ $ui['input'] }}">
+                <input type="text" name="mother_national_id" value="{{ $value('mother_national_id') }}" required inputmode="numeric" pattern="\d{9}" maxlength="9" dir="ltr" class="{{ $ui['input'] }}" @readonly($lockIdentity)>
+                @if ($lockIdentity)
+                    <span class="{{ $ui['hint'] }}">{{ __('orphan_case_update.national_id_locked') }}</span>
+                @endif
             </label>
             <label class="block">
                 <span class="{{ $ui['label'] }}">{{ __('orphans.field.mother_birth_date') }} {!! $star !!}</span>
@@ -158,12 +154,20 @@
         <p class="{{ $ui['sectionHint'] }}">{{ __('orphans.section.documents_hint', ['size' => '1']) }}</p>
         <div class="{{ $ui['grid'] }}">
             @foreach (OrphanFamily::DOCUMENTS as $document)
+                @php
+                    $documentOnFile = $family->exists && $family->hasDocument($document);
+                    $documentRequired = $documentsRequired || (! $documentOnFile && $lockIdentity);
+                @endphp
                 <label class="block">
-                    <span class="{{ $ui['label'] }}">{{ __('orphans.document.'.$document) }} @if ($documentsRequired) {!! $star !!} @endif</span>
-                    <input type="file" name="documents[{{ $document }}]" accept="image/jpeg,image/png,image/webp,application/pdf" data-max-bytes="{{ $maxBytes }}" @required($documentsRequired) class="{{ $ui['file'] }}">
+                    <span class="{{ $ui['label'] }}">{{ __('orphans.document.'.$document) }} @if ($documentRequired) {!! $star !!} @endif</span>
+                    <input type="file" name="documents[{{ $document }}]" accept="image/jpeg,image/png,image/webp,application/pdf" data-max-bytes="{{ $maxBytes }}" @required($documentRequired) class="{{ $ui['file'] }}">
                     <span class="{{ $ui['hint'] }}">{{ __('orphans.document.'.$document.'_hint') }}</span>
-                    @if ($family->exists && $family->hasDocument($document))
-                        <a href="{{ route('dashboard.orphans.document', [$family, $document]) }}" target="_blank" rel="noopener" class="{{ $ui['link'] }}">{{ __('orphans.view_current_document') }}</a>
+                    @if ($documentOnFile)
+                        @if ($showDocumentLinks)
+                            <a href="{{ route('dashboard.orphans.document', [$family, $document]) }}" target="_blank" rel="noopener" class="{{ $ui['link'] }}">{{ __('orphans.view_current_document') }}</a>
+                        @else
+                            <span class="{{ $ui['hint'] }}">{{ __('orphan_case_update.document_on_file') }}</span>
+                        @endif
                     @endif
                 </label>
             @endforeach

@@ -8,6 +8,7 @@
         ['route' => 'campaigns', 'key' => 'nav.campaigns'],
         ['route' => 'sponsorship', 'key' => 'nav.sponsorship'],
         ['route' => 'orphan-registration', 'key' => 'nav.register_orphan'],
+        ['route' => 'orphan-case-update', 'key' => 'nav.update_orphan_case'],
         SiteSettings::giftEnabled() ? ['route' => 'gift', 'key' => 'nav.gift'] : null,
         ['route' => 'zakat', 'key' => 'nav.zakat'],
     ]));

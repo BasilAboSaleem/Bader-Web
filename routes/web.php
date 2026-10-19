@@ -17,13 +17,17 @@ use App\Http\Controllers\Dashboard\RegionController;
 use App\Http\Controllers\Dashboard\SiteSettingController;
 use App\Http\Controllers\Dashboard\SiteTextController;
 use App\Http\Controllers\Dashboard\SponsorController;
+use App\Http\Controllers\Dashboard\SponsorRequestController;
 use App\Http\Controllers\Dashboard\SponsorshipCaseController;
+use App\Http\Controllers\Dashboard\SponsorshipDisbursementController;
+use App\Http\Controllers\Dashboard\SponsorshipReportController;
 use App\Http\Controllers\Dashboard\StoryController;
 use App\Http\Controllers\Dashboard\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DonationPaymentController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ImageVariantController;
+use App\Http\Controllers\OrphanCaseUpdateController;
 use App\Http\Controllers\OrphanRegistrationController;
 use App\Http\Controllers\PasswordSetupController;
 use App\Http\Controllers\PublicFormController;
@@ -66,6 +70,8 @@ Route::middleware('cache.public')->group(function () {
     Route::get('/facilities/{key}', [PublicPageController::class, 'facilityShow'])->name('facilities.show');
     Route::get('/sponsorship', [SponsorshipPageController::class, 'index'])->name('sponsorship');
     Route::get('/sponsorship/register', [OrphanRegistrationController::class, 'create'])->name('orphan-registration');
+    Route::get('/sponsorship/update', [OrphanCaseUpdateController::class, 'create'])->name('orphan-case-update');
+    Route::get('/sponsorship/update/case', [OrphanCaseUpdateController::class, 'edit'])->name('orphan-case-update.edit');
     Route::get('/sponsorship/{code}', [SponsorshipPageController::class, 'show'])->name('sponsorship.show');
     Route::get('/gift', [PublicPageController::class, 'gift'])->name('gift');
     Route::get('/zakat-calculator', [PublicPageController::class, 'zakat'])->name('zakat');
@@ -92,6 +98,18 @@ Route::middleware('throttle:10,1')->group(function () {
 Route::post('/sponsorship/register', [OrphanRegistrationController::class, 'store'])
     ->middleware('throttle:orphan-registration')
     ->name('orphan-registration.store');
+
+/*
+ * Case self-update POSTs sit outside the public GET cache group. Lookup opens a short session;
+ * throttles mirror registration so busy shared networks get a friendly message, not a bare 429.
+ */
+Route::post('/sponsorship/update/lookup', [OrphanCaseUpdateController::class, 'lookup'])
+    ->middleware('throttle:orphan-case-update')
+    ->name('orphan-case-update.lookup');
+Route::post('/sponsorship/update/case', [OrphanCaseUpdateController::class, 'update'])
+    ->middleware('throttle:orphan-case-update')
+    ->name('orphan-case-update.update');
+Route::post('/sponsorship/update/exit', [OrphanCaseUpdateController::class, 'exit'])->name('orphan-case-update.exit');
 
 // Online donations (the donate form carries a CSRF token, so it is never publicly cached)
 Route::get('/donate', [PublicPageController::class, 'donate'])->name('donate');
@@ -122,57 +140,89 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'role:'.User::ROLE_SPONSOR])->group(function () {
     Route::get('/my-sponsorships', [SponsorPortalController::class, 'index'])->name('sponsor.home');
+    Route::get('/my-sponsorships/{sponsorship}', [SponsorPortalController::class, 'show'])->name('sponsor.show');
+    Route::post('/my-sponsorships/{sponsorship}/requests', [SponsorPortalController::class, 'storeRequest'])->name('sponsor.requests.store');
+    Route::get('/my-sponsorships/{sponsorship}/print', [SponsorPortalController::class, 'print'])->name('sponsor.print');
+    Route::get('/my-sponsorships/{sponsorship}/finance', [SponsorPortalController::class, 'finance'])->name('sponsor.finance');
+    Route::get('/my-sponsorships/{sponsorship}/finance/print', [SponsorPortalController::class, 'financePrint'])->name('sponsor.finance.print');
 });
 
 Route::middleware(['auth', 'role:'.implode(',', User::STAFF_ROLES), WarmUploadedImages::class])->group(function () {
-    Route::get('/dashboard/settings', [SiteSettingController::class, 'edit'])->name('dashboard.settings.edit');
-    Route::put('/dashboard/settings', [SiteSettingController::class, 'update'])->name('dashboard.settings.update');
-    Route::get('/dashboard/homepage', [HomepageController::class, 'edit'])->name('dashboard.homepage.edit');
-    Route::put('/dashboard/homepage', [HomepageController::class, 'update'])->name('dashboard.homepage.update');
-    Route::get('/dashboard/pages', [InstitutionalPageController::class, 'edit'])->name('dashboard.pages.edit');
-    Route::put('/dashboard/pages', [InstitutionalPageController::class, 'update'])->name('dashboard.pages.update');
-    Route::get('/dashboard/site-texts', [SiteTextController::class, 'edit'])->name('dashboard.site-texts.edit');
-    Route::put('/dashboard/site-texts', [SiteTextController::class, 'update'])->name('dashboard.site-texts.update');
-    Route::resource('dashboard/faqs', FaqController::class)->names('dashboard.faqs')->except(['show']);
+    Route::middleware('role:'.implode(',', User::DASHBOARD_MANAGE_ROLES))->group(function () {
+        Route::get('/dashboard/settings', [SiteSettingController::class, 'edit'])->name('dashboard.settings.edit');
+        Route::put('/dashboard/settings', [SiteSettingController::class, 'update'])->name('dashboard.settings.update');
+        Route::get('/dashboard/homepage', [HomepageController::class, 'edit'])->name('dashboard.homepage.edit');
+        Route::put('/dashboard/homepage', [HomepageController::class, 'update'])->name('dashboard.homepage.update');
+        Route::get('/dashboard/pages', [InstitutionalPageController::class, 'edit'])->name('dashboard.pages.edit');
+        Route::put('/dashboard/pages', [InstitutionalPageController::class, 'update'])->name('dashboard.pages.update');
+        Route::get('/dashboard/site-texts', [SiteTextController::class, 'edit'])->name('dashboard.site-texts.edit');
+        Route::put('/dashboard/site-texts', [SiteTextController::class, 'update'])->name('dashboard.site-texts.update');
+        Route::resource('dashboard/faqs', FaqController::class)->names('dashboard.faqs')->except(['show']);
 
-    Route::resource('dashboard/programs', ProgramController::class)->names('dashboard.programs')->except(['show']);
-    Route::resource('dashboard/facilities', FacilityController::class)->names('dashboard.facilities')->except(['show']);
-    Route::resource('dashboard/regions', RegionController::class)->names('dashboard.regions')->except(['show']);
-    Route::resource('dashboard/campaigns', CampaignController::class)->names('dashboard.campaigns')->except(['show']);
-    Route::resource('dashboard/completed-projects', CompletedProjectController::class)
-        ->names('dashboard.completed-projects')
-        ->parameters(['completed-projects' => 'completedProject'])
-        ->except(['show']);
-    Route::resource('dashboard/sponsorship-cases', SponsorshipCaseController::class)->names('dashboard.sponsorship-cases')->except(['show']);
+        Route::resource('dashboard/programs', ProgramController::class)->names('dashboard.programs')->except(['show']);
+        Route::resource('dashboard/facilities', FacilityController::class)->names('dashboard.facilities')->except(['show']);
+        Route::resource('dashboard/regions', RegionController::class)->names('dashboard.regions')->except(['show']);
+        Route::resource('dashboard/campaigns', CampaignController::class)->names('dashboard.campaigns')->except(['show']);
+        Route::resource('dashboard/completed-projects', CompletedProjectController::class)
+            ->names('dashboard.completed-projects')
+            ->parameters(['completed-projects' => 'completedProject'])
+            ->except(['show']);
+        Route::resource('dashboard/sponsorship-cases', SponsorshipCaseController::class)->names('dashboard.sponsorship-cases')->except(['show']);
+        Route::resource('dashboard/stories', StoryController::class)->names('dashboard.stories')->except(['show']);
+        Route::resource('dashboard/media', MediaAssetController::class)->names('dashboard.media')->except(['show']);
+
+        Route::resource('dashboard/inbox', InboxController::class)->names('dashboard.inbox')->only(['index', 'show', 'update', 'destroy']);
+        Route::resource('dashboard/impact', ImpactMetricController::class)->names('dashboard.impact')->except(['show']);
+        Route::patch('dashboard/impact/{impact}/toggle', [ImpactMetricController::class, 'toggleApproval'])->name('dashboard.impact.toggle');
+        Route::resource('dashboard/donations', DonationController::class)->names('dashboard.donations')->except(['show']);
+        Route::patch('dashboard/donations/{donation}/verify', [DonationController::class, 'verify'])->name('dashboard.donations.verify');
+    });
+
     Route::middleware('role:'.implode(',', User::CONTENT_ROLES))->group(function () {
         Route::get('dashboard/orphans/import', [OrphanFamilyController::class, 'importForm'])->name('dashboard.orphans.import');
         Route::get('dashboard/orphans/import/template', [OrphanFamilyController::class, 'importTemplate'])->name('dashboard.orphans.import.template');
         Route::post('dashboard/orphans/import', [OrphanFamilyController::class, 'import'])->name('dashboard.orphans.import.store');
-        Route::resource('dashboard/orphans', OrphanFamilyController::class)
-            ->names('dashboard.orphans')
-            ->parameters(['orphans' => 'orphanFamily']);
+        Route::get('dashboard/orphans/create', [OrphanFamilyController::class, 'create'])->name('dashboard.orphans.create');
+        Route::post('dashboard/orphans', [OrphanFamilyController::class, 'store'])->name('dashboard.orphans.store');
+    });
+
+    Route::middleware('role:'.implode(',', User::ORPHAN_VIEW_ROLES))->group(function () {
+        Route::get('dashboard/orphans', [OrphanFamilyController::class, 'index'])->name('dashboard.orphans.index');
+        Route::get('dashboard/orphans/{orphanFamily}', [OrphanFamilyController::class, 'show'])->name('dashboard.orphans.show');
+        Route::get('dashboard/orphans/{orphanFamily}/print', [SponsorshipReportController::class, 'casePrint'])->name('dashboard.orphans.print');
+        Route::get('dashboard/orphans/{orphanFamily}/finance', [SponsorshipReportController::class, 'caseFinance'])->name('dashboard.orphans.finance');
+        Route::get('dashboard/orphans/{orphanFamily}/finance/print', [SponsorshipReportController::class, 'caseFinancePrint'])->name('dashboard.orphans.finance.print');
+        Route::get('dashboard/orphans/{orphanFamily}/documents/{document}', [OrphanFamilyController::class, 'document'])->name('dashboard.orphans.document');
+    });
+
+    Route::middleware('role:'.implode(',', User::CONTENT_ROLES))->group(function () {
+        Route::get('dashboard/orphans/{orphanFamily}/edit', [OrphanFamilyController::class, 'edit'])->name('dashboard.orphans.edit');
+        Route::put('dashboard/orphans/{orphanFamily}', [OrphanFamilyController::class, 'update'])->name('dashboard.orphans.update');
+        Route::delete('dashboard/orphans/{orphanFamily}', [OrphanFamilyController::class, 'destroy'])->name('dashboard.orphans.destroy');
         Route::patch('dashboard/orphans/{orphanFamily}/review', [OrphanFamilyController::class, 'review'])->name('dashboard.orphans.review');
         Route::patch('dashboard/orphans/{orphanFamily}/sponsorship', [OrphanFamilyController::class, 'updateSponsorship'])
             ->middleware('role:'.implode(',', User::FINANCE_ROLES))
             ->name('dashboard.orphans.sponsorship');
-        Route::get('dashboard/orphans/{orphanFamily}/documents/{document}', [OrphanFamilyController::class, 'document'])->name('dashboard.orphans.document');
     });
-    Route::resource('dashboard/stories', StoryController::class)->names('dashboard.stories')->except(['show']);
-    Route::resource('dashboard/media', MediaAssetController::class)->names('dashboard.media')->except(['show']);
-
-    Route::resource('dashboard/inbox', InboxController::class)->names('dashboard.inbox')->only(['index', 'show', 'update', 'destroy']);
-    Route::resource('dashboard/impact', ImpactMetricController::class)->names('dashboard.impact')->except(['show']);
-    Route::patch('dashboard/impact/{impact}/toggle', [ImpactMetricController::class, 'toggleApproval'])->name('dashboard.impact.toggle');
-    Route::resource('dashboard/donations', DonationController::class)->names('dashboard.donations')->except(['show']);
-    Route::patch('dashboard/donations/{donation}/verify', [DonationController::class, 'verify'])->name('dashboard.donations.verify');
 
     Route::resource('dashboard/users', UserController::class)
         ->names('dashboard.users')
         ->only(['index', 'create', 'store', 'destroy'])
         ->middleware('role:'.User::ROLE_SUPER_ADMIN);
 
+    Route::middleware('role:'.implode(',', User::FINANCE_REPORT_ROLES))->group(function () {
+        Route::get('dashboard/reports/finance', [SponsorshipReportController::class, 'period'])->name('dashboard.reports.finance');
+        Route::get('dashboard/reports/finance/print', [SponsorshipReportController::class, 'periodPrint'])->name('dashboard.reports.finance.print');
+    });
+
     Route::middleware('role:'.implode(',', User::FINANCE_ROLES))->group(function () {
         Route::resource('dashboard/sponsors', SponsorController::class)->names('dashboard.sponsors');
         Route::post('dashboard/sponsors/{sponsor}/invite', [SponsorController::class, 'invite'])->name('dashboard.sponsors.invite');
+        Route::get('dashboard/sponsor-requests', [SponsorRequestController::class, 'index'])->name('dashboard.sponsor-requests.index');
+        Route::patch('dashboard/sponsor-requests/{sponsorRequest}', [SponsorRequestController::class, 'update'])->name('dashboard.sponsor-requests.update');
+        Route::get('dashboard/disbursements', [SponsorshipDisbursementController::class, 'index'])->name('dashboard.disbursements.index');
+        Route::get('dashboard/disbursements/create', [SponsorshipDisbursementController::class, 'create'])->name('dashboard.disbursements.create');
+        Route::post('dashboard/disbursements', [SponsorshipDisbursementController::class, 'store'])->name('dashboard.disbursements.store');
+        Route::delete('dashboard/disbursements/{disbursement}', [SponsorshipDisbursementController::class, 'destroy'])->name('dashboard.disbursements.destroy');
     });
 });

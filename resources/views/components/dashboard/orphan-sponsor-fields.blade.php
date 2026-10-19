@@ -1,12 +1,14 @@
 {{--
-    Sponsorship status with the sponsor, amount, currency and start date, which only open (and become required)
-    while "sponsored" is chosen. $prefix is the input name prefix ('' for a widow's family, 'orphans[ID]' for one orphan).
-    A widow's family takes its amounts per person in the slot instead of a single amount.
+    Sponsorship status with the sponsor, amount, currency, start date, renewal type and planned end,
+    which only open (and become required) while "sponsored" is chosen. $prefix is the input name prefix
+    ('' for a widow's family, 'orphans[ID]' for one orphan). A widow's family takes its amounts per person
+    in the slot instead of a single amount.
 --}}
 @props(['label', 'status', 'sponsorship' => null, 'sponsors', 'prefix' => '', 'inputClass', 'withAmount' => true])
 
 @php
   use App\Models\OrphanFamily;
+  use App\Models\Sponsorship;
 
   $errorKey = $prefix === '' ? '' : str_replace(['[', ']'], ['.', ''], $prefix).'.';
   $name = fn (string $field): string => $prefix === '' ? $field : $prefix.'['.$field.']';
@@ -16,12 +18,16 @@
       'monthly_amount' => $sponsorship?->monthly_amount,
       'currency' => $sponsorship?->currency,
       'started_at' => $sponsorship?->started_at?->format('Y-m-d') ?? now()->startOfMonth()->format('Y-m-d'),
+      'renewal_type' => $sponsorship?->renewal_type ?? Sponsorship::RENEWAL_RECURRING,
+      'planned_ended_at' => $sponsorship?->planned_ended_at?->format('Y-m-d'),
   ];
   $value = fn (string $field) => old($errorKey.$field, $current[$field]);
   $isSponsored = $value('sponsorship_status') === OrphanFamily::SPONSORSHIP_SPONSORED;
   $labelClass = 'mb-1 block text-theme-sm font-medium text-gray-700 dark:text-gray-400';
   $star = '<span class="text-error-500">*</span>';
-  $fields = $withAmount ? ['sponsorship_status', 'sponsor_id', 'monthly_amount', 'currency', 'started_at'] : ['sponsorship_status', 'sponsor_id', 'currency', 'started_at'];
+  $fields = $withAmount
+      ? ['sponsorship_status', 'sponsor_id', 'monthly_amount', 'currency', 'started_at', 'renewal_type', 'planned_ended_at']
+      : ['sponsorship_status', 'sponsor_id', 'currency', 'started_at', 'renewal_type', 'planned_ended_at'];
 @endphp
 
 <div data-sponsor-scope {{ $attributes->class('space-y-3') }}>
@@ -59,9 +65,22 @@
           @endforeach
         </select>
       </label>
-      <label class="block {{ $withAmount ? 'col-span-2' : '' }}">
+      <label class="block">
         <span class="{{ $labelClass }}">{{ __('sponsors.field.started_at') }} {!! $star !!}</span>
         <input type="date" name="{{ $name('started_at') }}" value="{{ $value('started_at') }}" required class="{{ $inputClass }}">
+      </label>
+      <label class="block">
+        <span class="{{ $labelClass }}">{{ __('sponsors.field.renewal_type') }} {!! $star !!}</span>
+        <select name="{{ $name('renewal_type') }}" required data-renewal-type class="{{ $inputClass }}">
+          @foreach (Sponsorship::RENEWAL_TYPES as $type)
+            <option value="{{ $type }}" @selected($value('renewal_type') === $type)>{{ __('sponsors.renewal.'.$type) }}</option>
+          @endforeach
+        </select>
+      </label>
+      <label class="block col-span-2" data-planned-end>
+        <span class="{{ $labelClass }}">{{ __('sponsors.field.planned_ended_at') }}</span>
+        <input type="date" name="{{ $name('planned_ended_at') }}" value="{{ $value('planned_ended_at') }}" class="{{ $inputClass }}">
+        <span class="mt-1 block text-theme-xs text-gray-500 dark:text-gray-400">{{ __('sponsors.hint.planned_ended_at') }}</span>
       </label>
     </div>
     {{ $slot }}

@@ -28,7 +28,17 @@ class SponsorshipFactory extends Factory
             'monthly_amount' => 50,
             'currency' => 'USD',
             'started_at' => now()->startOfMonth()->toDateString(),
+            'renewal_type' => Sponsorship::RENEWAL_RECURRING,
+            'planned_ended_at' => null,
         ];
+    }
+
+    public function oneTime(?string $endsAt = null): static
+    {
+        return $this->state(fn (): array => [
+            'renewal_type' => Sponsorship::RENEWAL_ONE_TIME,
+            'planned_ended_at' => $endsAt ?? now()->addMonths(6)->toDateString(),
+        ]);
     }
 
     /**

@@ -45,5 +45,11 @@ class AppServiceProvider extends ServiceProvider
             ->response(fn (): RedirectResponse => redirect()->route('orphan-registration')
                 ->withInput()
                 ->withErrors(['throttle' => __('orphan_registration.too_many')])));
+
+        RateLimiter::for('orphan-case-update', fn (Request $request): Limit => Limit::perMinute(30)
+            ->by($request->ip())
+            ->response(fn (): RedirectResponse => redirect()->route('orphan-case-update')
+                ->withInput()
+                ->withErrors(['throttle' => __('orphan_case_update.too_many')])));
     }
 }
