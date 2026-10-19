@@ -21,8 +21,9 @@ return new class extends Migration
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
 
-            $table->unique(['sponsorship_id', 'period_year', 'period_month']);
-            $table->index(['period_year', 'period_month']);
+            // MySQL identifiers max out at 64 chars; the auto-generated unique name is longer.
+            $table->unique(['sponsorship_id', 'period_year', 'period_month'], 'disbursements_period_unique');
+            $table->index(['period_year', 'period_month'], 'disbursements_period_index');
         });
     }
 
