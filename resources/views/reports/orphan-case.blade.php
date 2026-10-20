@@ -110,7 +110,16 @@
       @foreach ($family->orphans as $index => $orphan)
         <tr>
           <td>{{ $index + 1 }}</td>
-          <td>{{ $orphan->full_name }}</td>
+          <td>
+            <span style="display:inline-flex;align-items:center;gap:8px;vertical-align:middle">
+              @if ($mode === 'admin' && $orphan->photo)
+                <a href="{{ route('dashboard.orphans.photo', [$family, $orphan]) }}" target="_blank" rel="noopener">
+                  <img src="{{ route('dashboard.orphans.photo', [$family, $orphan]) }}" alt="{{ $orphan->full_name }}" width="40" height="40" style="display:block;width:40px;height:40px;object-fit:cover;border-radius:9999px">
+                </a>
+              @endif
+              <span>{{ $orphan->full_name }}</span>
+            </span>
+          </td>
           <td dir="ltr">{{ $date($orphan->birth_date) }}</td>
           <td dir="ltr">{{ $orphan->national_id }}</td>
           <td>{{ __('orphans.education.'.$orphan->education_stage) }}</td>

@@ -109,6 +109,8 @@ Route::post('/sponsorship/update/lookup', [OrphanCaseUpdateController::class, 'l
 Route::post('/sponsorship/update/case', [OrphanCaseUpdateController::class, 'update'])
     ->middleware('throttle:orphan-case-update')
     ->name('orphan-case-update.update');
+Route::get('/sponsorship/update/case/orphans/{orphan}/photo', [OrphanCaseUpdateController::class, 'photo'])
+    ->name('orphan-case-update.photo');
 Route::post('/sponsorship/update/exit', [OrphanCaseUpdateController::class, 'exit'])->name('orphan-case-update.exit');
 
 // Online donations (the donate form carries a CSRF token, so it is never publicly cached)
@@ -193,6 +195,7 @@ Route::middleware(['auth', 'role:'.implode(',', User::STAFF_ROLES), WarmUploaded
         Route::get('dashboard/orphans/{orphanFamily}/finance', [SponsorshipReportController::class, 'caseFinance'])->name('dashboard.orphans.finance');
         Route::get('dashboard/orphans/{orphanFamily}/finance/print', [SponsorshipReportController::class, 'caseFinancePrint'])->name('dashboard.orphans.finance.print');
         Route::get('dashboard/orphans/{orphanFamily}/documents/{document}', [OrphanFamilyController::class, 'document'])->name('dashboard.orphans.document');
+        Route::get('dashboard/orphans/{orphanFamily}/orphans/{orphan}/photo', [OrphanFamilyController::class, 'photo'])->name('dashboard.orphans.photo');
     });
 
     Route::middleware('role:'.implode(',', User::CONTENT_ROLES))->group(function () {

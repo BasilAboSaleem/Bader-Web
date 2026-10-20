@@ -66,7 +66,7 @@
                 </div>
                 @include('partials.orphan-family-fields', [
                     'family' => $family,
-                    'documentsRequired' => false,
+                    'documentsRequired' => true,
                     'lockIdentity' => true,
                     'showDocumentLinks' => false,
                     'ui' => $ui,

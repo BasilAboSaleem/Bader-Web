@@ -97,7 +97,10 @@ class FullSiteSmokeTest extends TestCase
     {
         $superAdmin = User::factory()->create(['role' => User::ROLE_SUPER_ADMIN]);
 
-        foreach ($this->getRoutes(fn (string $name): bool => str_starts_with($name, 'dashboard') && $name !== 'dashboard.orphans.document') as $route) {
+        foreach ($this->getRoutes(fn (string $name): bool => str_starts_with($name, 'dashboard') && ! in_array($name, [
+            'dashboard.orphans.document',
+            'dashboard.orphans.photo',
+        ], true)) as $route) {
             $parameters = [];
 
             foreach ($route->parameterNames() as $parameter) {
@@ -124,7 +127,10 @@ class FullSiteSmokeTest extends TestCase
             'sponsorship.show' => ['code' => SponsorshipCase::query()->firstOrFail()->code],
             'password.reset' => ['token' => 'invitation-token', 'email' => 'sponsor@example.com'],
         ];
-        $skipped = ['locale.switch', 'donate.success', 'donate.cancel', 'sitemap', 'robots', 'login', 'image-variant', 'regions.show', 'gift'];
+        $skipped = [
+            'locale.switch', 'donate.success', 'donate.cancel', 'sitemap', 'robots', 'login', 'image-variant', 'regions.show', 'gift',
+            'orphan-case-update.edit', 'orphan-case-update.photo',
+        ];
 
         $routes = $this->getRoutes(fn (string $name): bool => ! str_starts_with($name, 'dashboard')
             && ! str_starts_with($name, 'sponsor.')

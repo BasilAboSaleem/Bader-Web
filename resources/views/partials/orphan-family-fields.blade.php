@@ -11,6 +11,7 @@
     $lockIdentity = $lockIdentity ?? false;
     $showDocumentLinks = $showDocumentLinks ?? true;
     $selectedType = old('type', $family->type ?? OrphanFamily::TYPE_ORPHAN);
+    $photosById = $family->exists ? $family->orphans->pluck('photo', 'id') : collect();
     $orphanRows = array_values(old('orphans', $family->exists
         ? $family->orphans->map(fn (Orphan $orphan): array => [
             'id' => $orphan->id,
@@ -20,10 +21,23 @@
             'education_stage' => $orphan->education_stage,
             'health_status' => $orphan->health_status,
             'health_notes' => $orphan->health_notes,
+            'photo' => $orphan->photo,
         ])->all()
         : []));
     $orphanRows = $orphanRows !== [] ? $orphanRows : [[]];
+    $orphanRows = array_map(function (array $row) use ($photosById, $family, $showDocumentLinks): array {
+        $id = isset($row['id']) ? (int) $row['id'] : null;
+        $row['photo'] = $row['photo'] ?? ($id ? $photosById->get($id) : null);
+        $row['photo_url'] = $id && filled($row['photo']) && $family->exists
+            ? ($showDocumentLinks
+                ? route('dashboard.orphans.photo', [$family, $id])
+                : route('orphan-case-update.photo', $id))
+            : null;
+
+        return $row;
+    }, $orphanRows);
     $maxBytes = OrphanFamilyInput::DOCUMENT_MAX_KB * 1024;
+    $photoMaxBytes = OrphanFamilyInput::PHOTO_MAX_KB * 1024;
     $value = fn (string $field) => old($field, $family->{$field} instanceof \Carbon\CarbonInterface ? $family->{$field}->format('Y-m-d') : $family->{$field});
     $star = '<span class="text-red-600">*</span>';
 @endphp

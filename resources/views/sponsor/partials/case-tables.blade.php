@@ -104,7 +104,16 @@
           @foreach ($family->orphans as $index => $orphan)
             <tr>
               <td class="{{ $td }}">{{ $index + 1 }}</td>
-              <td class="{{ $td }}">{{ $orphan->full_name }}</td>
+              <td class="{{ $td }}">
+                <span class="inline-flex max-w-full items-center justify-center gap-2.5 align-middle">
+                  @if (($showOrphanPhotos ?? false) && $orphan->photo)
+                    <a href="{{ route('dashboard.orphans.photo', [$family, $orphan]) }}" data-lightbox="orphan-portraits" data-close-label="{{ __('common.close') }}" class="shrink-0 cursor-zoom-in">
+                      <img src="{{ route('dashboard.orphans.photo', [$family, $orphan]) }}" alt="{{ $orphan->full_name }}" class="h-10 w-10 rounded-full object-cover ring-1 ring-gray-200 dark:ring-gray-700">
+                    </a>
+                  @endif
+                  <span class="min-w-0 text-start leading-5">{{ $orphan->full_name }}</span>
+                </span>
+              </td>
               <td class="{{ $td }}" dir="ltr">{{ $date($orphan->birth_date) }}</td>
               <td class="{{ $td }}" dir="ltr">{{ $orphan->national_id }}</td>
               <td class="{{ $td }}">{{ __('orphans.education.'.$orphan->education_stage) }}</td>

@@ -26,6 +26,7 @@ class Orphan extends Model
         'education_stage',
         'health_status',
         'health_notes',
+        'photo',
         'sponsorship_status',
     ];
 

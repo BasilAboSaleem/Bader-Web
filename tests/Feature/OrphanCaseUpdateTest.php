@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Http\Controllers\OrphanCaseUpdateController;
 use App\Models\Orphan;
 use App\Models\OrphanFamily;
+use App\Support\OrphanFamilyInput;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -91,7 +92,37 @@ class OrphanCaseUpdateTest extends TestCase
 
         $this->get(route('orphan-case-update.edit'))
             ->assertOk()
-            ->assertSee($family->father_full_name);
+            ->assertSee($family->father_full_name)
+            ->assertSee('name="documents[father_death_certificate]"', false)
+            ->assertSee('name="documents[martyr_certificate]"', false)
+            ->assertSee('name="documents[mother_id]"', false)
+            ->assertSee('name="documents[mother_id]" accept="image/jpeg,image/png,image/webp,application/pdf" data-max-bytes="'.(OrphanFamilyInput::DOCUMENT_MAX_KB * 1024).'" required', false)
+            ->assertSee(__('orphan_case_update.document_on_file'));
+    }
+
+    public function test_update_is_refused_unless_all_three_certificates_are_uploaded_again(): void
+    {
+        $family = OrphanFamily::factory()->widowFamily()->create([
+            'mother_national_id' => '401234567',
+            'documents' => [
+                'father_death_certificate' => 'orphan-documents/1/death.jpg',
+                'martyr_certificate' => 'orphan-documents/1/martyr.jpg',
+                'mother_id' => 'orphan-documents/1/mother.jpg',
+            ],
+        ]);
+        $orphan = Orphan::factory()->for($family, 'family')->create();
+
+        $this->withSession([
+            OrphanCaseUpdateController::SESSION_FAMILY_ID => $family->id,
+            OrphanCaseUpdateController::SESSION_VERIFIED_AT => now()->getTimestamp(),
+        ])->post(route('orphan-case-update.update'), $this->updateInput($family, $orphan))
+            ->assertSessionHasErrors([
+                'documents.father_death_certificate',
+                'documents.martyr_certificate',
+                'documents.mother_id',
+            ]);
+
+        $this->assertSame($family->documents, $family->fresh()->documents);
     }
 
     public function test_unknown_national_id_stays_on_the_lookup_page(): void
@@ -145,9 +176,52 @@ class OrphanCaseUpdateTest extends TestCase
             OrphanCaseUpdateController::SESSION_VERIFIED_AT => now()->getTimestamp(),
         ])->post(route('orphan-case-update.update'), $this->updateInput($family, $orphan, [
             'mother_national_id' => '409999999',
-        ]));
+            'documents' => $this->certificateUploads(),
+        ]))->assertRedirect(route('orphan-case-update'));
 
         $this->assertSame('401234567', $family->fresh()->mother_national_id);
+    }
+
+    public function test_family_can_attach_an_optional_portrait_and_strangers_cannot_open_it(): void
+    {
+        $family = OrphanFamily::factory()->widowFamily()->create([
+            'mother_national_id' => '401234567',
+            'review_status' => OrphanFamily::REVIEW_APPROVED,
+            'documents' => [
+                'father_death_certificate' => 'orphan-documents/test/death.jpg',
+                'martyr_certificate' => 'orphan-documents/test/martyr.pdf',
+                'mother_id' => 'orphan-documents/test/mother-id.jpg',
+            ],
+        ]);
+        $orphan = Orphan::factory()->for($family, 'family')->create(['national_id' => '412345678']);
+
+        $this->post(route('orphan-case-update.lookup'), ['national_id' => '401234567']);
+
+        $this->get(route('orphan-case-update.edit'))
+            ->assertOk()
+            ->assertSee('name="orphans[0][photo]"', false)
+            ->assertSee(__('orphans.field.orphan_photo_empty'))
+            ->assertSee(__('orphans.field.orphan_photo_hint'));
+
+        $input = $this->updateInput($family, $orphan, ['documents' => $this->certificateUploads()]);
+        $input['orphans'][0]['photo'] = UploadedFile::fake()->image('child.jpg', 1800, 1200);
+
+        $this->post(route('orphan-case-update.update'), $input)
+            ->assertRedirect(route('orphan-case-update'))
+            ->assertSessionHas('orphan_case_updated', true);
+
+        $orphan->refresh();
+        [$width, $height] = getimagesize(Storage::disk('local')->path($orphan->photo));
+        $this->assertLessThanOrEqual(480, max($width, $height));
+        Storage::disk('local')->assertExists($orphan->photo);
+
+        $this->get(route('orphan-case-update.photo', $orphan))->assertNotFound();
+
+        $this->post(route('orphan-case-update.lookup'), ['national_id' => '401234567']);
+
+        $this->get(route('orphan-case-update.photo', $orphan))->assertOk();
+        $this->get(route('orphan-case-update.edit'))
+            ->assertSee(route('orphan-case-update.photo', $orphan), false);
     }
 
     public function test_bots_that_fill_the_hidden_field_on_lookup_see_not_found(): void
@@ -196,6 +270,18 @@ class OrphanCaseUpdateTest extends TestCase
                 'health_notes' => $orphan->health_notes,
             ]],
             ...$overrides,
+        ];
+    }
+
+    /**
+     * @return array<string, UploadedFile>
+     */
+    private function certificateUploads(): array
+    {
+        return [
+            'father_death_certificate' => UploadedFile::fake()->image('death.png', 800, 600),
+            'martyr_certificate' => UploadedFile::fake()->createWithContent('martyr.pdf', "%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF"),
+            'mother_id' => UploadedFile::fake()->image('mother-id.jpg', 800, 600),
         ];
     }
 }

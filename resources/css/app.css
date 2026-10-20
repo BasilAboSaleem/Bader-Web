@@ -1512,7 +1512,7 @@
     color: var(--color-ink-800);
   }
 
-  .bader-public .lightbox {
+  .lightbox {
     max-width: min(92vw, 72rem);
     max-height: 92vh;
     margin: auto;
@@ -1522,16 +1522,16 @@
     overflow: visible;
   }
 
-  .bader-public .lightbox::backdrop {
+  .lightbox::backdrop {
     background-color: rgb(6 30 31 / 0.88);
     backdrop-filter: blur(6px);
   }
 
-  .bader-public .lightbox[open] {
+  .lightbox[open] {
     animation: fade-up 0.3s var(--ease-bader) both;
   }
 
-  .bader-public .lightbox-image {
+  .lightbox-image {
     display: block;
     max-width: 100%;
     max-height: 88vh;
@@ -1541,21 +1541,21 @@
     transition: filter 0.25s ease;
   }
 
-  .bader-public .lightbox-image:not([src]) {
+  .lightbox-image:not([src]) {
     width: min(92vw, 40rem);
     aspect-ratio: 4 / 3;
     background-color: rgb(255 255 255 / 0.06);
   }
 
-  .bader-public .lightbox.is-loading .lightbox-image {
+  .lightbox.is-loading .lightbox-image {
     filter: blur(3px) brightness(0.8);
   }
 
-  .bader-public .lightbox.is-loading .lightbox-image[src] {
+  .lightbox.is-loading .lightbox-image[src] {
     width: min(92vw, 72rem, calc(88vh * var(--lightbox-ratio, 1.5)));
   }
 
-  .bader-public .lightbox-spinner {
+  .lightbox-spinner {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -1570,7 +1570,7 @@
     animation: lightbox-spin 0.8s linear infinite;
   }
 
-  .bader-public .lightbox.is-loading .lightbox-spinner {
+  .lightbox.is-loading .lightbox-spinner {
     display: block;
   }
 
@@ -1578,7 +1578,7 @@
     to { transform: rotate(360deg); }
   }
 
-  .bader-public .lightbox-close {
+  .lightbox-close {
     position: absolute;
     top: -1rem;
     inset-inline-end: -1rem;
@@ -1594,16 +1594,16 @@
     box-shadow: var(--shadow-card-md);
   }
 
-  .bader-public .lightbox-close svg {
+  .lightbox-close svg {
     height: 1.25rem;
     width: 1.25rem;
   }
 
-  .bader-public .lightbox-close:hover {
+  .lightbox-close:hover {
     background-color: var(--color-gold-500);
   }
 
-  .bader-public .lightbox-nav {
+  .lightbox-nav {
     position: absolute;
     top: 50%;
     z-index: 1;
@@ -1619,24 +1619,24 @@
     transform: translateY(-50%);
   }
 
-  .bader-public .lightbox-nav svg {
+  .lightbox-nav svg {
     height: 1.5rem;
     width: 1.5rem;
   }
 
-  .bader-public .lightbox-nav:hover {
+  .lightbox-nav:hover {
     background-color: var(--color-gold-500);
   }
 
-  .bader-public .lightbox-prev {
+  .lightbox-prev {
     inset-inline-start: 0.75rem;
   }
 
-  .bader-public .lightbox-next {
+  .lightbox-next {
     inset-inline-end: 0.75rem;
   }
 
-  .bader-public .lightbox-counter {
+  .lightbox-counter {
     position: absolute;
     bottom: 0.75rem;
     left: 50%;
@@ -1650,7 +1650,7 @@
     transform: translateX(-50%);
   }
 
-  .bader-public :is(.lightbox-nav, .lightbox-counter)[hidden] {
+  :is(.lightbox-nav, .lightbox-counter)[hidden] {
     display: none;
   }
 

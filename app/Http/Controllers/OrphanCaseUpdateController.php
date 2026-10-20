@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Orphan;
 use App\Models\OrphanFamily;
 use App\Support\OrphanFamilyInput;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
 /**
@@ -134,6 +137,22 @@ class OrphanCaseUpdateController extends Controller
         }
 
         return $this->finishUpdate($request);
+    }
+
+    public function photo(Request $request, Orphan $orphan): StreamedResponse
+    {
+        $family = $this->authorizedFamily($request);
+
+        abort_unless($family && $orphan->orphan_family_id === $family->id && filled($orphan->photo), 404);
+
+        $disk = Storage::disk(OrphanFamilyInput::DOCUMENT_DISK);
+
+        abort_unless($disk->exists($orphan->photo), 404);
+
+        return $disk->response($orphan->photo, $family->code.'-'.$orphan->id.'.jpg', [
+            'Content-Type' => 'image/jpeg',
+            'Cache-Control' => 'private, max-age=300',
+        ]);
     }
 
     public function exit(Request $request): RedirectResponse

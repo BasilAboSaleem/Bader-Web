@@ -14,6 +14,20 @@
     @if (! empty($row['id']))
         <input type="hidden" name="orphans[{{ $index }}][id]" value="{{ $row['id'] }}">
     @endif
+    <div class="mt-4 flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
+        @if (! empty($row['photo_url']))
+            <a href="{{ $row['photo_url'] }}" data-lightbox="orphan-portraits" data-close-label="{{ __('common.close') }}" class="shrink-0 cursor-zoom-in">
+                <img src="{{ $row['photo_url'] }}" alt="{{ $field('full_name') }}" width="72" height="72" class="h-16 w-16 rounded-full object-cover">
+            </a>
+        @else
+            <span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gray-100 text-center text-xs leading-4 text-gray-500 dark:bg-gray-800 dark:text-gray-400">{{ __('orphans.field.orphan_photo_empty') }}</span>
+        @endif
+        <label class="block min-w-0 flex-1">
+            <span class="{{ $ui['label'] }}">{{ __('orphans.field.orphan_photo') }}</span>
+            <input type="file" name="orphans[{{ $index }}][photo]" accept="image/jpeg,image/png,image/webp" data-max-bytes="{{ $photoMaxBytes }}" data-too-large-message="{{ __('orphans.photo_too_large') }}" class="{{ $ui['file'] }}">
+            <span class="{{ $ui['hint'] }}">{{ __('orphans.field.orphan_photo_hint') }}</span>
+        </label>
+    </div>
     <div class="{{ $ui['grid'] }}">
         <label class="block">
             <span class="{{ $ui['label'] }}">{{ __('orphans.field.orphan_full_name') }} {!! $star !!}</span>

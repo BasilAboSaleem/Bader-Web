@@ -78,7 +78,7 @@ const initOrphanForm = (root) => {
         }
 
         event.preventDefault();
-        tooLarge.setCustomValidity(root.dataset.tooLargeMessage || '');
+        tooLarge.setCustomValidity(tooLarge.dataset.tooLargeMessage || root.dataset.tooLargeMessage || '');
         tooLarge.reportValidity();
         tooLarge.addEventListener('change', () => tooLarge.setCustomValidity(''), { once: true });
     });

@@ -7,6 +7,7 @@ use App\Models\OrphanFamily;
 use App\Models\Sponsor;
 use App\Models\Sponsorship;
 use App\Models\User;
+use App\Support\OrphanFamilyInput;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -90,6 +91,95 @@ class DashboardOrphansTest extends TestCase
             ->assertStreamedContent('image-bytes');
 
         $this->actingAs($admin)->get(route('dashboard.orphans.document', [$family, 'passport']))->assertNotFound();
+    }
+
+    public function test_optional_portrait_is_shrunk_kept_on_later_edits_and_stays_private(): void
+    {
+        Storage::fake('local');
+        $admin = User::factory()->create();
+
+        $this->actingAs($admin)->post(route('dashboard.orphans.store'), [
+            'type' => OrphanFamily::TYPE_ORPHAN,
+            'contact_name' => 'عبد الله سالم أبو عيد',
+            'contact_relation' => 'العم',
+            'contact_phone' => '0599123456',
+            'father_full_name' => 'محمد سالم خليل أبو عيد',
+            'father_death_date' => '2024-02-10',
+            'father_death_cause' => 'استشهد في قصف',
+            'orphans' => [[
+                'full_name' => 'أحمد محمد سالم أبو عيد',
+                'birth_date' => '2015-06-01',
+                'national_id' => '412345678',
+                'education_stage' => 'primary',
+                'health_status' => 'healthy',
+                'photo' => UploadedFile::fake()->image('ahmad.jpg', 2000, 1500),
+            ]],
+        ])->assertSessionHasNoErrors()->assertRedirect();
+
+        $family = OrphanFamily::sole();
+        $orphan = $family->orphans()->first();
+        $stored = $orphan->photo;
+        [$width, $height] = getimagesize(Storage::disk('local')->path($stored));
+
+        $this->assertStringEndsWith('.jpg', $stored);
+        $this->assertLessThanOrEqual(OrphanFamilyInput::PHOTO_MAX_EDGE, max($width, $height));
+        $this->assertLessThan(80 * 1024, Storage::disk('local')->size($stored));
+
+        auth()->logout();
+        $this->get(route('dashboard.orphans.photo', [$family, $orphan]))->assertRedirect(route('login'));
+        $this->actingAs($admin)->get(route('dashboard.orphans.photo', [$family, $orphan]))->assertOk();
+        $this->actingAs($admin)->get(route('dashboard.orphans.show', $family))
+            ->assertSee(route('dashboard.orphans.photo', [$family, $orphan]), false)
+            ->assertSee('data-lightbox="orphan-portraits"', false);
+        $this->actingAs($admin)->get(route('dashboard.orphans.edit', $family))
+            ->assertSee('name="orphans[0][photo]"', false)
+            ->assertSee(route('dashboard.orphans.photo', [$family, $orphan]), false);
+
+        $other = Orphan::factory()->create();
+        $this->actingAs($admin)->get(route('dashboard.orphans.photo', [$family, $other]))->assertNotFound();
+
+        $this->actingAs($admin)->put(route('dashboard.orphans.update', $family), [
+            'type' => OrphanFamily::TYPE_ORPHAN,
+            'contact_name' => 'عبد الله سالم أبو عيد',
+            'contact_relation' => 'العم',
+            'contact_phone' => '0599123456',
+            'father_full_name' => 'محمد سالم خليل أبو عيد',
+            'father_death_date' => '2024-02-10',
+            'father_death_cause' => 'استشهد في قصف',
+            'orphans' => [[
+                'id' => $orphan->id,
+                'full_name' => 'أحمد محمد سالم أبو عيد',
+                'birth_date' => '2015-06-01',
+                'national_id' => '412345678',
+                'education_stage' => 'primary',
+                'health_status' => 'healthy',
+            ]],
+        ])->assertRedirect(route('dashboard.orphans.show', $family));
+
+        $this->assertSame($stored, $orphan->refresh()->photo);
+        Storage::disk('local')->assertExists($stored);
+
+        $this->actingAs($admin)->post(route('dashboard.orphans.store'), [
+            'type' => OrphanFamily::TYPE_ORPHAN,
+            'contact_name' => 'عبد الله سالم أبو عيد',
+            'contact_relation' => 'العم',
+            'contact_phone' => '0599123456',
+            'father_full_name' => 'محمد سالم خليل أبو عيد',
+            'father_death_date' => '2024-02-10',
+            'father_death_cause' => 'استشهد في قصف',
+            'orphans' => [[
+                'full_name' => 'سلمى محمد سالم أبو عيد',
+                'birth_date' => '2017-03-20',
+                'national_id' => '423456789',
+                'education_stage' => 'primary',
+                'health_status' => 'healthy',
+                'photo' => UploadedFile::fake()->image('big.jpg')->size(OrphanFamilyInput::PHOTO_MAX_KB + 200),
+            ]],
+        ])->assertSessionHasErrors(['orphans.0.photo']);
+
+        $this->actingAs($admin)->delete(route('dashboard.orphans.destroy', $family));
+
+        Storage::disk('local')->assertMissing($stored);
     }
 
     public function test_admin_adds_a_file_manually_then_edits_its_orphans(): void

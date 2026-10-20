@@ -27,6 +27,8 @@ class OrphanRegistrationTest extends TestCase
         $this->get(route('orphan-registration'))
             ->assertOk()
             ->assertSee('name="documents[mother_id]"', false)
+            ->assertSee('name="orphans[0][photo]"', false)
+            ->assertSee(__('orphans.field.orphan_photo_hint'))
             ->assertSee(__('orphans.area.nuseirat_camp'));
 
         $this->post(route('orphan-registration.store'), $this->widowFamilyInput())

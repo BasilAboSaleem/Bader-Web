@@ -77,6 +77,7 @@
         @include('sponsor.partials.case-tables', [
             'family' => $family,
             'sponsorship' => $family->activeSponsorships->first() ?? $family->sponsorships->sortByDesc('started_at')->first(),
+            'showOrphanPhotos' => true,
         ])
       </div>
 

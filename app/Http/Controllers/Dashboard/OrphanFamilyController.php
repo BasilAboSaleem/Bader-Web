@@ -271,6 +271,20 @@ class OrphanFamilyController extends Controller
         return $disk->response($path, $orphanFamily->code.'-'.$document.'.'.pathinfo($path, PATHINFO_EXTENSION));
     }
 
+    public function photo(OrphanFamily $orphanFamily, Orphan $orphan): StreamedResponse
+    {
+        abort_unless($orphan->orphan_family_id === $orphanFamily->id && filled($orphan->photo), 404);
+
+        $disk = Storage::disk(OrphanFamilyInput::DOCUMENT_DISK);
+
+        abort_unless($disk->exists($orphan->photo), 404);
+
+        return $disk->response($orphan->photo, $orphanFamily->code.'-'.$orphan->id.'.jpg', [
+            'Content-Type' => 'image/jpeg',
+            'Cache-Control' => 'private, max-age=3600',
+        ]);
+    }
+
     /**
      * @return array<string, list<mixed>>
      */

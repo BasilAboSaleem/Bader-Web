@@ -11,6 +11,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Validation and saving shared by the public orphan registration form and the dashboard.
@@ -22,9 +23,15 @@ final class OrphanFamilyInput
 
     public const DOCUMENT_DISK = 'local';
 
+    public const PHOTO_MAX_KB = 2048;
+
+    public const PHOTO_MAX_EDGE = 480;
+
     private const IMAGE_MAX_EDGE = 1600;
 
     private const IMAGE_QUALITY = 72;
+
+    private const PHOTO_QUALITY = 70;
 
     /**
      * Decoding is skipped above this size so one oversized scan cannot exhaust PHP's memory limit.
@@ -76,34 +83,24 @@ final class OrphanFamilyInput
             'orphans.*.education_stage' => ['required', Rule::in(Orphan::EDUCATION_STAGES)],
             'orphans.*.health_status' => ['required', Rule::in(Orphan::HEALTH_STATUSES)],
             'orphans.*.health_notes' => ['nullable', 'string', 'max:500'],
+            'orphans.*.photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:'.self::PHOTO_MAX_KB],
             'documents' => [$documentsRequired ? 'required' : 'nullable', 'array'],
             ...collect(OrphanFamily::DOCUMENTS)->mapWithKeys(fn (string $document): array => ['documents.'.$document => $documentRule])->all(),
         ];
     }
 
     /**
-     * Public self-update: type and mother ID stay as stored; missing certificates must be uploaded.
+     * Public self-update: type and mother ID stay as stored, and the three certificates must be uploaded again.
      *
      * @return array<string, list<mixed>>
      */
     public static function publicUpdateRules(OrphanFamily $family): array
     {
-        $rules = self::rules(documentsRequired: false);
+        $rules = self::rules(documentsRequired: true);
         $rules['type'] = ['required', Rule::in([$family->type])];
 
         if ($family->type === OrphanFamily::TYPE_WIDOW_FAMILY && filled($family->mother_national_id)) {
             $rules['mother_national_id'] = ['required', 'digits:9', Rule::in([$family->mother_national_id])];
-        }
-
-        $rules['documents'] = ['nullable', 'array'];
-
-        foreach (OrphanFamily::DOCUMENTS as $document) {
-            $rules['documents.'.$document] = [
-                $family->hasDocument($document) ? 'nullable' : 'required',
-                'file',
-                'mimes:jpg,jpeg,png,webp,pdf',
-                'max:'.self::DOCUMENT_MAX_KB,
-            ];
         }
 
         return $rules;
@@ -122,6 +119,8 @@ final class OrphanFamilyInput
         foreach (self::ORPHAN_FIELDS as $field) {
             $attributes['orphans.*.'.$field] = __('orphans.field.orphan_'.$field);
         }
+
+        $attributes['orphans.*.photo'] = __('orphans.field.orphan_photo');
 
         foreach (OrphanFamily::DOCUMENTS as $document) {
             $attributes['documents.'.$document] = __('orphans.document.'.$document);
@@ -163,10 +162,20 @@ final class OrphanFamilyInput
                 $orphan = $family->orphans()->create($attributes);
             }
 
+            self::storePortrait($orphan, $row['photo'] ?? null, $family);
             $keptIds[] = $orphan->id;
         }
 
-        Orphan::where('orphan_family_id', $family->id)->whereNotIn('id', $keptIds)->delete();
+        $removed = Orphan::query()
+            ->where('orphan_family_id', $family->id)
+            ->whereNotIn('id', $keptIds)
+            ->get();
+
+        foreach ($removed as $removedOrphan) {
+            self::deleteStoredFile($removedOrphan->photo);
+        }
+
+        Orphan::query()->whereKey($removed->modelKeys())->delete();
     }
 
     /**
@@ -196,7 +205,9 @@ final class OrphanFamilyInput
 
     public static function deleteDocuments(OrphanFamily $family): void
     {
-        Storage::disk(self::DOCUMENT_DISK)->deleteDirectory('orphan-documents/'.$family->id);
+        $disk = Storage::disk(self::DOCUMENT_DISK);
+        $disk->deleteDirectory('orphan-documents/'.$family->id);
+        $disk->deleteDirectory('orphan-photos/'.$family->id);
     }
 
     /**
@@ -208,23 +219,62 @@ final class OrphanFamilyInput
     }
 
     /**
-     * Photos are re-encoded as compressed JPEG (which also strips anything hidden in the file); PDFs and
-     * images too large to decode safely are kept as sent.
+     * Replace the portrait only when a new image was uploaded. The stored file is a small JPEG.
      */
+    private static function storePortrait(Orphan $orphan, mixed $upload, OrphanFamily $family): void
+    {
+        if (! $upload instanceof UploadedFile) {
+            return;
+        }
+
+        $previous = $orphan->photo;
+        $path = self::storeCompressedImage($upload, 'orphan-photos/'.$family->id, self::PHOTO_MAX_EDGE, self::PHOTO_QUALITY);
+
+        if ($path === null) {
+            throw ValidationException::withMessages(['orphans' => __('orphans.photo_unreadable')]);
+        }
+
+        $orphan->update(['photo' => $path]);
+
+        if ($previous && $previous !== $path) {
+            self::deleteStoredFile($previous);
+        }
+    }
+
+    private static function deleteStoredFile(?string $path): void
+    {
+        if (filled($path)) {
+            Storage::disk(self::DOCUMENT_DISK)->delete($path);
+        }
+    }
+
     private static function storeDocument(UploadedFile $file, string $directory): string
     {
-        $dimensions = $file->getMimeType() === 'application/pdf' ? false : @getimagesize($file->getRealPath());
+        if ($file->getMimeType() === 'application/pdf') {
+            return $file->store($directory, self::DOCUMENT_DISK);
+        }
+
+        return self::storeCompressedImage($file, $directory, self::IMAGE_MAX_EDGE, self::IMAGE_QUALITY)
+            ?? $file->store($directory, self::DOCUMENT_DISK);
+    }
+
+    /**
+     * Re-encode a photo as a compressed JPEG, which also strips anything hidden in the file.
+     */
+    private static function storeCompressedImage(UploadedFile $file, string $directory, int $maxEdge, int $quality): ?string
+    {
+        $dimensions = @getimagesize($file->getRealPath());
         $canDecode = $dimensions && $dimensions[0] * $dimensions[1] <= self::IMAGE_MAX_DECODE_PIXELS;
         $image = $canDecode ? @imagecreatefromstring((string) file_get_contents($file->getRealPath())) : false;
 
         if (! $image instanceof GdImage) {
-            return $file->store($directory, self::DOCUMENT_DISK);
+            return null;
         }
 
         $image = self::applyExifOrientation($image, $file);
         $width = imagesx($image);
         $height = imagesy($image);
-        $scale = min(1, self::IMAGE_MAX_EDGE / max($width, $height));
+        $scale = min(1, $maxEdge / max($width, $height));
         $targetWidth = max(1, (int) round($width * $scale));
         $targetHeight = max(1, (int) round($height * $scale));
 
@@ -233,7 +283,7 @@ final class OrphanFamilyInput
         imagecopyresampled($canvas, $image, 0, 0, 0, 0, $targetWidth, $targetHeight, $width, $height);
 
         ob_start();
-        imagejpeg($canvas, null, self::IMAGE_QUALITY);
+        imagejpeg($canvas, null, $quality);
         $jpeg = (string) ob_get_clean();
 
         $path = $directory.'/'.Str::random(40).'.jpg';
