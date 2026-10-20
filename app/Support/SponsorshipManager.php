@@ -19,10 +19,10 @@ use Illuminate\Validation\ValidationException;
 class SponsorshipManager
 {
     /**
-     * Apply the dashboard sponsorship form of a widow's family: one sponsor for the family, with an amount for the
-     * mother and for each child. Beneficiaries left without an amount are not sponsored.
+     * Apply the dashboard sponsorship form of a widow's family: one sponsor and one total for the case.
+     * Older per-person rows are closed into history when the total is saved, and are never required.
      *
-     * @param  array{sponsorship_status: string, sponsor_id?: int|string|null, currency?: ?string, started_at?: ?string, renewal_type?: ?string, planned_ended_at?: ?string, mother_amount?: mixed, orphans?: array<int|string, array{monthly_amount?: mixed}>}  $input
+     * @param  array{sponsorship_status: string, sponsor_id?: int|string|null, currency?: ?string, started_at?: ?string, renewal_type?: ?string, planned_ended_at?: ?string, sponsorship_amount?: mixed}  $input
      */
     public static function applyToWidowFamily(OrphanFamily $family, array $input, User $by): void
     {
@@ -31,21 +31,26 @@ class SponsorshipManager
 
             if ($input['sponsorship_status'] !== OrphanFamily::SPONSORSHIP_SPONSORED) {
                 self::release($family, null, $today, $by);
+                self::releaseFamilyTotal($family, $today, $by);
                 $family->orphans->each(fn (Orphan $orphan) => self::release($family, $orphan, $today, $by));
-                $family->update(['sponsorship_status' => OrphanFamily::SPONSORSHIP_AVAILABLE]);
+                $family->update([
+                    'sponsorship_status' => OrphanFamily::SPONSORSHIP_AVAILABLE,
+                    'sponsorship_amount' => null,
+                ]);
 
                 return;
             }
 
             $terms = self::termsFrom($input);
 
-            self::assignOrRelease($family, null, $input['mother_amount'] ?? null, $terms, $by);
+            self::release($family, null, $today, $by);
+            $family->orphans->each(fn (Orphan $orphan) => self::release($family, $orphan, $today, $by));
+            self::assign($family, null, $input['sponsorship_amount'], $terms, $by, Sponsorship::BENEFICIARY_FAMILY);
 
-            foreach ($family->orphans as $orphan) {
-                self::assignOrRelease($family, $orphan, $input['orphans'][$orphan->id]['monthly_amount'] ?? null, $terms, $by);
-            }
-
-            $family->update(['sponsorship_status' => OrphanFamily::SPONSORSHIP_SPONSORED]);
+            $family->update([
+                'sponsorship_status' => OrphanFamily::SPONSORSHIP_SPONSORED,
+                'sponsorship_amount' => number_format((float) $input['sponsorship_amount'], 2, '.', ''),
+            ]);
         });
     }
 
@@ -124,7 +129,7 @@ class SponsorshipManager
             ? CarbonImmutable::parse((string) $input['planned_ended_at'])
             : null;
 
-        if ($renewalType === Sponsorship::RENEWAL_ONE_TIME && $plannedEndedAt === null) {
+        if (in_array($renewalType, [Sponsorship::RENEWAL_ONE_TIME, Sponsorship::RENEWAL_PREPAID], true) && $plannedEndedAt === null) {
             throw ValidationException::withMessages(['planned_ended_at' => __('sponsors.planned_end_required')]);
         }
 
@@ -156,10 +161,11 @@ class SponsorshipManager
      *
      * @param  array{sponsor_id: int, currency: string, started_at: CarbonImmutable, renewal_type: string, planned_ended_at: ?CarbonImmutable}  $terms
      */
-    private static function assign(OrphanFamily $family, ?Orphan $orphan, mixed $amount, array $terms, User $by): void
+    private static function assign(OrphanFamily $family, ?Orphan $orphan, mixed $amount, array $terms, User $by, ?string $beneficiaryType = null): void
     {
+        $beneficiaryType ??= $orphan ? Sponsorship::BENEFICIARY_ORPHAN : Sponsorship::BENEFICIARY_MOTHER;
         $amount = number_format((float) $amount, 2, '.', '');
-        $current = self::activeFor($family, $orphan);
+        $current = self::activeFor($family, $orphan, $beneficiaryType);
         $planned = $terms['planned_ended_at']?->toDateString();
 
         if (
@@ -184,7 +190,7 @@ class SponsorshipManager
             'sponsor_id' => $terms['sponsor_id'],
             'orphan_family_id' => $family->id,
             'orphan_id' => $orphan?->id,
-            'beneficiary_type' => $orphan ? Sponsorship::BENEFICIARY_ORPHAN : Sponsorship::BENEFICIARY_MOTHER,
+            'beneficiary_type' => $beneficiaryType,
             'monthly_amount' => $amount,
             'currency' => $terms['currency'],
             'started_at' => $terms['started_at'],
@@ -193,7 +199,9 @@ class SponsorshipManager
             'created_by' => $by->id,
         ]);
 
-        $orphan?->update(['sponsorship_status' => OrphanFamily::SPONSORSHIP_SPONSORED]);
+        if ($beneficiaryType === Sponsorship::BENEFICIARY_ORPHAN) {
+            $orphan?->update(['sponsorship_status' => OrphanFamily::SPONSORSHIP_SPONSORED]);
+        }
     }
 
     private static function release(OrphanFamily $family, ?Orphan $orphan, CarbonImmutable $endsAt, User $by): void
@@ -212,12 +220,23 @@ class SponsorshipManager
         $sponsorship->update(['ended_at' => $endsAt, 'ended_by' => $by->id]);
     }
 
-    private static function activeFor(OrphanFamily $family, ?Orphan $orphan): ?Sponsorship
+    private static function releaseFamilyTotal(OrphanFamily $family, CarbonImmutable $endsAt, User $by): void
     {
+        $current = self::activeFor($family, null, Sponsorship::BENEFICIARY_FAMILY);
+
+        if ($current) {
+            self::close($current, $endsAt->lessThan($current->started_at) ? CarbonImmutable::parse($current->started_at) : $endsAt, $by);
+        }
+    }
+
+    private static function activeFor(OrphanFamily $family, ?Orphan $orphan, ?string $beneficiaryType = null): ?Sponsorship
+    {
+        $beneficiaryType ??= $orphan ? Sponsorship::BENEFICIARY_ORPHAN : Sponsorship::BENEFICIARY_MOTHER;
+
         return Sponsorship::query()
             ->where('orphan_family_id', $family->id)
-            ->where('beneficiary_type', $orphan ? Sponsorship::BENEFICIARY_ORPHAN : Sponsorship::BENEFICIARY_MOTHER)
-            ->where('orphan_id', $orphan?->id)
+            ->where('beneficiary_type', $beneficiaryType)
+            ->where('orphan_id', $beneficiaryType === Sponsorship::BENEFICIARY_FAMILY ? null : $orphan?->id)
             ->active()
             ->lockForUpdate()
             ->first();

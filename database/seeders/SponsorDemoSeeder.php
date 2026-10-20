@@ -36,8 +36,8 @@ class SponsorDemoSeeder extends Seeder
         );
 
         $widowFamily = $this->widowFamily($team);
-        $yousef = $this->orphan($widowFamily, 'يوسف محمد سالم النجار', 9, 'primary', 'healthy');
-        $mariam = $this->orphan($widowFamily, 'مريم محمد سالم النجار', 6, 'kindergarten', 'chronic_illness');
+        $this->orphan($widowFamily, 'يوسف محمد سالم النجار', 9, 'primary', 'healthy');
+        $this->orphan($widowFamily, 'مريم محمد سالم النجار', 6, 'kindergarten', 'chronic_illness');
 
         if ($widowFamily->activeSponsorships()->count() === 0) {
             SponsorshipManager::applyToWidowFamily($widowFamily, [
@@ -45,8 +45,7 @@ class SponsorDemoSeeder extends Seeder
                 'sponsor_id' => $sponsor->id,
                 'currency' => 'ILS',
                 'started_at' => now()->subMonths(3)->startOfMonth()->toDateString(),
-                'mother_amount' => 400,
-                'orphans' => [$yousef->id => ['monthly_amount' => 200], $mariam->id => ['monthly_amount' => 200]],
+                'sponsorship_amount' => 800,
             ], $team);
         }
 
@@ -80,8 +79,8 @@ class SponsorDemoSeeder extends Seeder
         }
 
         $secondWidow = $this->namedWidow($team, 'نادية سعيد البرغوثي', 'سعيد أحمد البرغوثي');
-        $hadi = $this->orphan($secondWidow, 'هادي سعيد أحمد البرغوثي', 10, 'primary', 'healthy');
-        $lama = $this->orphan($secondWidow, 'لما سعيد أحمد البرغوثي', 5, 'kindergarten', 'healthy');
+        $this->orphan($secondWidow, 'هادي سعيد أحمد البرغوثي', 10, 'primary', 'healthy');
+        $this->orphan($secondWidow, 'لما سعيد أحمد البرغوثي', 5, 'kindergarten', 'healthy');
 
         if ($secondWidow->activeSponsorships()->count() === 0) {
             SponsorshipManager::applyToWidowFamily($secondWidow, [
@@ -89,8 +88,7 @@ class SponsorDemoSeeder extends Seeder
                 'sponsor_id' => $sponsor->id,
                 'currency' => 'SAR',
                 'started_at' => now()->subMonths(1)->startOfMonth()->toDateString(),
-                'mother_amount' => 500,
-                'orphans' => [$hadi->id => ['monthly_amount' => 250], $lama->id => ['monthly_amount' => 250]],
+                'sponsorship_amount' => 1000,
             ], $team);
         }
 

@@ -23,11 +23,16 @@ class Sponsorship extends Model
 
     public const BENEFICIARY_MOTHER = 'mother';
 
+    /** One amount for the whole case, instead of a mother and child split. */
+    public const BENEFICIARY_FAMILY = 'family';
+
     public const RENEWAL_RECURRING = 'recurring';
 
     public const RENEWAL_ONE_TIME = 'one_time';
 
-    public const RENEWAL_TYPES = [self::RENEWAL_RECURRING, self::RENEWAL_ONE_TIME];
+    public const RENEWAL_PREPAID = 'prepaid';
+
+    public const RENEWAL_TYPES = [self::RENEWAL_RECURRING, self::RENEWAL_ONE_TIME, self::RENEWAL_PREPAID];
 
     protected $fillable = [
         'sponsor_id',
@@ -102,11 +107,20 @@ class Sponsorship extends Model
         return $this->renewal_type === self::RENEWAL_RECURRING;
     }
 
+    public function isPrepaid(): bool
+    {
+        return $this->renewal_type === self::RENEWAL_PREPAID;
+    }
+
     /**
      * The beneficiary's name as the team and the sponsor know it.
      */
     public function beneficiaryName(): string
     {
+        if ($this->beneficiary_type === self::BENEFICIARY_FAMILY) {
+            return (string) $this->family->display_name;
+        }
+
         return $this->isForMother() ? (string) $this->family->mother_full_name : (string) $this->orphan?->full_name;
     }
 }

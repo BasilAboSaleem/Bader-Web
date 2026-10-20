@@ -78,6 +78,15 @@
         —
       @endforelse
     </p>
+    @php
+      $prepaidSponsorship = ($family->relationLoaded('activeSponsorships') ? $family->activeSponsorships : collect())
+          ->first(fn ($row) => $row->isPrepaid());
+    @endphp
+    @if ($prepaidSponsorship?->planned_ended_at)
+      <p @class(['mt-2 text-theme-sm font-semibold text-brand-800 dark:text-brand-200' => ! $print])>
+        {{ __('sponsors.prepaid_period', ['from' => $prepaidSponsorship->started_at->format('Y-m-d'), 'until' => $prepaidSponsorship->planned_ended_at->format('Y-m-d')]) }}
+      </p>
+    @endif
   </div>
 
   <div>

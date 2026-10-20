@@ -226,20 +226,11 @@ class OrphanFamilyController extends Controller
         if ($orphanFamily->isWidowFamily()) {
             $validated = $request->validate([
                 ...$this->sponsorRules(''),
-                'mother_amount' => ['nullable', 'numeric', 'min:0', 'max:100000'],
-                'orphans' => ['nullable', 'array'],
-                'orphans.*.monthly_amount' => ['nullable', 'numeric', 'min:0', 'max:100000'],
+                'sponsorship_amount' => ['required_if:sponsorship_status,'.OrphanFamily::SPONSORSHIP_SPONSORED, 'nullable', 'numeric', 'min:1', 'max:100000'],
             ], [], [
                 ...$this->sponsorAttributeNames(''),
-                'mother_amount' => __('sponsors.beneficiary.mother'),
-                'orphans.*.monthly_amount' => __('sponsors.field.monthly_amount'),
+                'sponsorship_amount' => __('sponsors.field.sponsorship_amount'),
             ]);
-
-            $amounts = collect($validated['orphans'] ?? [])->pluck('monthly_amount')->push($validated['mother_amount'] ?? null);
-
-            if ($validated['sponsorship_status'] === OrphanFamily::SPONSORSHIP_SPONSORED && $amounts->every(fn (mixed $amount): bool => (float) $amount <= 0)) {
-                throw ValidationException::withMessages(['mother_amount' => __('sponsors.amount_required')]);
-            }
 
             SponsorshipManager::applyToWidowFamily($orphanFamily, $validated, $request->user());
         } else {
@@ -268,7 +259,7 @@ class OrphanFamilyController extends Controller
 
         abort_unless($disk->exists($path), 404);
 
-        return $disk->response($path, $orphanFamily->code.'-'.$document.'.'.pathinfo($path, PATHINFO_EXTENSION));
+        return OrphanFamilyInput::inlineResponse($path, $orphanFamily->code.'-'.$document.'.'.pathinfo($path, PATHINFO_EXTENSION));
     }
 
     public function photo(OrphanFamily $orphanFamily, Orphan $orphan): StreamedResponse
@@ -279,7 +270,7 @@ class OrphanFamilyController extends Controller
 
         abort_unless($disk->exists($orphan->photo), 404);
 
-        return $disk->response($orphan->photo, $orphanFamily->code.'-'.$orphan->id.'.jpg', [
+        return OrphanFamilyInput::inlineResponse($orphan->photo, $orphanFamily->code.'-'.$orphan->id.'.jpg', [
             'Content-Type' => 'image/jpeg',
             'Cache-Control' => 'private, max-age=3600',
         ]);
@@ -298,7 +289,14 @@ class OrphanFamilyController extends Controller
             $prefix.'currency' => [$whenSponsored, 'nullable', Rule::in(config('bader.sponsorship_currencies'))],
             $prefix.'started_at' => [$whenSponsored, 'nullable', 'date', 'after_or_equal:2000-01-01', 'before_or_equal:'.now()->addYear()->toDateString()],
             $prefix.'renewal_type' => ['nullable', Rule::in(Sponsorship::RENEWAL_TYPES)],
-            $prefix.'planned_ended_at' => ['nullable', 'date', 'after_or_equal:'.$prefix.'started_at', 'before_or_equal:'.now()->addYears(10)->toDateString()],
+            $prefix.'planned_ended_at' => [
+                'nullable',
+                'required_if:'.$prefix.'renewal_type,'.Sponsorship::RENEWAL_ONE_TIME,
+                'required_if:'.$prefix.'renewal_type,'.Sponsorship::RENEWAL_PREPAID,
+                'date',
+                'after_or_equal:'.$prefix.'started_at',
+                'before_or_equal:'.now()->addYears(10)->toDateString(),
+            ],
         ];
     }
 

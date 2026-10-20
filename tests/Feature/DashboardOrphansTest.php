@@ -282,7 +282,7 @@ class DashboardOrphansTest extends TestCase
         $this->assertTrue($sponsorship->refresh()->isActive());
     }
 
-    public function test_a_widow_family_sponsor_pays_one_amount_for_the_mother_and_one_for_each_child(): void
+    public function test_a_widow_case_is_sponsored_with_one_total_instead_of_a_per_person_split(): void
     {
         $admin = User::factory()->create();
         $sponsor = Sponsor::factory()->create(['name' => 'خالد الحارثي']);
@@ -290,31 +290,37 @@ class DashboardOrphansTest extends TestCase
         [$ahmad, $salma] = Orphan::factory()->for($family, 'family')->count(2)->create()->all();
         $terms = ['sponsorship_status' => OrphanFamily::SPONSORSHIP_SPONSORED, 'sponsor_id' => $sponsor->id, 'currency' => 'ILS', 'started_at' => '2026-10-01'];
 
+        $this->actingAs($admin)->get(route('dashboard.orphans.show', $family))
+            ->assertSee('name="sponsorship_amount"', false)
+            ->assertDontSee('name="mother_amount"', false);
+
         $this->actingAs($admin)->patch(route('dashboard.orphans.sponsorship', $family), ['sponsorship_status' => OrphanFamily::SPONSORSHIP_SPONSORED])
-            ->assertSessionHasErrors(['sponsor_id', 'currency', 'started_at']);
-        $this->actingAs($admin)->patch(route('dashboard.orphans.sponsorship', $family), [...$terms, 'mother_amount' => '', 'orphans' => [$ahmad->id => ['monthly_amount' => 0]]])
-            ->assertSessionHasErrors('mother_amount');
-        $this->actingAs($admin)->patch(route('dashboard.orphans.sponsorship', $family), [...$terms, 'sponsor_id' => 9999, 'mother_amount' => 300])
+            ->assertSessionHasErrors(['sponsor_id', 'currency', 'started_at', 'sponsorship_amount']);
+        $this->actingAs($admin)->patch(route('dashboard.orphans.sponsorship', $family), [...$terms, 'sponsor_id' => 9999, 'sponsorship_amount' => 450])
             ->assertSessionHasErrors('sponsor_id');
         $this->assertTrue($family->refresh()->isAvailable());
 
         $this->actingAs($admin)->patch(route('dashboard.orphans.sponsorship', $family), [
             ...$terms,
-            'mother_amount' => 300,
-            'orphans' => [$ahmad->id => ['monthly_amount' => 150], $salma->id => ['monthly_amount' => '']],
+            'sponsorship_amount' => 450,
         ])->assertRedirect(route('dashboard.orphans.show', $family));
 
         $this->assertSame(OrphanFamily::SPONSORSHIP_SPONSORED, $family->refresh()->sponsorship_status);
-        $this->assertSame(['mother' => '300.00', 'orphan' => '150.00'], $family->activeSponsorships()->pluck('monthly_amount', 'beneficiary_type')->all());
-        $this->assertSame($ahmad->id, $family->activeSponsorships()->where('beneficiary_type', Sponsorship::BENEFICIARY_ORPHAN)->value('orphan_id'));
-        $this->assertFalse($ahmad->refresh()->isAvailable());
+        $this->assertSame('450.00', $family->sponsorship_amount);
+        $this->assertSame(['family' => '450.00'], $family->activeSponsorships()->pluck('monthly_amount', 'beneficiary_type')->all());
+        $this->assertTrue($ahmad->refresh()->isAvailable());
         $this->assertTrue($salma->refresh()->isAvailable());
+
+        $this->actingAs($admin)->get(route('dashboard.orphans.print', $family))
+            ->assertOk()
+            ->assertSee('450.00')
+            ->assertDontSee(__('sponsors.column.beneficiary'));
 
         $this->get(route('sponsorship'))
             ->assertOk()
             ->assertSee(__('sponsorship.status.sponsored'))
             ->assertDontSee('خالد الحارثي')
-            ->assertDontSee('300.00');
+            ->assertDontSee('450.00');
 
         $this->actingAs($admin)->patch(route('dashboard.orphans.sponsorship', $family), [
             ...$terms,
@@ -322,9 +328,69 @@ class DashboardOrphansTest extends TestCase
         ]);
 
         $this->assertTrue($family->refresh()->isAvailable());
+        $this->assertNull($family->sponsorship_amount);
         $this->assertSame(0, $family->activeSponsorships()->count());
-        $this->assertSame(2, $family->sponsorships()->whereNotNull('ended_at')->count());
-        $this->assertTrue($ahmad->refresh()->isAvailable());
+        $this->assertSame(1, $family->sponsorships()->whereNotNull('ended_at')->count());
+    }
+
+    public function test_an_existing_per_person_split_still_prints_as_one_total(): void
+    {
+        $admin = User::factory()->create();
+        $family = OrphanFamily::factory()->approved()->widowFamily()->create();
+        $orphan = Orphan::factory()->for($family, 'family')->create();
+        Sponsorship::factory()->forMother($family)->create(['monthly_amount' => 300, 'currency' => 'ILS']);
+        Sponsorship::factory()->for($orphan)->create([
+            'orphan_family_id' => $family->id,
+            'monthly_amount' => 150,
+            'currency' => 'ILS',
+        ]);
+
+        $this->actingAs($admin)->get(route('dashboard.orphans.print', $family))
+            ->assertOk()
+            ->assertSee('450.00')
+            ->assertDontSee('300.00')
+            ->assertDontSee('150.00')
+            ->assertDontSee(__('sponsors.column.beneficiary'));
+    }
+
+    public function test_prepaid_sponsorship_requires_an_end_date_and_the_report_says_it_was_paid_ahead(): void
+    {
+        $admin = User::factory()->create();
+        $sponsor = Sponsor::factory()->create();
+        $family = OrphanFamily::factory()->approved()->widowFamily()->create();
+        Orphan::factory()->for($family, 'family')->create();
+        $terms = [
+            'sponsorship_status' => OrphanFamily::SPONSORSHIP_SPONSORED,
+            'sponsor_id' => $sponsor->id,
+            'currency' => 'ILS',
+            'started_at' => '2026-01-01',
+            'renewal_type' => Sponsorship::RENEWAL_PREPAID,
+            'sponsorship_amount' => 600,
+        ];
+
+        $this->actingAs($admin)->patch(route('dashboard.orphans.sponsorship', $family), $terms)
+            ->assertSessionHasErrors('planned_ended_at');
+
+        $this->actingAs($admin)->patch(route('dashboard.orphans.sponsorship', $family), [
+            ...$terms,
+            'planned_ended_at' => '2026-12-31',
+        ])->assertRedirect(route('dashboard.orphans.show', $family));
+
+        $sponsorship = Sponsorship::active()->sole();
+        $this->assertTrue($sponsorship->isPrepaid());
+        $this->assertSame('2026-01-01', $sponsorship->started_at->toDateString());
+        $this->assertSame('2026-12-31', $sponsorship->planned_ended_at->toDateString());
+
+        $period = __('sponsors.prepaid_period', ['from' => '2026-01-01', 'until' => '2026-12-31']);
+
+        $this->actingAs($admin)->get(route('dashboard.orphans.print', $family))
+            ->assertOk()
+            ->assertSee(__('sponsors.renewal.prepaid'))
+            ->assertSee($period);
+
+        $this->actingAs($admin)->get(route('dashboard.orphans.finance', $family))
+            ->assertOk()
+            ->assertSee($period);
     }
 
     public function test_changing_the_amount_keeps_the_earlier_sponsorship_as_history(): void

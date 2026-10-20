@@ -157,32 +157,48 @@
       </tr>
     </table>
   @else
-    <table class="data grid">
-      <thead>
+    @php
+      $lead = $active->firstWhere('beneficiary_type', \App\Models\Sponsorship::BENEFICIARY_FAMILY) ?? $active->sortBy('started_at')->first();
+      $reportTotals = $family->sponsorship_amount !== null && $lead
+          ? [$lead->currency => (float) $family->sponsorship_amount]
+          : SponsorshipAmounts::monthlyTotals($active);
+      $sponsorNames = $active->map(fn ($row) => $row->sponsor->name)->unique()->values();
+    @endphp
+    @if ($reportTotals === [])
+      <p class="meta">{{ __('sponsors.no_active') }}</p>
+    @else
+      <table class="data">
         <tr>
-          <th>{{ __('sponsors.column.beneficiary') }}</th>
-          <th>{{ __('sponsors.column.sponsor') }}</th>
-          <th>{{ __('sponsors.column.monthly_amount') }}</th>
-          <th>{{ __('sponsors.field.started_at') }}</th>
-          <th>{{ __('sponsors.field.renewal_type') }}</th>
-          <th>{{ __('sponsors.field.planned_ended_at') }}</th>
+          <th>{{ __('sponsors.field.sponsor') }}</th>
+          <td>{{ $sponsorNames->implode(' · ') ?: '—' }}</td>
+          <th>{{ __('sponsors.field.sponsorship_amount') }}</th>
+          <td dir="ltr">
+            @foreach ($reportTotals as $currency => $amount)
+              {{ SponsorshipAmounts::format($amount, $currency) }}@if (! $loop->last) · @endif
+            @endforeach
+          </td>
         </tr>
-      </thead>
-      <tbody>
-        @forelse ($active as $row)
+        @if ($lead)
           <tr>
-            <td>{{ $row->beneficiaryName() }}</td>
-            <td>{{ $row->sponsor->name }}</td>
-            <td dir="ltr">{{ SponsorshipAmounts::format($row->monthly_amount, $row->currency) }}</td>
-            <td dir="ltr">{{ $date($row->started_at) }}</td>
-            <td>{{ __('sponsors.renewal.'.$row->renewal_type) }}</td>
-            <td dir="ltr">{{ $date($row->planned_ended_at) }}</td>
+            <th>{{ __('sponsors.field.started_at') }}</th>
+            <td dir="ltr">{{ $date($lead->started_at) }}</td>
+            <th>{{ __('sponsors.field.renewal_type') }}</th>
+            <td>
+              {{ __('sponsors.renewal.'.$lead->renewal_type) }}
+              @if ($lead->isPrepaid() && $lead->planned_ended_at)
+                <br>{{ __('sponsors.prepaid_period', ['from' => $date($lead->started_at), 'until' => $date($lead->planned_ended_at)]) }}
+              @endif
+            </td>
           </tr>
-        @empty
-          <tr><td colspan="6">{{ __('sponsors.no_active') }}</td></tr>
-        @endforelse
-      </tbody>
-    </table>
+          @if ($lead->planned_ended_at)
+            <tr>
+              <th>{{ __('sponsors.field.planned_ended_at') }}</th>
+              <td dir="ltr" colspan="3">{{ $date($lead->planned_ended_at) }}</td>
+            </tr>
+          @endif
+        @endif
+      </table>
+    @endif
   @endif
 
   @if ($family->review_notes)

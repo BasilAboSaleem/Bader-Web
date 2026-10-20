@@ -23,6 +23,13 @@ class SponsorshipFinanceReport
             ? $family->activeSponsorships
             : $family->activeSponsorships()->get();
 
+        if ($family->sponsorship_amount !== null && $active->isNotEmpty()) {
+            $currency = (string) ($active->firstWhere('beneficiary_type', Sponsorship::BENEFICIARY_FAMILY)?->currency
+                ?? $active->first()->currency);
+
+            return collect([$currency => (float) $family->sponsorship_amount]);
+        }
+
         return collect(SponsorshipAmounts::monthlyTotals($active));
     }
 
@@ -61,14 +68,13 @@ class SponsorshipFinanceReport
      *     national_id: string,
      *     phone: string,
      *     orphans_count: int,
-     *     wife_amount: float,
-     *     children_amount: float,
      *     displacement_amount: float|null,
      *     estimated_amount: float,
      *     started_at: ?string,
      *     month_amount: float,
      *     paid_on: ?string,
      *     sponsor_name: string,
+     *     prepaid_until: ?string,
      *     currency: string
      * }>
      */
@@ -81,15 +87,7 @@ class SponsorshipFinanceReport
                 $family = $rows->first()->sponsorship->family;
                 $currency = (string) $rows->first()->currency;
 
-                $wifeAmount = round((float) $rows
-                    ->filter(fn (SponsorshipDisbursement $row): bool => $row->sponsorship->isForMother())
-                    ->sum(fn (SponsorshipDisbursement $row): float => (float) $row->amount), 2);
-
-                $childrenAmount = round((float) $rows
-                    ->reject(fn (SponsorshipDisbursement $row): bool => $row->sponsorship->isForMother())
-                    ->sum(fn (SponsorshipDisbursement $row): float => (float) $row->amount), 2);
-
-                $monthAmount = round($wifeAmount + $childrenAmount, 2);
+                $monthAmount = round((float) $rows->sum(fn (SponsorshipDisbursement $row): float => (float) $row->amount), 2);
 
                 $startedAt = $rows
                     ->map(fn (SponsorshipDisbursement $row) => $row->sponsorship->started_at)
@@ -121,14 +119,17 @@ class SponsorshipFinanceReport
                         ? (string) ($family->mother_phone ?: '—')
                         : (string) ($family->contact_phone ?: '—'),
                     'orphans_count' => $family->orphans->count(),
-                    'wife_amount' => $wifeAmount,
-                    'children_amount' => $childrenAmount,
                     'displacement_amount' => null,
-                    'estimated_amount' => $monthAmount,
+                    'estimated_amount' => $family->sponsorship_amount !== null
+                        ? (float) $family->sponsorship_amount
+                        : $monthAmount,
                     'started_at' => $startedAt?->format('Y/m/d'),
                     'month_amount' => $monthAmount,
                     'paid_on' => $paidOn?->format('Y/m/d'),
                     'sponsor_name' => $sponsorName !== '' ? $sponsorName : '—',
+                    'prepaid_until' => $rows->contains(fn (SponsorshipDisbursement $row): bool => $row->sponsorship->isPrepaid())
+                        ? $rows->first(fn (SponsorshipDisbursement $row): bool => $row->sponsorship->isPrepaid())?->sponsorship->planned_ended_at?->format('Y/m/d')
+                        : null,
                     'currency' => $currency,
                 ];
             })

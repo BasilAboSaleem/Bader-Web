@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Validation and saving shared by the public orphan registration form and the dashboard.
@@ -208,6 +209,48 @@ final class OrphanFamilyInput
         $disk = Storage::disk(self::DOCUMENT_DISK);
         $disk->deleteDirectory('orphan-documents/'.$family->id);
         $disk->deleteDirectory('orphan-photos/'.$family->id);
+    }
+
+    /**
+     * Stream a private file inline. The host disables fpassthru, which Laravel's Storage::response() uses.
+     *
+     * @param  array<string, string>  $headers
+     */
+    public static function inlineResponse(string $path, string $name, array $headers = []): StreamedResponse
+    {
+        $disk = Storage::disk(self::DOCUMENT_DISK);
+        $response = new StreamedResponse;
+        $headers['Content-Type'] ??= $disk->mimeType($path) ?: 'application/octet-stream';
+        $headers['Content-Length'] ??= (string) $disk->size($path);
+
+        if (! array_key_exists('Content-Disposition', $headers)) {
+            $headers['Content-Disposition'] = $response->headers->makeDisposition('inline', $name, Str::ascii($name));
+        }
+
+        $response->headers->replace($headers);
+        $response->setCallback(function () use ($disk, $path): void {
+            $stream = $disk->readStream($path);
+
+            if (! is_resource($stream)) {
+                return;
+            }
+
+            try {
+                while (! feof($stream)) {
+                    $chunk = fread($stream, 8192);
+
+                    if ($chunk === false) {
+                        break;
+                    }
+
+                    echo $chunk;
+                }
+            } finally {
+                fclose($stream);
+            }
+        });
+
+        return $response;
     }
 
     /**

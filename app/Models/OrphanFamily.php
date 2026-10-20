@@ -58,6 +58,7 @@ class OrphanFamily extends Model
         'source',
         'review_status',
         'sponsorship_status',
+        'sponsorship_amount',
         'contact_name',
         'contact_relation',
         'contact_phone',
@@ -89,6 +90,7 @@ class OrphanFamily extends Model
         return [
             'father_death_date' => 'date',
             'mother_birth_date' => 'date',
+            'sponsorship_amount' => 'decimal:2',
             'documents' => 'array',
             'reviewed_at' => 'datetime',
         ];

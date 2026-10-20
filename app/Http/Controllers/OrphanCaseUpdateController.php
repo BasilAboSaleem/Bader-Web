@@ -149,7 +149,7 @@ class OrphanCaseUpdateController extends Controller
 
         abort_unless($disk->exists($orphan->photo), 404);
 
-        return $disk->response($orphan->photo, $family->code.'-'.$orphan->id.'.jpg', [
+        return OrphanFamilyInput::inlineResponse($orphan->photo, $family->code.'-'.$orphan->id.'.jpg', [
             'Content-Type' => 'image/jpeg',
             'Cache-Control' => 'private, max-age=300',
         ]);

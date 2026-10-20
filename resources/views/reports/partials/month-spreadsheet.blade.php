@@ -27,7 +27,7 @@
       @if ($print)
         <tr class="group-head">
           <th rowspan="2">#</th>
-          <th colspan="8">{{ __('sponsors.report.basic_data') }}</th>
+          <th colspan="6">{{ __('sponsors.report.basic_data') }}</th>
           <th rowspan="2">{{ __('sponsors.report.col.started_at') }}</th>
           <th rowspan="2" class="amount-col">{{ __('sponsors.report.col.month_amount') }}</th>
           <th rowspan="2">{{ __('sponsors.report.col.paid_on') }}</th>
@@ -38,8 +38,6 @@
           <th>{{ __('sponsors.report.col.national_id') }}</th>
           <th>{{ __('sponsors.report.col.phone') }}</th>
           <th>{{ __('sponsors.report.col.orphans_count') }}</th>
-          <th>{{ __('sponsors.report.col.wife') }}</th>
-          <th>{{ __('sponsors.report.col.children') }}</th>
           <th>{{ __('sponsors.report.col.displacement') }}</th>
           <th>{{ __('sponsors.report.col.estimated') }}</th>
         </tr>
@@ -50,8 +48,6 @@
           <th class="{{ $th }}">{{ __('sponsors.report.col.national_id') }}</th>
           <th class="{{ $th }}">{{ __('sponsors.report.col.phone') }}</th>
           <th class="{{ $th }}">{{ __('sponsors.report.col.orphans_count') }}</th>
-          <th class="{{ $th }}">{{ __('sponsors.report.col.wife') }}</th>
-          <th class="{{ $th }}">{{ __('sponsors.report.col.children') }}</th>
           <th class="{{ $th }}">{{ __('sponsors.report.col.displacement') }}</th>
           <th class="{{ $th }}">{{ __('sponsors.report.col.estimated') }}</th>
           <th class="{{ $th }}">{{ __('sponsors.report.col.started_at') }}</th>
@@ -69,8 +65,6 @@
           <td class="{{ $td }}" dir="ltr">{{ $row['national_id'] }}</td>
           <td class="{{ $td }}" dir="ltr">{{ $row['phone'] }}</td>
           <td class="{{ $td }}">{{ $row['orphans_count'] }}</td>
-          <td class="{{ $td }}" dir="ltr">{{ $money($row['wife_amount'], $row['currency']) }}</td>
-          <td class="{{ $td }}" dir="ltr">{{ $money($row['children_amount'], $row['currency']) }}</td>
           <td class="{{ $td }}" dir="ltr">{{ $row['displacement_amount'] === null ? '—' : $money($row['displacement_amount'], $row['currency']) }}</td>
           <td class="{{ $td }}" dir="ltr">{{ $money($row['estimated_amount'], $row['currency']) }}</td>
           <td class="{{ $td }}" dir="ltr">{{ $row['started_at'] ?: '—' }}</td>
@@ -78,11 +72,16 @@
             {{ $money($row['month_amount'], $row['currency']) }}
           </td>
           <td class="{{ $td }}" dir="ltr">{{ $row['paid_on'] ?: '—' }}</td>
-          <td class="{{ $td }}">{{ $row['sponsor_name'] }}</td>
+          <td class="{{ $td }}">
+            {{ $row['sponsor_name'] }}
+            @if ($row['prepaid_until'])
+              <span @class(['mt-0.5 block text-theme-xs font-semibold text-brand-700 dark:text-brand-300' => ! $print])>{{ __('sponsors.prepaid_period', ['from' => $row['started_at'] ?: '—', 'until' => $row['prepaid_until']]) }}</span>
+            @endif
+          </td>
         </tr>
       @empty
         <tr>
-          <td class="{{ $td }}" colspan="13">{{ __('sponsors.disbursements.empty') }}</td>
+          <td class="{{ $td }}" colspan="11">{{ __('sponsors.disbursements.empty') }}</td>
         </tr>
       @endforelse
     </tbody>

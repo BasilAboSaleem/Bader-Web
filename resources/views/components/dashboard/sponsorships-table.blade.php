@@ -47,6 +47,9 @@
             —
             @if ($sponsorship->ended_at)
               <span dir="ltr">{{ $sponsorship->ended_at->format('Y-m-d') }}</span>
+            @elseif ($sponsorship->isPrepaid() && $sponsorship->planned_ended_at)
+              <span dir="ltr">{{ $sponsorship->planned_ended_at->format('Y-m-d') }}</span>
+              <span class="mt-0.5 block font-medium text-brand-600">{{ __('sponsors.renewal.prepaid') }}</span>
             @else
               <span class="font-medium text-success-600">{{ __('sponsors.ongoing') }}</span>
             @endif

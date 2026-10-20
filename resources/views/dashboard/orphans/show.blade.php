@@ -173,20 +173,12 @@
             @endphp
             <x-dashboard.orphan-sponsor-fields :label="__('orphans.family_sponsorship')" :status="$family->sponsorship_status" :sponsorship="$anySponsorship"
               :sponsors="$sponsors" :input-class="$inputClass" :with-amount="false">
-              <div class="space-y-3 border-t border-gray-200 pt-3 dark:border-gray-700">
-                <p class="text-theme-xs text-gray-500 dark:text-gray-400">{{ __('sponsors.widow_amounts_hint') }}</p>
-                <label class="block">
-                  <span class="mb-1 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">{{ __('sponsors.beneficiary.mother') }} — {{ $family->mother_full_name }}</span>
-                  <input type="number" name="mother_amount" value="{{ old('mother_amount', $motherSponsorship?->monthly_amount) }}" min="0" max="100000" step="0.01" dir="ltr" class="{{ $inputClass }}">
-                </label>
-                @foreach ($family->orphans as $orphan)
-                  <label class="block">
-                    <span class="mb-1 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">{{ $orphan->full_name }}</span>
-                    <input type="number" name="orphans[{{ $orphan->id }}][monthly_amount]" value="{{ old('orphans.'.$orphan->id.'.monthly_amount', $familySponsorships->firstWhere('orphan_id', $orphan->id)?->monthly_amount) }}" min="0" max="100000" step="0.01" dir="ltr" class="{{ $inputClass }}">
-                  </label>
-                @endforeach
-                @error('mother_amount') <p class="text-theme-xs text-error-600">{{ $message }}</p> @enderror
-              </div>
+              <label class="block border-t border-gray-200 pt-3 dark:border-gray-700">
+                <span class="mb-1 block text-theme-sm font-medium text-gray-700 dark:text-gray-400">{{ __('sponsors.field.sponsorship_amount') }} <span class="text-error-500">*</span></span>
+                <input type="number" name="sponsorship_amount" value="{{ old('sponsorship_amount', $family->sponsorship_amount ?? ($familySponsorships->sum('monthly_amount') ?: null)) }}" required min="1" max="100000" step="0.01" dir="ltr" class="{{ $inputClass }}">
+                <span class="mt-1 block text-theme-xs text-gray-500 dark:text-gray-400">{{ __('sponsors.sponsorship_amount_hint') }}</span>
+                @error('sponsorship_amount') <p class="text-theme-xs text-error-600">{{ $message }}</p> @enderror
+              </label>
             </x-dashboard.orphan-sponsor-fields>
           @else
             <div class="space-y-4">

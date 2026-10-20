@@ -33,7 +33,7 @@ export const initSponsorFields = () => {
         const plannedEnd = scope.querySelector('[data-planned-end] input');
         if (renewal && plannedEnd) {
             const syncRenewal = () => {
-                plannedEnd.required = renewal.value === 'one_time';
+                plannedEnd.required = renewal.value === 'one_time' || renewal.value === 'prepaid';
             };
             renewal.addEventListener('change', syncRenewal);
             syncRenewal();
