@@ -94,11 +94,23 @@
           @endif
 
           @foreach (\App\Support\DashboardNavigation::groups(auth()->user()) as $navGroup)
-            <div>
-              <h2 class="mb-3 flex text-xs font-semibold leading-5 text-gray-400">
-                {{ __('dashboard.nav_group.'.$navGroup['key']) }}
-              </h2>
-              <ul class="flex flex-col gap-1">
+            @php
+              $groupOpen = collect($navGroup['modules'])->contains(fn (array $module): bool => request()->routeIs($module['route'], $module['pattern']));
+              $groupBadge = collect($navGroup['modules'])->sum('badge');
+            @endphp
+            <details class="group/nav rounded-xl" {{ $groupOpen ? 'open' : '' }}>
+              <summary class="flex cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-xs font-bold text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5 [&::-webkit-details-marker]:hidden">
+                <span class="menu-item-text">{{ __('dashboard.nav_group.'.$navGroup['key']) }}</span>
+                <span class="flex items-center gap-2">
+                  @if ($groupBadge > 0)
+                    <span class="inline-flex min-w-6 items-center justify-center rounded-full bg-error-500 px-1.5 py-0.5 text-[11px] font-semibold text-white">{{ $groupBadge }}</span>
+                  @endif
+                  <svg class="size-4 shrink-0 transition-transform group-open/nav:rotate-180" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" />
+                  </svg>
+                </span>
+              </summary>
+              <ul class="mt-1 flex flex-col gap-1 border-s border-gray-200 ps-2 dark:border-gray-800">
                 @foreach ($navGroup['modules'] as $module)
                   @php $isActive = request()->routeIs($module['route'], $module['pattern']); @endphp
                   <li>
@@ -118,7 +130,7 @@
                   </li>
                 @endforeach
               </ul>
-            </div>
+            </details>
           @endforeach
 
         </div>

@@ -17,6 +17,14 @@ class DashboardNavigation
      * @var array<string, array<string, string>>
      */
     private const GROUPS = [
+        'sponsorship' => [
+            'orphans' => 'dashboard.orphans.index',
+            'sponsors' => 'dashboard.sponsors.index',
+            'sponsor_requests' => 'dashboard.sponsor-requests.index',
+            'disbursements' => 'dashboard.disbursements.index',
+            'finance_reports' => 'dashboard.reports.finance',
+            'sponsorship_cases' => 'dashboard.sponsorship-cases.index',
+        ],
         'website' => [
             'homepage' => 'dashboard.homepage.edit',
             'pages' => 'dashboard.pages.edit',
@@ -31,12 +39,6 @@ class DashboardNavigation
             'campaigns' => 'dashboard.campaigns.index',
             'facilities' => 'dashboard.facilities.index',
             'regions' => 'dashboard.regions.index',
-            'orphans' => 'dashboard.orphans.index',
-            'sponsors' => 'dashboard.sponsors.index',
-            'sponsor_requests' => 'dashboard.sponsor-requests.index',
-            'disbursements' => 'dashboard.disbursements.index',
-            'finance_reports' => 'dashboard.reports.finance',
-            'sponsorship_cases' => 'dashboard.sponsorship-cases.index',
             'stories' => 'dashboard.stories.index',
         ],
         'operations' => [
@@ -55,7 +57,7 @@ class DashboardNavigation
      * @var array{key: string, modules: list<array{key: string, route: string, pattern: string, badge: int}>}
      */
     private const BOARD_GROUP = [
-        'key' => 'projects',
+        'key' => 'sponsorship',
         'modules' => [
             ['key' => 'orphans', 'route' => 'dashboard.orphans.index', 'pattern' => 'dashboard.orphans.*', 'badge' => 0],
             ['key' => 'finance_reports', 'route' => 'dashboard.reports.finance', 'pattern' => 'dashboard.reports.*', 'badge' => 0],

@@ -28,6 +28,10 @@ class DashboardNavigationTest extends TestCase
         }
 
         $response->assertDontSee('href="'.route('dashboard.users.index').'"', false);
+        $response->assertSee(__('dashboard.nav_group.sponsorship'));
+        $response->assertSee(__('dashboard.nav_group.website'));
+        $response->assertSee(__('dashboard.nav_group.projects'));
+        $response->assertDontSee('<details class="group/nav rounded-xl" open>', false);
     }
 
     public function test_super_admin_sees_the_accounts_section(): void
@@ -37,7 +41,11 @@ class DashboardNavigationTest extends TestCase
         $this->actingAs($superAdmin)
             ->get(route('dashboard.programs.index'))
             ->assertOk()
-            ->assertSee('href="'.route('dashboard.users.index').'"', false);
+            ->assertSee('href="'.route('dashboard.users.index').'"', false)
+            ->assertSeeInOrder([
+                '<details class="group/nav rounded-xl" open>',
+                __('dashboard.nav_group.projects'),
+            ], false);
     }
 
     public function test_dashboard_counts_only_items_waiting_for_the_team(): void
